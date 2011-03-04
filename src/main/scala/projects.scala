@@ -7,18 +7,20 @@ trait BannoCommonDeps extends BasicScalaProject {
   lazy val scalajCollection = "org.scalaj" % "scalaj-collection_2.8.0" % "1.0"
 }
 
-class DefaultBannoProject(info: ProjectInfo)
-extends DefaultProject(info)
-with BannoCommonDeps
-with IdeaProject
-with ScctProject
-with CiTask {
-
+trait BannoRepo extends BasicScalaProject {
   lazy val t8Repo     = "internal" at "http://10.3.0.26:8080/archiva/repository/internal/"
 
   override def managedStyle = ManagedStyle.Maven
   lazy val publishTo = t8Repo
 }
+
+class DefaultBannoProject(info: ProjectInfo)
+extends DefaultProject(info)
+with BannoRepo
+with BannoCommonDeps
+with IdeaProject
+with ScctProject
+with CiTask
 
 trait BannoAkkaProject extends AkkaProject {
   lazy val akkaRemote = akkaModule("remote")
@@ -48,6 +50,7 @@ with AkkaKernelDeployment {
 
 class BannoAkkaWebProject(info: ProjectInfo)
 extends DefaultWebProject(info)
+with BannoRepo
 with BannoAkkaProject
 with ScctProject
 with CiTask
