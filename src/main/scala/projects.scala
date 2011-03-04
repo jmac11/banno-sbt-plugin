@@ -11,7 +11,8 @@ class DefaultBannoProject(info: ProjectInfo)
 extends DefaultProject(info)
 with BannoCommonDeps
 with IdeaProject
-with ScctProject {
+with ScctProject
+with CiTask {
 
   lazy val t8Repo     = "internal" at "http://10.3.0.26:8080/archiva/repository/internal/"
 
@@ -45,6 +46,12 @@ with AkkaKernelDeployment {
   override def akkaKernelBootClass = "akka.kernel.Main"
 }
 
+class BannoAkkaWebProject(info: ProjectInfo)
+extends DefaultWebProject(info)
+with BannoAkkaProject
+with ScctProject
+with CiTask
+
 trait ScalaTestDeps extends BasicScalaProject {
   lazy val scalaTest = "org.scalatest" % "scalatest" % "1.3" % "test"
   lazy val awaitility = "com.jayway.awaitility" % "awaitility" % "1.3.1" % "test"
@@ -53,4 +60,32 @@ trait ScalaTestDeps extends BasicScalaProject {
 
 trait SpecsTestDeps extends BasicScalaProject {
   lazy val specs = "org.scala-tools.testing" % "specs_2.8.0" % "1.6.5" % "test"
+}
+
+trait LiftDeps extends BasicScalaProject {
+  lazy val liftVersion = "2.2"
+  lazy val liftWebKit = "net.liftweb" %% "lift-webkit" % liftVersion
+  lazy val liftWizard = "net.liftweb" %% "lift-wizard" % liftVersion
+  lazy val liftMapper = "net.liftweb" %% "lift-mapper" % liftVersion
+  lazy val liftWidgets = "net.liftweb" %% "lift-widgets" % liftVersion
+  lazy val liftRecord = "net.liftweb" %% "lift-record" % liftVersion
+  lazy val liftSquerylRecord = "net.liftweb" %% "lift-squeryl-record" % liftVersion
+
+  lazy val log4j = "log4j" % "log4j" % "1.2.16"
+  lazy val slf4j = "org.slf4j" % "slf4j-log4j12" % "1.6.1"
+
+  lazy val jettyServer = "org.mortbay.jetty" % "jetty" % "6.1.22" % "test"
+  lazy val liftTestKit =  "net.liftweb" %% "lift-testkit" % liftVersion % "test"
+}
+
+trait JRebelScan extends BasicWebScalaProject {
+  // For use with JRebel - kills SBT's redeploy detection in favor of JRebel's
+  override def scanDirectories = Nil
+}
+
+trait CiTask extends BasicScalaProject { scct: ScctProject =>
+  lazy val ciActions = List(clean, cleanLib, update, test, scct.testCoverage, doc, publishLocal)
+  lazy val ci = task {
+    ciActions.foldLeft(None: Option[String]) { (result, task) => result orElse act(task.name) }
+  } describedAs "Runs ci tasks"
 }
