@@ -13,5 +13,11 @@ class Project(info: ProjectInfo) extends PluginProject(info) {
   val sbtIdeaRepo = "sbt-idea-repo" at "http://mpeltonen.github.com/maven/"
   val sbtIdea = "com.github.mpeltonen" % "sbt-idea-plugin" % "0.2.0"
 
+  val t8Repo = "Banno Internal Repo" at "http://10.3.0.26:8081/nexus/content/repositories/snapshots/"
+  override def managedStyle = ManagedStyle.Maven
+
+  lazy val publishTo = Resolver.sftp("Banno Maven Repo", "10.3.0.26", "/data/sonatype-work/nexus/storage/snapshots/")
+//  lazy val publishTo = t8Repo
+//  Credentials.add("Banno Internal Repo", "10.3.0.26:8081", "admin", "")
   override def compileAction = task {None}
 }

@@ -8,10 +8,14 @@ trait BannoCommonDeps extends BasicScalaProject {
 }
 
 trait BannoRepo extends BasicScalaProject {
-  lazy val t8Repo     = "internal" at "http://10.3.0.26:8080/archiva/repository/internal/"
+  //lazy val t8Repo     = "internal" at "http://10.3.0.26:8080/archiva/repository/internal/"
+
+  val t8Repo     = "Banno Internal Repo" at "http://10.3.0.26:8081/nexus/content/repositories/snapshots/"
 
   override def managedStyle = ManagedStyle.Maven
-  lazy val publishTo = t8Repo
+  //lazy val publishTo = t8Repo
+
+  lazy val publishTo = Resolver.sftp("Banno Maven Repo", "10.3.0.26", "/data/sonatype-work/nexus/storage/snapshots/")
 }
 
 class DefaultBannoProject(info: ProjectInfo)
