@@ -59,6 +59,11 @@ with BannoAkkaProject
 with ScctProject
 with CiTask
 
+trait HueDeps extends BasicScalaProject {
+  lazy val htmlunit = "net.sourceforge.htmlunit" % "htmlunit" % "2.8"
+  lazy val hue = "be.roam.hue" % "hue" % "1.1"
+}
+
 trait ScalaTestDeps extends BasicScalaProject {
   lazy val scalaTest = "org.scalatest" % "scalatest" % "1.3" % "test"
   lazy val awaitility = "com.jayway.awaitility" % "awaitility" % "1.3.1" % "test"
