@@ -1,7 +1,7 @@
 import sbt._
 
 class Project(info: ProjectInfo) extends PluginProject(info) {
-  val BannoExternalRepo   = "Banno External Repo" at "http://10.3.0.26:8081/nexus/content/repositories/external/"
+  val BannoExternalRepo   = "Banno External Repo" at "http://10.3.0.26:8081/nexus/content/groups/external/"
   val BannoSnapshotsRepo  = "Banno Snapshots Repo" at "http://10.3.0.26:8081/nexus/content/repositories/snapshots/"
   val BannoReleasesRepo   = "Banno Releases Repo" at "http://10.3.0.26:8081/nexus/content/repositories/releases/"
 
@@ -16,5 +16,5 @@ class Project(info: ProjectInfo) extends PluginProject(info) {
   val akkaPlugin = "se.scalablesolutions.akka" % "akka-sbt-plugin" % "1.0"
   val sbtAkkaBivy = "net.evilmonkeylabs" % "sbt-akka-bivy" % "0.2.0"
   val scctPlugin = "reaktor" % "sbt-scct-for-2.8" % "0.1-SNAPSHOT"
-  val sbtIdea = "com.github.mpeltonen" % "sbt-idea-plugin" % "0.2.0"
+  val sbtIdea = "com.github.mpeltonen" % "sbt-idea-plugin" % "0.4.0"
 }
