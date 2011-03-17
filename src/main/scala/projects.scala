@@ -1,6 +1,7 @@
 import sbt._
 import sbt_akka_bivy._
 import reaktor.scct.ScctProject
+import java.net.URL
 
 trait BannoCommonDeps extends BasicScalaProject {
   lazy val jodaTime = "joda-time" % "joda-time" % "1.6"
@@ -8,9 +9,10 @@ trait BannoCommonDeps extends BasicScalaProject {
 }
 
 object BannoNexusRepositories {
-  val BannoExternalRepo   = Resolver.url("Banno External Repo","http://10.3.0.26:8081/nexus/content/groups/external/")
-  val BannoSnapshotsRepo  = Resolver.url("Banno Snapshots Repo", "http://10.3.0.26:8081/nexus/content/repositories/snapshots")
-  val BannoReleasesRepo   = Resolver.url("Banno Releases Repo", "http://10.3.0.26:8081/nexus/content/repositories/releases")
+  implicit val patterns: Patterns = Resolver.mavenStylePatterns
+  val BannoExternalRepo   = Resolver.url("Banno External Repo", new URL("http://10.3.0.26:8081/nexus/content/groups/external/"))
+  val BannoSnapshotsRepo  = Resolver.url("Banno Snapshots Repo", new URL("http://10.3.0.26:8081/nexus/content/repositories/snapshots"))
+  val BannoReleasesRepo   = Resolver.url("Banno Releases Repo", new URL("http://10.3.0.26:8081/nexus/content/repositories/releases"))
 }
 
 trait BannoRepo extends BasicScalaProject {
