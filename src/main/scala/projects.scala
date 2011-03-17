@@ -7,15 +7,25 @@ trait BannoCommonDeps extends BasicScalaProject {
   lazy val scalajCollection = "org.scalaj" % "scalaj-collection_2.8.0" % "1.0"
 }
 
+object BannoNexusRepositories {
+  val BannoExternalRepo   = Resolver.url("Banno External Repo","http://10.3.0.26:8081/nexus/content/repositories/external")
+  val BannoSnapshotsRepo  = Resolver.url("Banno Snapshots Repo", "http://10.3.0.26:8081/nexus/content/repositories/snapshots")
+  val BannoReleasesRepo   = Resolver.url("Banno Releases Repo", "http://10.3.0.26:8081/nexus/content/repositories/releases")
+}
+
 trait BannoRepo extends BasicScalaProject {
-  //lazy val t8Repo     = "internal" at "http://10.3.0.26:8080/archiva/repository/internal/"
-
-  val t8Repo     = "Banno Internal Repo" at "http://10.3.0.26:8081/nexus/content/repositories/snapshots/"
-
   override def managedStyle = ManagedStyle.Maven
-  //lazy val publishTo = t8Repo
 
-  lazy val publishTo = Resolver.sftp("Banno Maven Repo", "10.3.0.26", "/data/sonatype-work/nexus/storage/snapshots/")
+  import BannoNexusRepositories._
+  override def ivyRepositories = Resolver.defaultLocal(None) ::
+                                 ("Local Maven Repository" at "file://"+Path.userHome+"/.m2/repository") ::
+                                 BannoExternalRepo ::
+                                 BannoReleasesRepo ::
+                                 BannoSnapshotsRepo ::
+                                 Nil
+
+  Credentials(Path.userHome / ".ivy2" / ".banno_credentials", log)
+  lazy val publishTo = BannoSnapshotsRepo
 }
 
 class DefaultBannoProject(info: ProjectInfo)
