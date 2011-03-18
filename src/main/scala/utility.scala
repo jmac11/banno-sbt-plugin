@@ -3,9 +3,12 @@ import reaktor.scct.ScctProject
 
 trait BannoRepo extends BasicScalaProject { self: SnapshotOrRelease =>
   import self._
-  override def managedStyle = ManagedStyle.Maven
 
-  import BannoNexusRepositories._
+  override def managedStyle = ManagedStyle.Maven
+  lazy val BannoExternalRepo   = "Banno External Repo" at "http://10.3.0.26:8081/nexus/content/groups/external/"
+  lazy val BannoSnapshotsRepo  = "Banno Snapshots Repo" at "http://10.3.0.26:8081/nexus/content/repositories/snapshots"
+  lazy val BannoReleasesRepo   = "Banno Releases Repo" at "http://10.3.0.26:8081/nexus/content/repositories/releases"
+
   override def ivyRepositories = Resolver.defaultLocal(None) ::
                                  ("Local Maven Repository" at "file://"+Path.userHome+"/.m2/repository") ::
                                  BannoExternalRepo ::
