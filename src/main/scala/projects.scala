@@ -9,6 +9,7 @@ with BannoCommonDeps
 with IdeaProject
 with ScctProject
 with CiTask
+with SnapshotOrRelease
 
 class DefaultBannoAkkaProject(info: ProjectInfo)
 extends DefaultBannoProject(info)
@@ -27,3 +28,4 @@ with BannoRepo
 with BannoAkkaProject
 with ScctProject
 with CiTask
+with SnapshotOrRelease

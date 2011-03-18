@@ -1,7 +1,8 @@
 import sbt._
 import reaktor.scct.ScctProject
 
-trait BannoRepo extends BasicScalaProject {
+trait BannoRepo extends BasicScalaProject { self: SnapshotOrRelease =>
+  import self._
   override def managedStyle = ManagedStyle.Maven
 
   import BannoNexusRepositories._
@@ -13,7 +14,7 @@ trait BannoRepo extends BasicScalaProject {
                                  Nil
 
   Credentials(Path.userHome / ".ivy2" / ".banno_credentials", log)
-  lazy val publishTo = BannoSnapshotsRepo
+  lazy val publishTo = if (isSnapshot) BannoSnapshotsRepo else BannoReleasesRepo
 }
 
 trait JRebelScan extends BasicWebScalaProject {
@@ -28,3 +29,6 @@ trait CiTask extends BasicScalaProject { scct: ScctProject =>
   } describedAs "Runs ci tasks"
 }
 
+trait SnapshotOrRelease extends BasicScalaProject {
+  def isSnapshot: Boolean = version.toString.endsWith("SNAPSHOT")
+}
