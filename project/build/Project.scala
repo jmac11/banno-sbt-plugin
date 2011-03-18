@@ -13,6 +13,9 @@ class Project(info: ProjectInfo) extends PluginProject(info) {
 
   override def compileAction = task {None}
 
+  override def releaseAction = (packageAction && incrementVersion) describedAs "Packages and increments the version"
+  lazy val publishAndRelease = release dependsOn publish describedAs "Publishs artifacts and increments the version"
+
   val akkaPlugin = "se.scalablesolutions.akka" % "akka-sbt-plugin" % "1.0"
   val sbtAkkaBivy = "net.evilmonkeylabs" % "sbt-akka-bivy" % "0.2.0"
   val scctPlugin = "reaktor" % "sbt-scct-for-2.8" % "0.1-SNAPSHOT"
