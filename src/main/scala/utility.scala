@@ -10,10 +10,10 @@ trait BannoRepo extends BasicScalaProject { self: SnapshotOrRelease =>
   lazy val BannoReleasesRepo   = "Banno Releases Repo" at "http://10.3.0.26:8081/nexus/content/repositories/releases"
 
   override def ivyRepositories = Resolver.defaultLocal(None) ::
-                                 ("Local Maven Repository" at "file://"+Path.userHome+"/.m2/repository") ::
                                  BannoExternalRepo ::
                                  BannoReleasesRepo ::
                                  BannoSnapshotsRepo ::
+                                 ("Local Maven Repository" at "file://"+Path.userHome+"/.m2/repository") ::
                                  Nil
 
   Credentials(Path.userHome / ".ivy2" / ".banno_credentials", log)
