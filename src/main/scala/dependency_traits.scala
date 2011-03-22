@@ -7,17 +7,18 @@ trait BannoCommonDeps extends BasicScalaProject {
   lazy val scalajCollection = "org.scalaj" % "scalaj-collection_2.8.0" % "1.0"
 }
 
-trait BannoAkkaProject extends AkkaProject {
+trait BannoAkkaProject extends BasicScalaProject {
+  lazy val akkaVersion = "1.0"
+
+  def akkaModule(module: String) = "se.scalablesolutions.akka" % ("akka-" + module) % akkaVersion
+
+  lazy val akkaActor = akkaModule("actor")
   lazy val akkaRemote = akkaModule("remote")
 
   // necessary since we depend on akka-kernel
-  // which has it's own dependencies (eg. terrastore-javaclient, aws-java-sdk, et al) that also depend on another version of jackson
-  // this causes ivy to do something stupid and choose the wrong transitive dependency
-  // this breaks akka-remote actors
   override def ivyXML =
   <dependencies>
-    <override org="org.codehaus.jackson" module="jackson-mapper-asl" rev="1.4.3"/>
-    <override org="org.codehaus.jackson" module="jackson-core-asl" rev="1.4.3"/>
+    <exclude org="se.scalablesolutions.akka" module="akka-persistence"/>
   </dependencies>
 }
 
