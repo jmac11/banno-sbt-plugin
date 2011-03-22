@@ -30,6 +30,7 @@ trait CiTask extends BasicScalaProject { scct: ScctProject =>
   lazy val ci = task {
     ciActions.foldLeft(None: Option[String]) { (result, task) => result orElse act(task.name) }
   } describedAs "Runs ci tasks"
+  lazy val ccq = task { List(compile, console-quick).foldLeft(None:Option[String]){ (result,task) => result orElse act(task.name) }
 }
 
 trait SnapshotOrRelease extends BasicScalaProject {
