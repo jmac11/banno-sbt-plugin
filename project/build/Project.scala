@@ -1,6 +1,6 @@
 import sbt._
 
-class Project(info: ProjectInfo) extends PluginProject(info) {
+class Project(info: ProjectInfo) extends PluginProject(info) with test.ScalaScripted {
   val BannoExternalRepo   = "Banno External Repo" at "http://10.3.0.26:8081/nexus/content/groups/external/"
   val BannoSnapshotsRepo  = "Banno Snapshots Repo" at "http://10.3.0.26:8081/nexus/content/repositories/snapshots/"
   val BannoReleasesRepo   = "Banno Releases Repo" at "http://10.3.0.26:8081/nexus/content/repositories/releases/"
@@ -12,6 +12,10 @@ class Project(info: ProjectInfo) extends PluginProject(info) {
   lazy val publishTo = BannoReleasesRepo
 
   override def compileAction = task {None}
+  
+  override def scriptedSbt = "0.7.5"
+  override def scriptedBufferLog = false
+  override def testAction = scripted
 
   override def releaseAction = (packageAction && incrementVersion) describedAs "Packages and increments the version"
   lazy val publishAndRelease = release dependsOn publish describedAs "Publishs artifacts and increments the version"
