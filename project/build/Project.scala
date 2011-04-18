@@ -15,9 +15,10 @@ class Project(info: ProjectInfo) extends PluginProject(info) with test.ScalaScri
   
   override def scriptedSbt = "0.7.5"
   override def scriptedBufferLog = false
-  override def testAction = scripted
+  override def testAction = testNoScripted
+  lazy val default = scripted dependsOn(publishLocal)
 
-  override def releaseAction = (packageAction && incrementVersion) describedAs "Packages and increments the version"
+  override def releaseAction = (default && incrementVersion) describedAs "Packages and increments the version"
   lazy val publishAndRelease = release dependsOn publish describedAs "Publishs artifacts and increments the version"
 
   val sbtAkkaBivy = "net.evilmonkeylabs" % "sbt-akka-bivy" % "0.2.0"
