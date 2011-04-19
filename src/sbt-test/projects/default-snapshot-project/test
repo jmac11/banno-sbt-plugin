@@ -1,3 +1,7 @@
 > update
 
 > check-file lib_managed/scala_2.7.7/compile/test-dep_2.7.7-1.0-SNAPSHOT.jar
+
+> update-banno-release-versions
+
+> check-banno-version com.banno.test-dep 0.9.9

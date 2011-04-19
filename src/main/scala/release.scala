@@ -1,11 +1,13 @@
 import sbt._
+import java.util.Properties
 
-sealed case class BannoDep(groupId: String, artifactId: String, snapshotVersion: String)  
+sealed case class BannoDep(groupId: String, artifactId: String, snapshotVersion: String) {
+  def propKey = groupId + "." + artifactId
+}
   
 trait VariableBannoDepVersions extends BasicScalaProject with SnapshotOrRelease {
-  import java.util.Properties
+  var bannoDependencies: Set[BannoDep] = Set()
   
-  var bannoDependencies: Set[BannoDep] = Set() 
   override def libraryDependencies = super.libraryDependencies ++ bannoDependenciesAsModuleIds
 
   def bannoDependency(groupId: String, artifactId: String): Unit = {
@@ -16,9 +18,23 @@ trait VariableBannoDepVersions extends BasicScalaProject with SnapshotOrRelease 
     bannoDependencies += BannoDep(groupId, artifactId, snapshotVersion)
   }
 
+  lazy val updateBannoReleaseVersions = task {
+    val newVersions = new Properties
+    bannoDependencies foreach { dep =>
+      val latestVersion = Nexus.latestReleasedVersionFor(dep.groupId, appendScalaVersion(dep.artifactId))
+      newVersions.setProperty(dep.propKey, latestVersion)                         
+    }
+    log.info("Setting Banno Versions to:")
+    newVersions.list(new java.io.PrintWriter(new LoggerWriter(log, Level.Info)))
+    FileUtilities.writeStream(bannoVersionsPath.asFile, log) { stream =>
+      newVersions.store(stream, null)
+      None
+    }
+  }
+
   lazy val bannoVersionsPath = path("project") / "banno-versions.properties"
   
-  def bannoVersions: Properties = {
+  protected def bannoVersions: Properties = {
     val bannoVersions = new Properties()
     FileUtilities.readStream(bannoVersionsPath.asFile, log) { stream =>
       bannoVersions.load(stream)
@@ -28,10 +44,10 @@ trait VariableBannoDepVersions extends BasicScalaProject with SnapshotOrRelease 
   }
   
   private def versionForBannoDep(dep: BannoDep): String= {
-    if (isSnapshot) {
+    if (isSnapshot) {n
       dep.snapshotVersion
     } else {
-      bannoVersions.getProperty(dep.groupId + "." + dep.artifactId)                        
+      bannoVersions.getProperty(dep.propKey)                        
     }
   }
 
@@ -49,7 +65,6 @@ trait VariableBannoDepVersions extends BasicScalaProject with SnapshotOrRelease 
   
 }
 
-  // def updateBannoReleaseVersions
   // def versionSnapshotToRelease
   // def versionReleaseToSnapshot
   // override def releaseAction
