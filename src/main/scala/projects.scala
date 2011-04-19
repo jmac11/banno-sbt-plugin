@@ -11,6 +11,7 @@ with ScctProject
 with CiTask
 with SnapshotOrRelease
 with UpdateMavenMetadataAfterPublish
+with BannoReleaseProcess
 
 class DefaultBannoAkkaProject(info: ProjectInfo)
 extends DefaultBannoProject(info)
@@ -31,3 +32,4 @@ with ScctProject
 with CiTask
 with SnapshotOrRelease
 with UpdateMavenMetadataAfterPublish
+with BannoReleaseProcess
