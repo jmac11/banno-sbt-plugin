@@ -10,6 +10,7 @@ with IdeaProject
 with ScctProject
 with CiTask
 with SnapshotOrRelease
+with UpdateMavenMetadataAfterPublish
 
 class DefaultBannoAkkaProject(info: ProjectInfo)
 extends DefaultBannoProject(info)
@@ -29,3 +30,4 @@ with BannoAkkaProject
 with ScctProject
 with CiTask
 with SnapshotOrRelease
+with UpdateMavenMetadataAfterPublish

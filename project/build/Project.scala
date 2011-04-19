@@ -24,4 +24,5 @@ class Project(info: ProjectInfo) extends PluginProject(info) with test.ScalaScri
   val sbtAkkaBivy = "net.evilmonkeylabs" % "sbt-akka-bivy" % "0.2.0"
   val scctPlugin = "reaktor" % "sbt-scct-for-2.8" % "0.1-SNAPSHOT"
   val sbtIdea = "com.github.mpeltonen" % "sbt-idea-plugin" % "0.4.0"
+  val dispatchHttp = "net.databinder" %% "dispatch-http" % "0.7.8"
 }
