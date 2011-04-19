@@ -36,23 +36,15 @@ trait SnapshotOrRelease extends BasicScalaProject {
 }
 
 trait UpdateMavenMetadataAfterPublish extends BasicScalaProject with SnapshotOrRelease {
-  import org.apache.ivy.util.url.CredentialsStore
-  import dispatch._
-  import Http._
-  
+  private val NEXUS_UPDATE_METADATA_JOB_ID = "41"
   // TODO: instead of invoking nexus to update the maven-metadata.xml, upload a maven-metadata.xml
   def updateMavenMetadata = task {
     if (isSnapshot) {
       log.info("Not updating maven metadata for SNAPSHOT")
     } else {
       log.info("Updating maven metadata")
-      val creds = CredentialsStore.INSTANCE.getCredentials("Sonatype Nexus Repository Manager", "10.3.0.26")
-      val request = :/("10.3.0.26", 8081) / "nexus/service/local/schedule_run/41" as (creds.getUserName, creds.getPasswd)
-      Http(request <> { xml =>
-        val status = (xml \\ "status")(0).text
-                       val created = (xml \\ "created")(0).text
-                       log.info("Maven Metadata Update - " + status + " at " + created)
-                     })
+      Nexus.runScheduledJob(NEXUS_UPDATE_METADATA_JOB_ID) { (status, createdAt) =>
+        log.info("Maven Metadata Update - " + status + " at " + createdAt) }
     }
     None
   } describedAs ("Updates the maven-metadata.xml on the repo to publish")
