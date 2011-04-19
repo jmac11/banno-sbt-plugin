@@ -44,7 +44,7 @@ trait VariableBannoDepVersions extends BasicScalaProject with SnapshotOrRelease 
   }
   
   private def versionForBannoDep(dep: BannoDep): String= {
-    if (isSnapshot) {n
+    if (isSnapshot) {
       dep.snapshotVersion
     } else {
       bannoVersions.getProperty(dep.propKey)                        
