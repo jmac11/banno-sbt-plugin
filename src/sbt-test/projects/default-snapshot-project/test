@@ -5,3 +5,13 @@
 > update-banno-release-versions
 
 > check-banno-version com.banno.test-dep 0.9.9
+
+> git-create-repo
+
+> version-snapshot-to-release
+
+> check-git-log "Release version: 1.0"
+
+> version-release-to-snapshot
+
+> check-git-log "Snapshot version: 1.0-SNAPSHOT"

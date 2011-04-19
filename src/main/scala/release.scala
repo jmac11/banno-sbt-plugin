@@ -65,8 +65,30 @@ trait VariableBannoDepVersions extends BasicScalaProject with SnapshotOrRelease 
   
 }
 
-  // def versionSnapshotToRelease
-  // def versionReleaseToSnapshot
-  // override def releaseAction
+trait ReleaseVersioning extends BasicScalaProject {
+  lazy val versionSnapshotToRelease = task {
+    modifyVersion("Release version") { _.incrementMicro.withExtra(None)}
+  }
+  
+  lazy val versionReleaseToSnapshot = task {
+    modifyVersion("Snapshot version") { v => BasicVersion(v.major, v.minor, None, Some("SNAPSHOT"))}
+  }
 
-trait BannoReleaseProcess extends VariableBannoDepVersions
+  private def modifyVersion(msgHeader: String)(f: (BasicVersion) => Version): Option[String] = {
+    projectVersion.get match {
+      case Some(version: BasicVersion) =>
+        val newVersion = f(version)
+        log.info("Changing version to " + newVersion)
+        projectVersion() = newVersion
+        saveEnvironment()
+        Git.commit("project/build.properties", "%s: %s".format(msgHeader, newVersion), log)
+      case weird => 
+        Some("Can't modify " + weird)
+    }
+  }
+
+  // noChangeSinceLastRelease
+}
+
+trait BannoReleaseProcess extends VariableBannoDepVersions with ReleaseVersioning
+  // override def releaseAction

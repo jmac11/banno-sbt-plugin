@@ -1,4 +1,5 @@
 import sbt._
+import Process._
 import java.util.Properties
 
 class Project(info: ProjectInfo) extends DefaultBannoProject(info) {
@@ -18,6 +19,21 @@ class Project(info: ProjectInfo) extends DefaultBannoProject(info) {
       None
     } else {
       Some("Expected version %s for %s, but was %s".format(expectedVersion, key, actualVersion))
+    }
+  }}
+
+  lazy val gitCreateRepo = task {
+    "git init" #&& "git add ." #&& "git commit -m init_commit" ! (log)
+    None
+  }
+
+  lazy val checkGitLog = task { (args) => task {
+    val msg = args(0)
+    val gitLog: String = ("git --no-pager log" !!)
+    if (gitLog.contains(msg)) {
+      None
+    } else {
+      Some("Log:\n%s\n\texpected to contain message: %s".format(gitLog, msg))
     }
   }}
 }
