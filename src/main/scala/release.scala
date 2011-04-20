@@ -119,10 +119,22 @@ trait BannoReleaseProcess extends VariableBannoDepVersions with ReleaseVersionin
                                  versionSnapshotToRelease,
                                  update,
                                  test,
+                                 publish,
                                  tagVersion,
-                                 versionReleaseToSnapshot)
+                                 versionReleaseToSnapshot,
+                                 gitPush)
   // with push
   override def releaseAction = task {
     releaseActions.foldLeft(None: Option[String]) { (result, task) => result orElse act(task.name) }
   } describedAs "The Banno Release Process"
+
+  lazy val gitPush = task {
+    if (Git.hasRemote("origin", log)) {
+      Git.pull(log) orElse
+      Git.push(log) orElse
+      Git.pushTags("1*", log)
+    } else {
+      None
+    }
+  }
 }

@@ -2,12 +2,23 @@ import sbt._
 
 object Git {
   def tag(tagName:String, msg: String, log: Logger): Option[String] = git("tag" :: "-a" :: "-m" :: msg :: tagName :: Nil, log)
+  
   def commit(path: String, msg: String, log: Logger): Option[String] = git("add" :: path :: Nil, log) orElse git("commit" :: "-m" :: msg :: Nil, log)
-  def push(log: Logger): Option[String] = None
-  def pushTags(filter: String, log: Logger): Option[String] = None
+  
+  def pull(log: Logger): Option[String] = git("pull" :: "origin" :: Nil, log)
+  
+  def push(log: Logger): Option[String] = git("push" :: "origin" :: Nil, log)
+  
+  def pushTags(filter: String, log: Logger): Option[String] = git("push" :: "origin" :: "--tags" :: Nil, log)
+  
   def isDifference(diffRevisions: String, log: Logger): Boolean = {
     val diff = Process("git" :: "diff" :: diffRevisions :: Nil) !! (log)
     !diff.isEmpty
+  }
+  
+  def hasRemote(remoteName: String, log: Logger): Boolean = {
+    val diff = Process("git" :: "remote" :: Nil) !! (log)
+    diff.contains(remoteName)
   }
 
   private def git(args: List[String], log: Logger): Option[String] = {
