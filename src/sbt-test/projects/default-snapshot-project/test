@@ -1,16 +1,27 @@
+# assure that a snapshot project uses snapshot dependencies for a banno dep
+
 > update
 
 > check-file lib_managed/scala_2.7.7/compile/test-dep_2.7.7-1.0-SNAPSHOT.jar
 
+# test the release process
+
+# set up  
+> git-create-repo
+
+# start test
 > update-banno-release-versions
 
 > check-banno-version com.banno.test-dep 0.9.9
 
-> git-create-repo
-
 > version-snapshot-to-release
 
 > check-git-log "Release version: 1.0"
+
+# make sure that the project is now a release version and uses release versions for banno dep  
+> update
+
+> check-file lib_managed/scala_2.7.7/compile/test-dep_2.7.7-0.9.9.jar
 
 > version-release-to-snapshot
 
