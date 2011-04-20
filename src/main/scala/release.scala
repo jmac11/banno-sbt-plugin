@@ -71,7 +71,8 @@ trait VariableBannoDepVersions extends BasicScalaProject with SnapshotOrRelease 
 trait ReleaseVersioning extends BasicScalaProject {
   lazy val versionSnapshotToRelease = task {
     modifyVersion("Updating version to release") { currentVersion =>
-      val nextVersionMaybe = lastVersion.map(v => v.incrementMicro)     
+      val nextVersionMaybe = lastVersion.filter(v => v.major == currentVersion.major && v.minor == currentVersion.minor)
+                                        .map(v => v.incrementMicro)
       nextVersionMaybe.getOrElse(currentVersion.incrementMicro.withExtra(None))
     }
   }
