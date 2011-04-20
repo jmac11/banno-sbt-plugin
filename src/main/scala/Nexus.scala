@@ -12,10 +12,14 @@ object Nexus {
    })
   }
 
-  def latestReleasedVersionFor(groupId: String, artifactId: String): String = {
+  def latestReleasedVersionFor(groupId: String, artifactId: String): Option[String] = {
     val params = Map("g" -> groupId, "a" -> artifactId, "v" -> "LATEST", "r" -> "releases")
     val request = nexusBase / "artifact/maven/resolve" <<? params
-    Http(request <> { xml => (xml \\ "version").text })
+    try {
+      Http(request <> { xml => Some((xml \\ "version").text) })
+    } catch {
+      case StatusCode(404, _) => None
+    }
   }
 
   lazy val nexusBase = :/("10.3.0.26", 8081) / "nexus/service/local"

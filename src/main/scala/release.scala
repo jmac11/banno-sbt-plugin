@@ -21,7 +21,7 @@ trait VariableBannoDepVersions extends BasicScalaProject with SnapshotOrRelease 
   lazy val updateBannoReleaseVersions = task {
     val newVersions = new Properties
     bannoDependencies foreach { dep =>
-      val latestVersion = Nexus.latestReleasedVersionFor(dep.groupId, appendScalaVersion(dep.artifactId))
+      val latestVersion = Nexus.latestReleasedVersionFor(dep.groupId, appendScalaVersion(dep.artifactId)).getOrElse(throw new RuntimeException("Unable to find release for " + dep))
       newVersions.setProperty(dep.propKey, latestVersion)                         
     }
     log.info("Setting Banno Versions to:")
@@ -30,6 +30,7 @@ trait VariableBannoDepVersions extends BasicScalaProject with SnapshotOrRelease 
       newVersions.store(stream, null)
       None
     }
+    // TODO: commit change
   }
 
   lazy val bannoVersionsPath = path("project") / "banno-versions.properties"
@@ -67,7 +68,17 @@ trait VariableBannoDepVersions extends BasicScalaProject with SnapshotOrRelease 
 
 trait ReleaseVersioning extends BasicScalaProject {
   lazy val versionSnapshotToRelease = task {
-    modifyVersion("Release version") { _.incrementMicro.withExtra(None)}
+    modifyVersion("Release version") { currentVersion =>
+      val lastVersionStr = Nexus.latestReleasedVersionFor(organization, name + "_" + buildScalaVersion)
+      val lastVersion = lastVersionStr.map { v =>
+        Version.fromString(v) match {
+          case Right(version: BasicVersion) => version
+          case value => throw new RuntimeException("Unable to parse version: " + value)
+        }
+      }
+      val nextVersionMaybe = lastVersion.map(v => v.incrementMicro)     
+      nextVersionMaybe.getOrElse(currentVersion.incrementMicro.withExtra(None))
+    }
   }
   
   lazy val versionReleaseToSnapshot = task {
