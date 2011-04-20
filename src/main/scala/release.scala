@@ -71,13 +71,6 @@ trait VariableBannoDepVersions extends BasicScalaProject with SnapshotOrRelease 
 trait ReleaseVersioning extends BasicScalaProject {
   lazy val versionSnapshotToRelease = task {
     modifyVersion("Updating version to release") { currentVersion =>
-      val lastVersionStr = Nexus.latestReleasedVersionFor(organization, name + "_" + buildScalaVersion)
-      val lastVersion = lastVersionStr.map { v =>
-        Version.fromString(v) match {
-          case Right(version: BasicVersion) => version
-          case value => throw new RuntimeException("Unable to parse version: " + value)
-        }
-      }
       val nextVersionMaybe = lastVersion.map(v => v.incrementMicro)     
       nextVersionMaybe.getOrElse(currentVersion.incrementMicro.withExtra(None))
     }
@@ -100,16 +93,25 @@ trait ReleaseVersioning extends BasicScalaProject {
     }
   }
 
-  // noChangeSinceLastRelease
-}
-
-trait GitInteraction extends BasicScalaProject {
-  lazy val tagVersion = task {
-    Git.tag(version.toString, "Tagging release version: " + version, log)
+  def lastVersion: Option[BasicVersion] = {
+    val lastVersionStr = Nexus.latestReleasedVersionFor(organization, name + "_" + buildScalaVersion)
+    lastVersionStr.map { v =>
+      Version.fromString(v) match {
+        case Right(version: BasicVersion) => version
+        case value => throw new RuntimeException("Unable to parse version: " + value)
+      }
+    }
   }
+  
+  lazy val tagVersion = task {
+    Git.tag(versionTagName, "Tagging release version: " + version, log)
+  }
+  
+  def hasChangedSinceLastRelease(): Boolean = lastVersion.map(v => Git.isDifference(v.toString + "..HEAD", log)).getOrElse(true)
+
+  def versionTagName: String = version.toString
 }
 
-trait BannoReleaseProcess extends VariableBannoDepVersions
-            with ReleaseVersioning with GitInteraction
+trait BannoReleaseProcess extends VariableBannoDepVersions with ReleaseVersioning
   // override def releaseAction
   // with push

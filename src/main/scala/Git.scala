@@ -5,6 +5,10 @@ object Git {
   def commit(path: String, msg: String, log: Logger): Option[String] = git("add" :: path :: Nil, log) orElse git("commit" :: "-m" :: msg :: Nil, log)
   def push(log: Logger): Option[String] = None
   def pushTags(filter: String, log: Logger): Option[String] = None
+  def isDifference(diffRevisions: String, log: Logger): Boolean = {
+    val diff = Process("git" :: "diff" :: diffRevisions :: Nil) !! (log)
+    !diff.isEmpty
+  }
 
   private def git(args: List[String], log: Logger): Option[String] = {
     log.info("running git " + args.mkString(" "))
