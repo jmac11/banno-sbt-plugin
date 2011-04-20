@@ -18,7 +18,11 @@
 
 > version-snapshot-to-release
 
-> check-git-log "Release version: 1.0"
+> check-git-log "Updating version to release: 1.0"
+
+> tag-version
+
+> check-git-tag "Tagging release version: 1.0"
 
 # make sure that the project is now a release version and uses release versions for banno dep  
 > update
@@ -27,4 +31,4 @@
 
 > version-release-to-snapshot
 
-> check-git-log "Snapshot version: 1.0-SNAPSHOT"
+> check-git-log "Updating to snapshot version: 1.0-SNAPSHOT"

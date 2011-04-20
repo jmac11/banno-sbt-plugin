@@ -36,4 +36,14 @@ class Project(info: ProjectInfo) extends DefaultBannoProject(info) {
       Some("Log:\n%s\n\texpected to contain message: %s".format(gitLog, msg))
     }
   }}
+
+  lazy val checkGitTag = task { (args) => task {
+    val msg = args(0)
+    val gitTagLog: String = ("git --no-pager tag -l -n" !!)
+    if (gitTagLog.contains(msg)) {
+      None
+    } else {
+      Some("Tag List:\n%s\n\texpected to contain message: %s".format(gitTagLog, msg))
+    }
+  }}
 }
