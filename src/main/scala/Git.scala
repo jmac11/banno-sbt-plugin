@@ -12,8 +12,12 @@ object Git {
   def pushTags(filter: String, log: Logger): Option[String] = git("push" :: "origin" :: "--tags" :: Nil, log)
   
   def isDifference(diffRevisions: String, log: Logger): Boolean = {
-    val diff = Process("git" :: "diff" :: diffRevisions :: Nil) !! (log)
-    !diff.isEmpty
+    try {
+      val diff = Process("git" :: "diff" :: diffRevisions :: Nil) !! (log)
+      !diff.isEmpty
+    } catch {
+      case _ : Exception => true // hackety, hack, hack
+    }
   }
   
   def hasRemote(remoteName: String, log: Logger): Boolean = {
