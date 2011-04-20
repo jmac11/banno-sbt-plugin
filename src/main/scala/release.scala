@@ -30,7 +30,9 @@ trait VariableBannoDepVersions extends BasicScalaProject with SnapshotOrRelease 
       newVersions.store(stream, null)
       None
     }
-    // TODO: commit change
+    Git.commit(bannoVersionsPath.toString,
+               "Updating banno dependencies to released versions",
+               log)
   }
 
   lazy val bannoVersionsPath = path("project") / "banno-versions.properties"
@@ -80,6 +82,8 @@ trait ReleaseVersioning extends BasicScalaProject {
       nextVersionMaybe.getOrElse(currentVersion.incrementMicro.withExtra(None))
     }
   }
+
+  // def gitTag
   
   lazy val versionReleaseToSnapshot = task {
     modifyVersion("Snapshot version") { v => BasicVersion(v.major, v.minor, None, Some("SNAPSHOT"))}
@@ -103,3 +107,4 @@ trait ReleaseVersioning extends BasicScalaProject {
 
 trait BannoReleaseProcess extends VariableBannoDepVersions with ReleaseVersioning
   // override def releaseAction
+  // with push
