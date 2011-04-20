@@ -112,6 +112,17 @@ trait ReleaseVersioning extends BasicScalaProject {
   def versionTagName: String = version.toString
 }
 
-trait BannoReleaseProcess extends VariableBannoDepVersions with ReleaseVersioning
-  // override def releaseAction
+trait BannoReleaseProcess extends VariableBannoDepVersions with ReleaseVersioning {
+  lazy val releaseActions = List(clean,
+                                 cleanLib,
+                                 updateBannoReleaseVersions,
+                                 versionSnapshotToRelease,
+                                 update,
+                                 test,
+                                 tagVersion,
+                                 versionReleaseToSnapshot)
   // with push
+  override def releaseAction = task {
+    releaseActions.foldLeft(None: Option[String]) { (result, task) => result orElse act(task.name) }
+  } describedAs "The Banno Release Process"
+}
