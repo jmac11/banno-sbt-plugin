@@ -19,7 +19,7 @@ trait VariableBannoDepVersions extends BasicScalaProject with SnapshotOrRelease 
   }
 
   lazy val updateBannoReleaseVersions = task {
-    val newVersions = new Properties
+    val newVersions = bannoVersions
     bannoDependencies foreach { dep =>
       val latestVersion = Nexus.latestReleasedVersionFor(dep.groupId, appendScalaVersion(dep.artifactId)).getOrElse(throw new RuntimeException("Unable to find release for " + dep))
       newVersions.setProperty(dep.propKey, latestVersion)                         
@@ -35,7 +35,7 @@ trait VariableBannoDepVersions extends BasicScalaProject with SnapshotOrRelease 
                log)
   }
 
-  lazy val bannoVersionsPath = path("project") / "banno-versions.properties"
+  lazy val bannoVersionsPath = rootProject.info.builderPath / "banno-versions.properties"
   
   protected def bannoVersions: Properties = {
     val bannoVersions = new Properties()
@@ -86,8 +86,8 @@ trait ReleaseVersioning extends BasicScalaProject {
       case Some(version: BasicVersion) =>
         val newVersion = f(version)
         log.info("Changing version to " + newVersion)
-        projectVersion() = newVersion
-        saveEnvironment()
+        rootProject.projectVersion() = newVersion
+        rootProject.saveEnvironment()
         Git.commit("project/build.properties", "%s: %s".format(msgHeader, newVersion), log)
       case weird => 
         Some("Can't modify " + weird)
@@ -95,7 +95,7 @@ trait ReleaseVersioning extends BasicScalaProject {
   }
 
   def lastVersion: Option[BasicVersion] = {
-    val lastVersionStr = Nexus.latestReleasedVersionFor(organization, name + "_" + buildScalaVersion)
+    val lastVersionStr = Nexus.latestReleasedVersionFor(organization, normalizedName + "_" + buildScalaVersion)
     lastVersionStr.map { v =>
       Version.fromString(v) match {
         case Right(version: BasicVersion) => version

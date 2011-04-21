@@ -15,7 +15,8 @@ trait BannoRepo extends BasicScalaProject with SnapshotOrRelease {
                                  Nil
 
   Credentials(Path.userHome / ".ivy2" / ".banno_credentials", log)
-  lazy val publishTo = if (isSnapshot) BannoSnapshotsRepo else BannoReleasesRepo
+  
+  override def defaultPublishRepository = Some(if (isSnapshot) BannoSnapshotsRepo else BannoReleasesRepo)
 }
 
 trait JRebelScan extends BasicWebScalaProject {
