@@ -5,7 +5,7 @@ sealed case class BannoDep(groupId: String, artifactId: String, snapshotVersion:
   def propKey = groupId + "." + artifactId
 }
   
-trait VariableBannoDepVersions extends BasicScalaProject with SnapshotOrRelease {
+trait VariableBannoDepVersions extends BasicDependencyProject with SnapshotOrRelease {
   var bannoDependencies: Set[BannoDep] = Set()
   
   override def libraryDependencies = super.libraryDependencies ++ bannoDependenciesAsModuleIds
@@ -18,9 +18,11 @@ trait VariableBannoDepVersions extends BasicScalaProject with SnapshotOrRelease 
     bannoDependencies += BannoDep(groupId, artifactId, snapshotVersion)
   }
 
-  lazy val updateBannoReleaseVersions = task {
+  def bannoDependenciesToUpdate: Set[BannoDep] = bannoDependencies
+
+  def updateBannoReleaseVersionsAction = task {
     val newVersions = bannoVersions
-    bannoDependencies foreach { dep =>
+    bannoDependenciesToUpdate foreach { dep =>
       val latestVersion = Nexus.latestReleasedVersionFor(dep.groupId, appendScalaVersion(dep.artifactId)).getOrElse(throw new RuntimeException("Unable to find release for " + dep))
       newVersions.setProperty(dep.propKey, latestVersion)                         
     }
@@ -68,8 +70,8 @@ trait VariableBannoDepVersions extends BasicScalaProject with SnapshotOrRelease 
   
 }
 
-trait ReleaseVersioning extends BasicScalaProject {
-  lazy val versionSnapshotToRelease = task {
+trait ReleaseVersioning extends BasicDependencyProject {
+  def versionSnapshotToReleaseAction = task {
     modifyVersion("Updating version to release") { currentVersion =>
       val nextVersionMaybe = lastVersion.filter(v => v.major == currentVersion.major && v.minor == currentVersion.minor)
                                         .map(v => v.incrementMicro)
@@ -77,7 +79,7 @@ trait ReleaseVersioning extends BasicScalaProject {
     }
   }
 
-  lazy val versionReleaseToSnapshot = task {
+  def versionReleaseToSnapshotAction = task {
     modifyVersion("Updating to snapshot version") { v => BasicVersion(v.major, v.minor, None, Some("SNAPSHOT"))}
   }
 
@@ -104,7 +106,7 @@ trait ReleaseVersioning extends BasicScalaProject {
     }
   }
   
-  lazy val tagVersion = task {
+  def tagVersionAction = task {
     Git.tag(versionTagName, "Tagging release version: " + version, log)
   }
   
@@ -113,7 +115,30 @@ trait ReleaseVersioning extends BasicScalaProject {
   def versionTagName: String = version.toString
 }
 
-trait BannoReleaseProcess extends VariableBannoDepVersions with ReleaseVersioning {
+trait GitPush extends Project {
+  def gitPushAction = task {
+    if (Git.hasRemote("origin", log)) {
+      Git.pull(log) orElse
+      Git.push(log) orElse
+      Git.pushTags("1*", log)
+    } else {
+      None
+    }
+  }
+}
+
+trait RunSequential extends Project {
+  def runSequential(taskNames: Seq[String]): Option[String] =
+    taskNames.foldLeft(None: Option[String]) { (result, taskName) => result orElse act(taskName) }
+}
+
+trait BannoReleaseProcess extends BasicScalaProject with VariableBannoDepVersions with ReleaseVersioning with GitPush with RunSequential {
+  lazy val updateBannoReleaseVersions = super.updateBannoReleaseVersionsAction
+  lazy val versionSnapshotToRelease = super.versionSnapshotToReleaseAction
+  lazy val tagVersion = super.tagVersionAction
+  lazy val versionReleaseToSnapshot = super.versionReleaseToSnapshotAction
+  lazy val gitPush = super.gitPushAction
+  
   lazy val releaseActions = List(clean,
                                  cleanLib,
                                  updateBannoReleaseVersions,
@@ -127,20 +152,40 @@ trait BannoReleaseProcess extends VariableBannoDepVersions with ReleaseVersionin
   // with push
   override def releaseAction = task {
     if (hasChangedSinceLastRelease) {
-      releaseActions.foldLeft(None: Option[String]) { (result, task) => result orElse act(task.name) }
+      runSequential(releaseActions.map(_.name))
     } else {
       log.info("Nothing has changed since last release. Not doing anything.")
       None
     }
   } describedAs "The Banno Release Process"
+}
 
-  lazy val gitPush = task {
-    if (Git.hasRemote("origin", log)) {
-      Git.pull(log) orElse
-      Git.push(log) orElse
-      Git.pushTags("1*", log)
+trait BannoMultiReleaseProcess extends BasicDependencyProject with ReleaseVersioning with VariableBannoDepVersions with GitPush with RunSequential {
+  lazy val updateBannoReleaseVersionsMulti = super.updateBannoReleaseVersionsAction
+  lazy val versionSnapshotToReleaseMulti = super.versionSnapshotToReleaseAction
+  lazy val tagVersionMulti = super.tagVersionAction
+  lazy val versionReleaseToSnapshotMulti = super.versionReleaseToSnapshotAction
+  lazy val gitPushMulti = super.gitPushAction
+  
+  lazy val parentPreTasks = List(updateBannoReleaseVersionsMulti,
+                                 versionSnapshotToReleaseMulti)
+  lazy val releaseModuleTasks = List("clean", "clean-lib", "update", "test", "publish")
+  lazy val parentPostTasks = List(tagVersionMulti,
+                                  versionReleaseToSnapshotMulti,
+                                  gitPushMulti)
+  
+  lazy val releaseMulti = task {
+    if (hasChangedSinceLastRelease) {
+      runSequential(parentPreTasks.map(_.name)) orElse
+      runSequential(releaseModuleTasks) orElse
+      runSequential(parentPostTasks.map(_.name))
     } else {
+      log.info("Nothin has changed since last release. Not doing anything.")
       None
     }
-  }
+  } describedAs "The Banno Release Process"
+  
+  override def bannoDependenciesToUpdate: Set[BannoDep] = Set(subProjects.values.toList.flatMap {
+    case proj: VariableBannoDepVersions => proj.bannoDependencies
+  }: _*)
 }

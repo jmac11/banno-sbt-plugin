@@ -1,7 +1,7 @@
 import sbt._
 import reaktor.scct.ScctProject
 
-trait BannoRepo extends BasicScalaProject with SnapshotOrRelease { 
+trait BannoRepo extends BasicDependencyProject with SnapshotOrRelease { 
   override def managedStyle = ManagedStyle.Maven
   lazy val BannoExternalRepo   = "Banno External Repo" at "http://10.3.0.26:8081/nexus/content/groups/external/"
   lazy val BannoSnapshotsRepo  = "Banno Snapshots Repo" at "http://10.3.0.26:8081/nexus/content/repositories/snapshots"
@@ -32,11 +32,11 @@ trait CiTask extends BasicScalaProject { scct: ScctProject =>
   lazy val ccq = consoleQuickAction dependsOn compile
 }
 
-trait SnapshotOrRelease extends BasicScalaProject {
+trait SnapshotOrRelease extends BasicDependencyProject {
   def isSnapshot: Boolean = version.toString.endsWith("SNAPSHOT")
 }
 
-trait UpdateMavenMetadataAfterPublish extends BasicScalaProject with SnapshotOrRelease {
+trait UpdateMavenMetadataAfterPublish extends BasicDependencyProject with SnapshotOrRelease {
   private val NEXUS_UPDATE_METADATA_JOB_ID = "41"
   // TODO: instead of invoking nexus to update the maven-metadata.xml, upload a maven-metadata.xml
   def updateMavenMetadata = task {

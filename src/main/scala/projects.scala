@@ -33,3 +33,9 @@ with CiTask
 with SnapshotOrRelease
 with UpdateMavenMetadataAfterPublish
 with BannoReleaseProcess
+
+class BannoParentProject(info: ProjectInfo)
+extends ParentProject(info)
+with BannoMultiReleaseProcess
+with BannoRepo
+with UpdateMavenMetadataAfterPublish

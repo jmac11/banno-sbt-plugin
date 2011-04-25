@@ -13,7 +13,7 @@ object Nexus {
   }
 
   def latestReleasedVersionFor(groupId: String, artifactId: String): Option[String] = {
-    val params = Map("g" -> groupId, "a" -> artifactId, "v" -> "LATEST", "r" -> "releases")
+    val params = Map("g" -> groupId, "a" -> artifactId, "v" -> "LATEST", "r" -> "releases", "e" -> "pom")
     val request = nexusBase / "artifact/maven/resolve" <<? params
     try {
       Http(request <> { xml => Some((xml \\ "version").text) })
