@@ -109,8 +109,10 @@ trait ReleaseVersioning extends BasicDependencyProject {
   def tagVersionAction = task {
     Git.tag(versionTagName, "Tagging release version: " + version, log)
   }
-  
-  def hasChangedSinceLastRelease(): Boolean = lastVersion.map(v => Git.isDifference(v.toString + "..HEAD", log)).getOrElse(true)
+
+  val CHANGED_FILES_TO_IGNORE = Set("project/build.properties", "project/banno-versions.properties")
+  def hasChangedSinceLastRelease(): Boolean = lastVersion.map(v =>
+    Git.isDifference("refs/tags/" + v.toString, CHANGED_FILES_TO_IGNORE, log)).getOrElse(true)
 
   def versionTagName: String = version.toString
 }

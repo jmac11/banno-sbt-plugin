@@ -46,4 +46,11 @@ class Project(info: ProjectInfo) extends DefaultBannoProject(info) {
       Some("Tag List:\n%s\n\texpected to contain message: %s".format(gitTagLog, msg))
     }
   }}
+
+  lazy val pause = task { (args) => task {
+    val seconds = args(0).toInt
+    log.info("sleeping for " + seconds + " seconds")
+    Thread.sleep(seconds * 1000)
+    None
+  }}
 }

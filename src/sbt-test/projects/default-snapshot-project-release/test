@@ -13,3 +13,7 @@
 > check-git-tag "Tagging release version: 1.0"
 
 > check-git-log "Updating to snapshot version: 1.0-SNAPSHOT"
+
+> pause 3
+
+> release

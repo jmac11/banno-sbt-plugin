@@ -13,10 +13,11 @@ object Git {
   
   def merge(ref: String, log: Logger): Option[String] = git("merge" :: ref :: Nil, log)
 
-  def isDifference(diffRevisions: String, log: Logger): Boolean = {
+  def isDifference(diffRevisions: String, filesToIgnore: Set[String], log: Logger): Boolean = {
     try {
-      val diff = Process("git" :: "diff" :: diffRevisions :: Nil) !! (log)
-      !diff.isEmpty
+      val diff = Process("git" :: "diff" :: diffRevisions :: "--name-only" :: Nil) !! (log)
+      val changedFiles = diff.split("\n").foldLeft(Set[String]())(_ + _)
+      !(changedFiles -- filesToIgnore).isEmpty
     } catch {
       case _ : Exception => true // hackety, hack, hack
     }
