@@ -5,12 +5,14 @@ object Git {
   
   def commit(path: String, msg: String, log: Logger): Option[String] = git("add" :: path :: Nil, log) orElse git("commit" :: "-m" :: msg :: Nil, log)
   
-  def pull(log: Logger): Option[String] = git("pull" :: "origin" :: Nil, log)
+  def checkout(ref: String, log: Logger): Option[String] = git("checkout" :: ref :: Nil, log)
+
+  def pull(log: Logger): Option[String] = git("pull" :: Nil, log)
   
-  def push(log: Logger): Option[String] = git("push" :: "origin" :: Nil, log)
+  def pushWithTags(ref: String, log: Logger): Option[String] = git("push" :: "origin" :: "--tags" :: ref :: Nil, log)
   
-  def pushTags(filter: String, log: Logger): Option[String] = git("push" :: "origin" :: "--tags" :: Nil, log)
-  
+  def merge(ref: String, log: Logger): Option[String] = git("merge" :: ref :: Nil, log)
+
   def isDifference(diffRevisions: String, log: Logger): Boolean = {
     try {
       val diff = Process("git" :: "diff" :: diffRevisions :: Nil) !! (log)
@@ -23,6 +25,15 @@ object Git {
   def hasRemote(remoteName: String, log: Logger): Boolean = {
     val diff = Process("git" :: "remote" :: Nil) !! (log)
     diff.contains(remoteName)
+  }
+
+  val RefspecRE = "ref: (.+)".r
+  def currentHeadSHA(log: Logger): String = {
+    val Right(head) = FileUtilities.readString(new java.io.File(".git/HEAD"), log)
+    head.trim match {
+      case RefspecRE(ref) => ref
+      case sha => sha
+    }
   }
 
   private def git(args: List[String], log: Logger): Option[String] = {
