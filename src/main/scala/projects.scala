@@ -28,6 +28,7 @@ class BannoAkkaWebProject(info: ProjectInfo)
 extends DefaultWebProject(info)
 with BannoRepo
 with BannoAkkaProject
+with IdeaProject
 with ScctProject
 with CiTask
 with SnapshotOrRelease
