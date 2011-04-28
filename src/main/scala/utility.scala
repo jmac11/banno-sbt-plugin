@@ -1,4 +1,5 @@
 import sbt._
+import com.github.retronym.OneJarProject
 import reaktor.scct.ScctProject
 
 trait BannoRepo extends BasicDependencyProject with SnapshotOrRelease { 
@@ -52,4 +53,13 @@ trait UpdateMavenMetadataAfterPublish extends BasicDependencyProject with Snapsh
 
   override def publishAction = updateMavenMetadata dependsOn super.publishAction
   
+}
+
+trait FatJar extends DefaultProject with OneJarProject {
+  lazy val packageJar = super.packageAction
+  override def packageAction = onejarTask(onejarTemporaryPath,
+    onejarClasspath,
+    onejarExtraJars
+  ) dependsOn (packageJar) describedAs ("Builds a single-file, executable JAR using One-JAR")
+  lazy val oneJarArtifact = Artifact(artifactID, "onejar")
 }

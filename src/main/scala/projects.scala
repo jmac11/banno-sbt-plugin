@@ -1,5 +1,4 @@
 import sbt._
-import sbt_akka_bivy._
 import reaktor.scct.ScctProject
 
 class DefaultBannoProject(info: ProjectInfo)
@@ -19,10 +18,14 @@ with BannoAkkaProject
 
 class BannoFatAkkaKernelProject(info: ProjectInfo)
 extends DefaultBannoAkkaProject(info)
-with AkkaKernelDeployment {
+with FatJar {
   lazy val akkaKernel = akkaModule("kernel")
-  override def akkaKernelBootClass = "akka.kernel.Main"
+  override def mainClass = Some("akka.kernel.Main")
 }
+
+class BannoFatStandaloneWebProject(info: ProjectInfo)
+extends DefaultBannoProject(info)
+with FatJar
 
 class BannoAkkaWebProject(info: ProjectInfo)
 extends DefaultWebProject(info)

@@ -1,5 +1,4 @@
 import sbt._
-import sbt_akka_bivy._
 import reaktor.scct.ScctProject
 
 trait BannoCommonDeps extends BasicScalaProject {
