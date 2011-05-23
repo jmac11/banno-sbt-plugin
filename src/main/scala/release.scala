@@ -37,6 +37,13 @@ trait VariableBannoDepVersions extends BasicDependencyProject with SnapshotOrRel
                log)
   }
 
+  def bannoDependenciesNeedUpdated: Boolean =
+    bannoDependenciesToUpdate exists { dep =>
+      val latestVersion = Nexus.latestReleasedVersionFor(dep.groupId, appendScalaVersion(dep.artifactId))
+                                      .getOrElse(throw new RuntimeException("Unable to find release for " + dep))
+      bannoVersions.get(dep.propKey) != latestVersion
+    }
+
   lazy val bannoVersionsPath = rootProject.info.builderPath / "banno-versions.properties"
   
   protected def bannoVersions: Properties = {
@@ -157,7 +164,7 @@ trait BannoReleaseProcess extends BasicScalaProject with VariableBannoDepVersion
                                  gitMergeAndPush)
   // with push
   override def releaseAction = task {
-    if (hasChangedSinceLastRelease) {
+    if (hasChangedSinceLastRelease || bannoDependenciesNeedUpdated) {
       runSequential(releaseActions.map(_.name))
     } else {
       log.info("Nothing has changed since last release. Not doing anything.")
@@ -181,7 +188,7 @@ trait BannoMultiReleaseProcess extends BasicDependencyProject with ReleaseVersio
                                   gitMergeAndPushMulti)
   
   lazy val releaseMulti = task {
-    if (hasChangedSinceLastRelease) {
+    if (hasChangedSinceLastRelease || bannoDependenciesNeedUpdated) {
       runSequential(parentPreTasks.map(_.name)) orElse
       runSequential(releaseModuleTasks) orElse
       runSequential(parentPostTasks.map(_.name))
