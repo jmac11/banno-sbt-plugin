@@ -9,7 +9,7 @@ object Git {
 
   def pull(log: Logger): Option[String] = git("pull" :: Nil, log)
   
-  def pushWithTags(ref: String, log: Logger): Option[String] = git("push" :: "origin" :: "--tags" :: ref :: Nil, log)
+  def push(ref: String, log: Logger): Option[String] = git("push" :: "origin" :: ref :: Nil, log)
   
   def merge(ref: String, log: Logger): Option[String] = git("merge" :: ref :: Nil, log)
 

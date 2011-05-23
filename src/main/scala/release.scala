@@ -78,11 +78,14 @@ trait VariableBannoDepVersions extends BasicDependencyProject with SnapshotOrRel
 }
 
 trait ReleaseVersioning extends BasicDependencyProject {
+  var releasedVersion: Option[BasicVersion] = None
+  
   def versionSnapshotToReleaseAction = task {
     modifyVersion("Updating version to release") { currentVersion =>
       val nextVersionMaybe = lastVersion.filter(v => v.major == currentVersion.major && v.minor == currentVersion.minor)
-                                        .map(v => v.incrementMicro)
-      nextVersionMaybe.getOrElse(currentVersion.incrementMicro.withExtra(None))
+                                        .map(v => v.incrementMicro)      
+      releasedVersion = Some(nextVersionMaybe.getOrElse(currentVersion.incrementMicro.withExtra(None)))
+      releasedVersion.get                                   
     }
   }
 
@@ -125,6 +128,8 @@ trait ReleaseVersioning extends BasicDependencyProject {
 }
 
 trait GitMergeAndPush extends Project {
+  self: ReleaseVersioning =>
+    
   def gitMergeAndPushAction = task {
     if (Git.hasRemote("origin", log)) {
       val head = Git.currentHeadSHA(log)
@@ -132,7 +137,8 @@ trait GitMergeAndPush extends Project {
       Git.checkout("master", log) orElse
       Git.pull(log) orElse
       Git.merge(head, log)
-      Git.pushWithTags("master", log)
+      Git.push("master", log)
+      Git.push(self.releasedVersion.map(_.toString).get, log)
       
     } else {
       None
