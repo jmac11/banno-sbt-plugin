@@ -63,3 +63,34 @@ trait FatJar extends DefaultProject with OneJarProject {
   ) dependsOn (packageJar) describedAs ("Builds a single-file, executable JAR using One-JAR")
   lazy val oneJarArtifact = Artifact(artifactID, "onejar")
 }
+
+trait HadoopShim extends DefaultProject {
+  lazy val hadoopShimArtifact = Artifact(artifactID, "hadoop-shim")
+  
+  def hadoopShimTask = packageTask(hadoopShimPathFinder,
+                                   defaultJarPath("-hadoop-shim.jar")) dependsOn (compile, hadoopShimCopy) describedAs ("Packages a jar to be sent to Hadoop")
+
+  lazy val hadoopShim = hadoopShimTask
+  
+  lazy val packageJar = super.packageAction
+  override def packageAction = hadoopShimTask dependsOn (packageJar)
+
+  def hadoopShimTemporaryPath = outputPath / "hadoop-shim"
+  def hadoopShimClasspath = runClasspath +++ mainDependencies.scalaJars
+  def hadoopShimPathFinder = ((hadoopShimTemporaryPath ##) ** "*")
+  
+  lazy val hadoopShimCopy = task {
+    FileUtilities.clean(hadoopShimTemporaryPath, log)
+    
+    val (libs, dirs) = hadoopShimClasspath.get.partition(ClasspathUtilities.isArchive)
+    
+    val tempLibPath = hadoopShimTemporaryPath / "lib"
+    FileUtilities.copyFlat(libs, tempLibPath, log)
+
+    dirs.foreach { dir =>
+      FileUtilities.copy(((dir ##) ** "*").get, hadoopShimTemporaryPath, log)
+    }
+    
+    None
+  }
+}
