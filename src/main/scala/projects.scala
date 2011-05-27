@@ -1,4 +1,5 @@
 import sbt._
+import de.element34.sbteclipsify._
 import reaktor.scct.ScctProject
 
 class DefaultBannoProject(info: ProjectInfo)
@@ -6,6 +7,7 @@ extends DefaultProject(info)
 with BannoRepo
 with BannoCommonDeps
 with IdeaProject
+with Eclipsify
 with ScctProject
 with CiTask
 with SnapshotOrRelease
@@ -32,6 +34,7 @@ extends DefaultWebProject(info)
 with BannoRepo
 with BannoAkkaProject
 with IdeaProject
+with Eclipsify
 with ScctProject
 with CiTask
 with SnapshotOrRelease
