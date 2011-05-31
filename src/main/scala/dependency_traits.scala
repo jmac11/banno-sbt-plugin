@@ -4,6 +4,7 @@ import reaktor.scct.ScctProject
 trait BannoCommonDeps extends BasicScalaProject {
   lazy val jodaTime = "joda-time" % "joda-time" % "1.6"
   lazy val scalajCollection = "org.scalaj" % "scalaj-collection_2.8.0" % "1.0"
+  lazy val configFromCouch = "com.banno" %% "hidabed" % "1.0-SNAPSHOT"
 }
 
 trait BannoAkkaProject extends BasicScalaProject {
