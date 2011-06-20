@@ -23,7 +23,7 @@ class Project(info: ProjectInfo) extends PluginProject(info) with test.ScalaScri
 
   val scctPlugin = buildScalaVersion match {
     case "2.8.1" => "reaktor" % "sbt-scct-for-2.8" % "0.1-SNAPSHOT"
-    case _ => "reaktor" % "sbt-scct-for-2.9" % "0.1-SNAPSHOT"}
+    case _ => "reaktor" % "scct-sbt-for-2.9" % "0.1-SNAPSHOT"}
   val sbtIdea = "com.github.mpeltonen" % "sbt-idea-plugin" % "0.4.0"
   val eclipsify = "de.element34" % "sbt-eclipsify" % "0.7.0"
   val onejarSBT = "com.github.retronym" % "sbt-onejar" % "0.2"
