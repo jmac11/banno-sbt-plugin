@@ -26,6 +26,6 @@ class Project(info: ProjectInfo) extends PluginProject(info) with test.ScalaScri
     case _ => "reaktor" % "scct-sbt-for-2.9" % "0.1-SNAPSHOT"}
   val sbtIdea = "com.github.mpeltonen" % "sbt-idea-plugin" % "0.4.0"
   val eclipsify = "de.element34" % "sbt-eclipsify" % "0.7.0"
-  val onejarSBT = "com.github.retronym" % "sbt-onejar" % "0.2"
+  val assemblySBT = "com.codahale" % "assembly-sbt" % "0.1.1"
   val dispatchHttp = "net.databinder" %% "dispatch-http" % "0.7.8"
 }

@@ -1,0 +1,14 @@
+# create a hadoop shim jar
+
+> update
+
+> check-file lib_managed/scala_2.7.7/compile/test-dep_2.7.7-1.0-SNAPSHOT.jar
+
+> package
+
+> check-file target/scala_2.7.7/sbt-plugin-test-fat-jar_2.7.7-1.0-SNAPSHOT-assembly.jar
+
+> check-jar-has target/scala_2.7.7/sbt-plugin-test-fat-jar_2.7.7-1.0-SNAPSHOT-assembly.jar org/joda/time/DateTime.class
+
+> check-jar-has target/scala_2.7.7/sbt-plugin-test-fat-jar_2.7.7-1.0-SNAPSHOT-assembly.jar com/banno/Test.class
+
