@@ -61,7 +61,7 @@ trait FatJar extends BasicScalaProject with assembly.AssemblyBuilder {
                                             assemblyClasspath,
                                             assemblyExtraJars,
                                             assemblyExclude
-                                          ) dependsOn (packageJar) describedAs ("Builds a single-file, executable JAR using assembly-sbt")
+                                          ) dependsOn (packageJar, copyResourcesAction) describedAs ("Builds a single-file, executable JAR using assembly-sbt")
   lazy val assemblyArtifact = Artifact(artifactID, "assembly")
 }
 
