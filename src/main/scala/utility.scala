@@ -24,8 +24,8 @@ trait JRebelScan extends BasicWebScalaProject {
   override def scanDirectories = Nil
 }
 
-trait CiTask extends BasicScalaProject { scct: ScctProject =>
-  lazy val ciActions = List(clean, cleanLib, update, test, scct.testCoverage, doc, publish)
+trait CiTask extends BasicScalaProject { 
+  lazy val ciActions = List(clean, cleanLib, update, test, doc, publish)
   lazy val ci = task {
     ciActions.foldLeft(None: Option[String]) { (result, task) => result orElse act(task.name) }
   } describedAs "Runs ci tasks"
