@@ -34,7 +34,7 @@ trait HueDeps extends BasicScalaProject {
 
 trait ScalaTestDeps extends BasicScalaProject {
   lazy val scalaTest = buildScalaVersion match {
-    case "2.8.1" => "org.scalatest" % "scalatest" % "1.5" % "test"
+    case "2.8.1" => "org.scalatest" %% "scalatest" % "1.5" % "test"
     case "2.9.0" => "org.scalatest" %% "scalatest" % "1.4.1" % "test"
     case "2.9.0-1" => "org.scalatest" % "scalatest_2.9.0" % "1.4.1" % "test"
   }
