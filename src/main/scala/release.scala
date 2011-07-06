@@ -106,14 +106,19 @@ trait ReleaseVersioning extends BasicDependencyProject {
     }
   }
 
+  val knownScalaVersions = List("2.9.0-1", "2.8.1", "2.7.7")
+  
   def lastVersion: Option[BasicVersion] = {
-    val lastVersionStr = Nexus.latestReleasedVersionFor(organization, normalizedName + "_" + buildScalaVersion)
-    lastVersionStr.map { v =>
-      Version.fromString(v) match {
-        case Right(version: BasicVersion) => version
-        case value => throw new RuntimeException("Unable to parse version: " + value)
+    val latestVersions = knownScalaVersions.flatMap { scalaVersion =>
+      val lastVersionStr = Nexus.latestReleasedVersionFor(organization, normalizedName + "_" + scalaVersion)
+      lastVersionStr.map { v =>
+        Version.fromString(v) match {
+          case Right(version: BasicVersion) => version
+          case value => throw new RuntimeException("Unable to parse version: " + value)
+        }
       }
     }
+    latestVersions.sort { (a,b) => a.micro.get >= b.micro.get }.firstOption
   }
   
   def tagVersionAction = task {
