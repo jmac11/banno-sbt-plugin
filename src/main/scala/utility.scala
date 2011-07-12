@@ -56,6 +56,8 @@ trait UpdateMavenMetadataAfterPublish extends BasicDependencyProject with Snapsh
 
 trait FatJar extends BasicScalaProject with assembly.AssemblyBuilder {
   lazy val packageJar = super.packageAction
+  override def assemblyConflictingFiles(path: Path) =
+    (path / "license") :: (path / "LICENSE") :: (path / "License") :: super.assemblyConflictingFiles(path)
   override def assemblyJarName = artifactID + "-" + this.version + "-assembly" + ".jar"
   override def packageAction = assemblyTask(assemblyTemporaryPath,
                                             assemblyClasspath,
