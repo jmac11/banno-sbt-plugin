@@ -78,14 +78,12 @@ trait VariableBannoDepVersions extends BasicDependencyProject with SnapshotOrRel
 }
 
 trait ReleaseVersioning extends BasicDependencyProject {
-  var releasedVersion: Option[BasicVersion] = None
   
   def versionSnapshotToReleaseAction = task {
     modifyVersion("Updating version to release") { currentVersion =>
       val nextVersionMaybe = lastVersion.filter(v => v.major == currentVersion.major && v.minor == currentVersion.minor)
                                         .map(v => v.incrementMicro)      
-      releasedVersion = Some(nextVersionMaybe.getOrElse(currentVersion.incrementMicro.withExtra(None)))
-      releasedVersion.get                                   
+      nextVersionMaybe.getOrElse(currentVersion.incrementMicro.withExtra(None))                              
     }
   }
 
@@ -125,6 +123,17 @@ trait ReleaseVersioning extends BasicDependencyProject {
     Git.tag(versionTagName, "Tagging release version: " + version, log)
   }
 
+  def lastVersionTag = {
+    val versionTags = Git.listTags(log).map(Version.fromString(_)).flatMap {
+      case Right(b: BasicVersion) => Some(b)
+      case _ => None
+    }
+    
+    val sortedVersionTags = versionTags sort { (b1, b2) => b1.major < b2.major || b1.minor.get < b2.minor.get || b1.micro.get < b2.micro.get }
+    
+    sortedVersionTags.last.toString
+  }
+
   val CHANGED_FILES_TO_IGNORE = Set("project/build.properties", "project/banno-versions.properties")
   def hasChangedSinceLastRelease(): Boolean = lastVersion.map(v =>
     Git.isDifference("refs/tags/" + v.toString, CHANGED_FILES_TO_IGNORE, log)).getOrElse(true)
@@ -143,7 +152,7 @@ trait GitMergeAndPush extends Project {
       Git.pull(log) orElse
       Git.merge(head, log)
       Git.push("master", log)
-      Git.push(self.releasedVersion.map(_.toString).get, log)
+      Git.push(self.lastVersionTag, log)
       
     } else {
       None

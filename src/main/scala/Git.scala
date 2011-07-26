@@ -22,6 +22,11 @@ object Git {
       case _ : Exception => true // hackety, hack, hack
     }
   }
+
+  def listTags(log: Logger): List[String] = {
+    val tags = Process("git" :: "tag" :: "-l" :: Nil) !! (log)
+    tags.split("\n").toList
+  }
   
   def hasRemote(remoteName: String, log: Logger): Boolean = {
     val diff = Process("git" :: "remote" :: Nil) !! (log)
