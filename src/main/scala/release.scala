@@ -162,26 +162,33 @@ trait BannoReleaseProcess extends BasicScalaProject with VariableBannoDepVersion
   lazy val tagVersion = super.tagVersionAction
   lazy val versionReleaseToSnapshot = super.versionReleaseToSnapshotAction
   lazy val gitMergeAndPush = super.gitMergeAndPushAction
+
+  lazy val preReleaseActions = List(updateBannoReleaseVersions,
+                                    versionSnapshotToRelease)
   
   lazy val releaseActions = List(clean,
                                  cleanLib,
-                                 updateBannoReleaseVersions,
-                                 versionSnapshotToRelease,
                                  update,
                                  test,
-                                 publish,
-                                 tagVersion,
-                                 versionReleaseToSnapshot,
-                                 gitMergeAndPush)
-  // with push
-  override def releaseAction = task {
+                                 publish)
+  
+  lazy val postReleaseActions = List(tagVersion,
+                                     versionReleaseToSnapshot,
+                                     gitMergeAndPush)
+
+  def taskIfChanged(actions: List[Task]) = task {
     if (hasChangedSinceLastRelease || bannoDependenciesNeedUpdated) {
-      runSequential(releaseActions.map(_.name))
+      runSequential(actions.map(_.name))
     } else {
       log.info("Nothing has changed since last release. Not doing anything.")
       None
     }
   } describedAs "The Banno Release Process"
+  
+  lazy val preRelease = taskIfChanged(preReleaseActions)
+  lazy val runRelease = taskIfChanged(releaseActions)
+  lazy val postRelease = taskIfChanged(postReleaseActions)
+  override def releaseAction = taskIfChanged(preReleaseActions ++ releaseActions ++ postReleaseActions)
 }
 
 trait BannoMultiReleaseProcess extends BasicDependencyProject with ReleaseVersioning with VariableBannoDepVersions with GitMergeAndPush with RunSequential {
