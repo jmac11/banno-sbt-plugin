@@ -97,3 +97,7 @@ trait HadoopShim extends DefaultProject {
     None
   }
 }
+
+trait BannoCompilerOptions extends BasicScalaProject {
+  override def compileOptions = super.compileOptions ++ Seq(Deprecation, Unchecked)
+}

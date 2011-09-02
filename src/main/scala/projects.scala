@@ -13,6 +13,7 @@ with CiTask
 with SnapshotOrRelease
 with UpdateMavenMetadataAfterPublish
 with BannoReleaseProcess
+with BannoCompilerOptions
 
 class DefaultBannoAkkaProject(info: ProjectInfo)
 extends DefaultBannoProject(info)
