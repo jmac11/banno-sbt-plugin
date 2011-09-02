@@ -104,9 +104,11 @@ trait ReleaseVersioning extends BasicDependencyProject {
     }
   }
 
-  val knownScalaVersions = List("2.9.0-1", "2.8.1", "2.7.7")
   
-  def lastVersion: Option[BasicVersion] = {
+  def lastVersion: Option[BasicVersion] = sortedVersionTags.lastOption orElse lastVersionInNexus
+  
+  val knownScalaVersions = List("2.9.1", "2.9.0-1", "2.8.1", "2.7.7")
+  def lastVersionInNexus: Option[BasicVersion] = {
     val latestVersions = knownScalaVersions.flatMap { scalaVersion =>
       val lastVersionStr = Nexus.latestReleasedVersionFor(organization, normalizedName + "_" + scalaVersion)
       lastVersionStr.map { v =>
@@ -123,14 +125,15 @@ trait ReleaseVersioning extends BasicDependencyProject {
     Git.tag(versionTagName, "Tagging release version: " + version, log)
   }
 
-  def lastVersionTag = {
+  def sortedVersionTags = {
     val versionTags = Git.listTags(log).map(Version.fromString(_)).flatMap {
       case Right(b: BasicVersion) => Some(b)
       case _ => None
     }
-    
-    val sortedVersionTags = versionTags sort { (b1, b2) => b1.major < b2.major || b1.minor.get < b2.minor.get || b1.micro.get < b2.micro.get }
-    
+    versionTags sort { (b1, b2) => b1.major < b2.major || b1.minor.get < b2.minor.get || b1.micro.get < b2.micro.get }
+  }
+  
+  def lastVersionTag = {
     sortedVersionTags.last.toString
   }
 

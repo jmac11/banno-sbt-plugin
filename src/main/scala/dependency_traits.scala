@@ -5,7 +5,7 @@ trait BannoCommonDeps extends BasicScalaProject {
   lazy val jodaTime = "joda-time" % "joda-time" % "1.6"
   lazy val scalajCollection = buildScalaVersion match {
     case "2.7.7" => "org.scalaj" % "scalaj-collection_2.8.0" % "1.0"
-    case _ => "org.scalaj" %% "scalaj-collection" % "1.1"
+    case _ => "org.scalaj" %% "scalaj-collection" % "1.2"
   }
 }
 
@@ -33,21 +33,24 @@ trait HueDeps extends BasicScalaProject {
 }
 
 trait ScalaTestDeps extends BasicScalaProject {
+  lazy val scalaTestVersion = "1.6.1"
   lazy val scalaTest = buildScalaVersion match {
     case "2.8.1" => "org.scalatest" %% "scalatest" % "1.5" % "test"
-    case "2.9.0" => "org.scalatest" %% "scalatest" % "1.6.1" % "test"
-    case "2.9.0-1" => "org.scalatest" % "scalatest_2.9.0" % "1.6.1" % "test"
+    case "2.9.0" => "org.scalatest" %% "scalatest" % scalaTestVersion % "test"
+    case "2.9.0-1" => "org.scalatest" % "scalatest_2.9.0" % scalaTestVersion % "test"
+    case _ => "org.scalatest" %% "scalatest" % scalaTestVersion % "test"
   }
   lazy val awaitility = "com.jayway.awaitility" % "awaitility" % "1.3.1" % "test"
   lazy val scalaAwaitility = "com.jayway.awaitility" % "awaitility-scala" % "1.3.1" % "test"
 }
 
 trait SpecsTestDeps extends BasicScalaProject {
-  lazy val specs = "org.scala-tools.testing" % "specs_2.8.0" % "1.6.5" % "test"
+  lazy val specsVersion = "1.6.9"
+  lazy val specs = "org.scala-tools.testing" %% "specs" % specsVersion % "test"
 }
 
 trait Specs2TestDeps extends BasicScalaProject {
-  lazy val specs2Version = "1.4"
+  lazy val specs2Version = "1.5"
   lazy val specs2 = "org.specs2" %% "specs2" % specs2Version % "test"
   def specs2Framework = new TestFramework("org.specs2.runner.SpecsFramework")
   override def testFrameworks = super.testFrameworks ++ Seq(specs2Framework)
