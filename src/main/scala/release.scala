@@ -201,6 +201,7 @@ trait BannoReleaseProcess extends BasicScalaProject with VariableBannoDepVersion
   lazy val runRelease = taskIfChanged(releaseActions)
   lazy val postRelease = taskIfChanged(postReleaseActions)
   override def releaseAction = taskIfChanged(preReleaseActions ++ releaseActions ++ postReleaseActions)
+  lazy val releaseNoMerge = taskIfChanged(preReleaseActions ++ releaseActions ++ List(tagVersion,versionReleaseToSnapshot))
 }
 
 trait BannoMultiReleaseProcess extends BasicDependencyProject with ReleaseVersioning with VariableBannoDepVersions with GitMergeAndPush with RunSequential {
