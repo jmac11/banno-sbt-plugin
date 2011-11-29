@@ -4,14 +4,14 @@ import java.util.Properties
 sealed case class BannoDep(groupId: String, artifactId: String, snapshotVersion: String) {
   def propKey = groupId + "." + artifactId
 }
-
+  
 trait VariableBannoDepVersions extends BasicDependencyProject with SnapshotOrRelease {
   var bannoDependencies: Set[BannoDep] = Set()
-
+  
   override def libraryDependencies = super.libraryDependencies ++ bannoDependenciesAsModuleIds
 
   def bannoDependency(groupId: String, artifactId: String): Unit = {
-    bannoDependency(groupId, artifactId, "1.1-SNAPSHOT")
+    bannoDependency(groupId, artifactId, "1.0-SNAPSHOT")
   }
 
   def bannoDependency(groupId: String, artifactId: String, snapshotVersion: String) : Unit = {
@@ -24,7 +24,7 @@ trait VariableBannoDepVersions extends BasicDependencyProject with SnapshotOrRel
     val newVersions = bannoVersions
     bannoDependenciesToUpdate foreach { dep =>
       val latestVersion = Nexus.latestReleasedVersionFor(dep.groupId, appendScalaVersion(dep.artifactId)).getOrElse(throw new RuntimeException("Unable to find release for " + dep))
-      newVersions.setProperty(dep.propKey, latestVersion)
+      newVersions.setProperty(dep.propKey, latestVersion)                         
     }
     log.info("Setting Banno Versions to:")
     newVersions.list(new java.io.PrintWriter(new LoggerWriter(log, Level.Info)))
@@ -45,45 +45,45 @@ trait VariableBannoDepVersions extends BasicDependencyProject with SnapshotOrRel
     }
 
   lazy val bannoVersionsPath = rootProject.info.builderPath / "banno-versions.properties"
-
+  
   protected def bannoVersions: Properties = {
     val bannoVersions = new Properties()
     FileUtilities.readStream(bannoVersionsPath.asFile, log) { stream =>
       bannoVersions.load(stream)
-      None
+      None                                                   
     }
     bannoVersions
   }
-
+  
   private def versionForBannoDep(dep: BannoDep): String= {
     if (isSnapshot) {
       dep.snapshotVersion
     } else {
-      bannoVersions.getProperty(dep.propKey)
+      bannoVersions.getProperty(dep.propKey)                        
     }
   }
 
-
+  
   private def bannoDependenciesAsModuleIds(): Set[ModuleID] = {
     bannoDependencies map { dep =>
       val BannoDep(groupId, artifactId, snapshotVersion) = dep
       ModuleID(groupId, appendScalaVersion(artifactId), versionForBannoDep(dep))
     }
   }
-
+  
   private def appendScalaVersion(artifactId: String): String = {
     artifactId + "_" + buildScalaVersion
   }
-
+  
 }
 
 trait ReleaseVersioning extends BasicDependencyProject {
-
+  
   def versionSnapshotToReleaseAction = task {
     modifyVersion("Updating version to release") { currentVersion =>
       val nextVersionMaybe = lastVersion.filter(v => v.major == currentVersion.major && v.minor == currentVersion.minor)
-                                        .map(v => v.incrementMicro)
-      nextVersionMaybe.getOrElse(currentVersion.incrementMicro.withExtra(None))
+                                        .map(v => v.incrementMicro)      
+      nextVersionMaybe.getOrElse(currentVersion.incrementMicro.withExtra(None))                              
     }
   }
 
@@ -99,14 +99,14 @@ trait ReleaseVersioning extends BasicDependencyProject {
         rootProject.projectVersion() = newVersion
         rootProject.saveEnvironment()
         Git.commit("project/build.properties", "%s: %s".format(msgHeader, newVersion), log)
-      case weird =>
+      case weird => 
         Some("Can't modify " + weird)
     }
   }
 
-
+  
   def lastVersion: Option[BasicVersion] = sortedVersionTags.lastOption orElse lastVersionInNexus
-
+  
   val knownScalaVersions = List("2.9.1", "2.9.0-1", "2.8.1", "2.7.7")
   def lastVersionInNexus: Option[BasicVersion] = {
     val latestVersions = knownScalaVersions.flatMap { scalaVersion =>
@@ -120,7 +120,7 @@ trait ReleaseVersioning extends BasicDependencyProject {
     }
     latestVersions.sort { (a,b) => a.micro.get >= b.micro.get }.firstOption
   }
-
+  
   def tagVersionAction = task {
     Git.tag(versionTagName, "Tagging release version: " + version, log)
   }
@@ -132,7 +132,7 @@ trait ReleaseVersioning extends BasicDependencyProject {
     }
     versionTags sort { (b1, b2) => b1.major < b2.major || b1.minor.get < b2.minor.get || b1.micro.get < b2.micro.get }
   }
-
+  
   def lastVersionTag = {
     sortedVersionTags.last.toString
   }
@@ -146,17 +146,17 @@ trait ReleaseVersioning extends BasicDependencyProject {
 
 trait GitMergeAndPush extends Project {
   self: ReleaseVersioning =>
-
+    
   def gitMergeAndPushAction = task {
     if (Git.hasRemote("origin", log)) {
       val head = Git.currentHeadSHA(log)
-
+      
       Git.checkout("master", log) orElse
       Git.pull(log) orElse
       Git.merge(head, log)
       Git.push("master", log)
       Git.push(self.lastVersionTag, log)
-
+      
     } else {
       None
     }
@@ -177,13 +177,13 @@ trait BannoReleaseProcess extends BasicScalaProject with VariableBannoDepVersion
 
   lazy val preReleaseActions = List(updateBannoReleaseVersions,
                                     versionSnapshotToRelease)
-
+  
   lazy val releaseActions = List(clean,
                                  cleanLib,
                                  update,
                                  test,
                                  publish)
-
+  
   lazy val postReleaseActions = List(tagVersion,
                                      versionReleaseToSnapshot,
                                      gitMergeAndPush)
@@ -196,7 +196,7 @@ trait BannoReleaseProcess extends BasicScalaProject with VariableBannoDepVersion
       None
     }
   } describedAs "The Banno Release Process"
-
+  
   lazy val preRelease = taskIfChanged(preReleaseActions)
   lazy val runRelease = taskIfChanged(releaseActions)
   lazy val postRelease = taskIfChanged(postReleaseActions)
@@ -210,14 +210,14 @@ trait BannoMultiReleaseProcess extends BasicDependencyProject with ReleaseVersio
   lazy val tagVersionMulti = super.tagVersionAction
   lazy val versionReleaseToSnapshotMulti = super.versionReleaseToSnapshotAction
   lazy val gitMergeAndPushMulti = super.gitMergeAndPushAction
-
+  
   lazy val parentPreTasks = List(updateBannoReleaseVersionsMulti,
                                  versionSnapshotToReleaseMulti)
   lazy val releaseModuleTasks = List("clean", "clean-lib", "update", "test", "publish")
   lazy val parentPostTasks = List(tagVersionMulti,
                                   versionReleaseToSnapshotMulti,
                                   gitMergeAndPushMulti)
-
+  
   lazy val releaseMulti = task {
     if (hasChangedSinceLastRelease || bannoDependenciesNeedUpdated) {
       runSequential(parentPreTasks.map(_.name)) orElse
@@ -228,7 +228,7 @@ trait BannoMultiReleaseProcess extends BasicDependencyProject with ReleaseVersio
       None
     }
   } describedAs "The Banno Release Process"
-
+  
   override def bannoDependenciesToUpdate: Set[BannoDep] = Set(subProjects.values.toList.flatMap {
     case proj: VariableBannoDepVersions => proj.bannoDependencies
   }: _*)
