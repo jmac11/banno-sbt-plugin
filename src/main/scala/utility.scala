@@ -1,22 +1,26 @@
 import sbt._
 import reaktor.scct.ScctProject
 
-trait BannoRepo extends BasicDependencyProject with SnapshotOrRelease { 
+trait BannoRepo extends BasicDependencyProject with SnapshotOrRelease {
   override def managedStyle = ManagedStyle.Maven
   lazy val BannoExternalRepo   = "Banno External Repo" at "http://10.3.0.26:8081/nexus/content/groups/external/"
   lazy val BannoSnapshotsRepo  = "Banno Snapshots Repo" at "http://10.3.0.26:8081/nexus/content/repositories/snapshots"
   lazy val BannoReleasesRepo   = "Banno Releases Repo" at "http://10.3.0.26:8081/nexus/content/repositories/releases"
 
-  override def ivyRepositories = BannoExternalRepo ::
+  override def ivyRepositories = Resolver.defaultLocal(None) ::
+                                 BannoExternalRepo ::
                                  BannoReleasesRepo ::
                                  BannoSnapshotsRepo ::
-                                 Resolver.defaultLocal(None) ::
                                  ("Local Maven Repository" at "file://"+Path.userHome+"/.m2/repository") ::
                                  Nil
 
   Credentials(Path.userHome / ".ivy2" / ".banno_credentials", log)
-  
+
   override def defaultPublishRepository = Some(if (isSnapshot) BannoSnapshotsRepo else BannoReleasesRepo)
+
+  lazy val deleteLocalIvyRepo = task {
+    FileUtilities.clean(Path.userHome / ".ivy2" / "local", log)
+  }
 }
 
 trait JRebelScan extends BasicWebScalaProject {
@@ -24,7 +28,7 @@ trait JRebelScan extends BasicWebScalaProject {
   override def scanDirectories = Nil
 }
 
-trait CiTask extends BasicScalaProject { 
+trait CiTask extends BasicScalaProject {
   lazy val ciActions = List(clean, cleanLib, update, test, doc, publish)
   lazy val ci = task {
     ciActions.foldLeft(None: Option[String]) { (result, task) => result orElse act(task.name) }
@@ -51,7 +55,7 @@ trait UpdateMavenMetadataAfterPublish extends BasicDependencyProject with Snapsh
   } describedAs ("Updates the maven-metadata.xml on the repo to publish")
 
   override def publishAction = updateMavenMetadata dependsOn super.publishAction
-  
+
 }
 
 trait FatJar extends BasicScalaProject with assembly.AssemblyBuilder {
@@ -69,31 +73,31 @@ trait FatJar extends BasicScalaProject with assembly.AssemblyBuilder {
 
 trait HadoopShim extends DefaultProject {
   lazy val hadoopShimArtifact = Artifact(artifactID, "hadoop-shim")
-  
+
   def hadoopShimTask = packageTask(hadoopShimPathFinder,
                                    defaultJarPath("-hadoop-shim.jar")) dependsOn (compile, hadoopShimCopy) describedAs ("Packages a jar to be sent to Hadoop")
 
   lazy val hadoopShim = hadoopShimTask
-  
+
   lazy val packageJar = super.packageAction
   override def packageAction = hadoopShimTask dependsOn (packageJar)
 
   def hadoopShimTemporaryPath = outputPath / "hadoop-shim"
   def hadoopShimClasspath = runClasspath +++ mainDependencies.scalaJars
   def hadoopShimPathFinder = ((hadoopShimTemporaryPath ##) ** "*")
-  
+
   lazy val hadoopShimCopy = task {
     FileUtilities.clean(hadoopShimTemporaryPath, log)
-    
+
     val (libs, dirs) = hadoopShimClasspath.get.partition(ClasspathUtilities.isArchive)
-    
+
     val tempLibPath = hadoopShimTemporaryPath / "lib"
     FileUtilities.copyFlat(libs, tempLibPath, log)
 
     dirs.foreach { dir =>
       FileUtilities.copy(((dir ##) ** "*").get, hadoopShimTemporaryPath, log)
     }
-    
+
     None
   }
 }
