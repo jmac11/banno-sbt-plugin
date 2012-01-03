@@ -2,7 +2,7 @@ import sbt._
 import reaktor.scct.ScctProject
 
 trait BannoCommonDeps extends BasicScalaProject {
-  lazy val jodaTime = "joda-time" % "joda-time" % "1.6"
+  lazy val jodaTime = "joda-time" % "joda-time" % "2.0"
   lazy val scalajCollection = buildScalaVersion match {
     case "2.7.7" => "org.scalaj" % "scalaj-collection_2.8.0" % "1.0"
     case _ => "org.scalaj" %% "scalaj-collection" % "1.2"
