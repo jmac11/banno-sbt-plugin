@@ -68,3 +68,11 @@ trait LiftDeps extends BasicScalaProject {
   lazy val jettyServer = "org.mortbay.jetty" % "jetty" % "6.1.22" % "test"
   lazy val liftTestKit =  "net.liftweb" %% "lift-testkit" % liftVersion % "test"
 }
+
+trait MetricsDeps extends BasicScalaProject {
+  lazy val metricsVersion = "2.0.2"
+  lazy val metrics = "com.yammer.metrics" % "metrics-core" % metricsVersion
+  lazy val metricsScala = "com.yammer.metrics" %% "metrics-scala" % metricsVersion
+  lazy val metricsGraphite = "com.yammer.metrics" % "metrics-graphite" % metricsVersion
+  val metricsLogback = "com.yammer.metrics" % "metrics-logback" % metricsVersion
+}
