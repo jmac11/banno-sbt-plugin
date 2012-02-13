@@ -47,7 +47,7 @@ trait SpecsTestDeps extends BasicScalaProject {
 }
 
 trait Specs2TestDeps extends BasicScalaProject {
-  lazy val specs2Version = "1.7"
+  lazy val specs2Version = "1.8"
   lazy val specs2 = "org.specs2" %% "specs2" % specs2Version % "test"
   def specs2Framework = new TestFramework("org.specs2.runner.SpecsFramework")
   override def testFrameworks = super.testFrameworks ++ Seq(specs2Framework)
