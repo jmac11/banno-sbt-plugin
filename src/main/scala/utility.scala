@@ -3,9 +3,9 @@ import reaktor.scct.ScctProject
 
 trait BannoRepo extends BasicDependencyProject with SnapshotOrRelease {
   override def managedStyle = ManagedStyle.Maven
-  lazy val BannoExternalRepo   = "Banno External Repo" at "http://10.3.0.26:8081/nexus/content/groups/external/"
-  lazy val BannoSnapshotsRepo  = "Banno Snapshots Repo" at "http://10.3.0.26:8081/nexus/content/repositories/snapshots"
-  lazy val BannoReleasesRepo   = "Banno Releases Repo" at "http://10.3.0.26:8081/nexus/content/repositories/releases"
+  lazy val BannoExternalRepo   = "Banno External Repo" at "http://nexus.banno.com/nexus/content/groups/external/"
+  lazy val BannoSnapshotsRepo  = "Banno Snapshots Repo" at "http://nexus.banno.com/nexus/content/repositories/snapshots"
+  lazy val BannoReleasesRepo   = "Banno Releases Repo" at "http://nexus.banno.com/nexus/content/repositories/releases"
 
   override def ivyRepositories = Resolver.defaultLocal(None) ::
                                  BannoExternalRepo ::
