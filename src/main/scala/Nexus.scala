@@ -22,7 +22,7 @@ object Nexus {
     }
   }
 
-  lazy val nexusBase = :/("10.3.0.26", 8081) / "nexus/service/local"
+  lazy val nexusBase = :/("nexus.banno.com") / "nexus/service/local"
 
   lazy val nexusBaseAuthenticated = {
     val creds = CredentialsStore.INSTANCE.getCredentials("Sonatype Nexus Repository Manager", "10.3.0.26")

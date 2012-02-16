@@ -1,9 +1,9 @@
 import sbt._
 
 class Project(info: ProjectInfo) extends PluginProject(info) with test.ScalaScripted {
-  val BannoExternalRepo   = "Banno External Repo" at "http://10.3.0.26:8081/nexus/content/groups/external/"
-  val BannoSnapshotsRepo  = "Banno Snapshots Repo" at "http://10.3.0.26:8081/nexus/content/repositories/snapshots/"
-  val BannoReleasesRepo   = "Banno Releases Repo" at "http://10.3.0.26:8081/nexus/content/repositories/releases/"
+  val BannoExternalRepo   = "Banno External Repo" at "http://nexus.banno.com/nexus/content/groups/external/"
+  val BannoSnapshotsRepo  = "Banno Snapshots Repo" at "http://nexus.banno.com/nexus/content/repositories/snapshots/"
+  val BannoReleasesRepo   = "Banno Releases Repo" at "http://nexus.banno.com/nexus/content/repositories/releases/"
 
   override def managedStyle = ManagedStyle.Maven
   override def ivyRepositories = Resolver.defaultLocal(None) :: BannoExternalRepo :: BannoReleasesRepo :: BannoSnapshotsRepo ::  Nil
