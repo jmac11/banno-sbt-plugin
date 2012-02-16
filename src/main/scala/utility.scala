@@ -41,7 +41,7 @@ trait SnapshotOrRelease extends BasicDependencyProject {
 }
 
 trait UpdateMavenMetadataAfterPublish extends BasicDependencyProject with SnapshotOrRelease {
-  private val NEXUS_UPDATE_METADATA_JOB_ID = "41"
+  private val NEXUS_UPDATE_METADATA_JOB_ID = "6"
   // TODO: instead of invoking nexus to update the maven-metadata.xml, upload a maven-metadata.xml
   def updateMavenMetadata = task {
     if (isSnapshot) {
