@@ -25,7 +25,7 @@ object Nexus {
   lazy val nexusBase = :/("nexus.banno.com") / "nexus/service/local"
 
   lazy val nexusBaseAuthenticated = {
-    val creds = CredentialsStore.INSTANCE.getCredentials("Sonatype Nexus Repository Manager", "10.3.0.26")
+    val creds = CredentialsStore.INSTANCE.getCredentials("Sonatype Nexus Repository Manager", "nexus.banno.com")
     nexusBase as (creds.getUserName, creds.getPasswd)
   }
 }
