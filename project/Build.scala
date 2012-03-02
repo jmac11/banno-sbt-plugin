@@ -21,6 +21,10 @@ object MyBuild extends Build {
                             externalResolvers <<= resolvers map { rs =>
                               Resolver.withDefaultResolvers(rs, mavenCentral = false, scalaTools = false)
                             },
+
+                            addSbtPlugin("com.github.gseitz" % "sbt-release" % "0.4"),
+                            libraryDependencies += "net.databinder" %% "dispatch-http" % "0.7.8",
+
                             publishTo <<= (version) { v =>
                               if (v.trim.endsWith("SNAPSHOT")) Some(bannoSnapshots)
                               else Some(bannoReleases)

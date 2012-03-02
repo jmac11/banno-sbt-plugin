@@ -5,8 +5,9 @@ import Keys._
 object BannoSettings {
   val settings =
     Seq(organization := "com.banno",
-        scalaVersion := "2.9.1",
-        version := "1.0-SNAPSHOT") ++
+        scalaVersion := "2.9.1"
+      ) ++
     BannoNexus.settings ++
-    BannoCommonDeps.settings
+    BannoCommonDeps.settings ++
+    BannoRelease.settings
 }
