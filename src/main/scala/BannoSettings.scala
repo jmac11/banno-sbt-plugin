@@ -7,6 +7,7 @@ object BannoSettings {
     Seq(organization := "com.banno",
         scalaVersion := "2.9.1"
       ) ++
+    Seq(checksums in update := Nil) ++
     BannoNexus.settings ++
     BannoCommonDeps.settings ++
     BannoRelease.settings
