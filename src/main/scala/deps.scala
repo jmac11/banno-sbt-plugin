@@ -20,7 +20,10 @@ object Akka {
   val settings: Seq[Project.Setting[_]] = Seq(
     version := "2.0.1",
     libraryDependencies <++= (version) { v =>
-      Seq(akkaModule("actor", v), akkaModule("remote", v))
+      Seq(akkaModule("actor", v),
+          akkaModule("remote", v),
+          akkaModule("slf4j", v),
+          akkaModule("testkit", v) % "test")
     }
   )
 }
