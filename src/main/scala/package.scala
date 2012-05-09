@@ -29,4 +29,9 @@ package object banno {
 
     Seq(defaultBannoDepReleasedVersion, depVersion, withDep)
   }
+
+  def addBannoDependencies(artifactIds: String*) =
+    artifactIds.foldLeft(Seq[Setting[_]]()) { (settings, artifactId) =>
+      settings ++ addBannoDependency(artifactId)
+    }
 }
