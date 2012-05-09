@@ -4,6 +4,7 @@ import Keys._
 
 package object banno {
   val bannoDependencies = SettingKey[Seq[ModuleID]]("banno-dependencies")
+  val bannoDependenciesFileName = "versions-banno-deps.sbt"
 
   def addBannoDependency(artifactId: String,
                          groupId: String = "com.banno",
