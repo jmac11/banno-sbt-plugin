@@ -37,7 +37,7 @@ object BannoRelease {
     st.log.info("Updating banno dependencies to latest releases")
     val bannoDeps = extract.get(bannoDependencies)
     val withLatestRelease = bannoDeps.map { dep =>
-      dep -> Nexus.latestReleasedVersionFor(dep.organization, dep.name)
+      dep -> Nexus.latestReleasedVersionFor(dep.organization, dep.name).getOrElse("1.0.001")
     }
 
     // write to file
