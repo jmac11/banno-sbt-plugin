@@ -46,7 +46,10 @@ object BannoRelease {
         st.log.info("updating \"%s\" to %s".format(dep, latest))
         "SettingKey[String](\"%s-released-version\") := \"%s\"\n\n".format(dep.name, latest)
     }
-    IO.write(new File(bannoDependenciesFileName), newSettingsContent.mkString)
+
+    if (!newSettingsContent.isEmpty) {
+      IO.write(new File(bannoDependenciesFileName), newSettingsContent.mkString)
+    }
 
     // reapply settings
     val newReleaseVersionSettings = withLatestRelease.map {
