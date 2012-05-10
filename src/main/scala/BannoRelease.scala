@@ -63,8 +63,11 @@ object BannoRelease {
   }
 
   val commitReleaseBannoDepsVersions: ReleasePart = { st =>
-    Git.add(bannoDependenciesFileName) !! st.log
-    Git.commit("Updating banno dependencies to released versions") !! st.log
+    val modified = Process("git" :: "status" :: "--porcelain" :: "--" :: bannoDependenciesFileName :: Nil) !! st.log
+    if (!modified.isEmpty) {
+      Git.add(bannoDependenciesFileName) !! st.log
+      Git.commit("Updating banno dependencies to released versions") !! st.log
+    }
     st
   }
 
