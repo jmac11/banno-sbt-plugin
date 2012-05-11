@@ -21,10 +21,10 @@ object BannoRelease {
     releaseProcess <<= thisProjectRef apply { ref =>
       Seq(
         initialGitChecks,
-        checkSnapshotDependencies,
         inquireVersions,
         updateReleaseBannoDeps,
         setReleaseVersion,
+        // checkSnapshotDependencies,
         runTest,
         commitReleaseBannoDepsVersions,
         commitReleaseVersion,
