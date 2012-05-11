@@ -122,8 +122,8 @@ object BannoRelease {
   }
 
   def push(st: State) = {
-    Git.pushTags !! st.log
     Git.pushCurrentBranch !! st.log
+    Git.pushTags !! st.log
     st
   }
 }
