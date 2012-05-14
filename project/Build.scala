@@ -26,7 +26,14 @@ object MyBuild extends Build {
                               Resolver.withDefaultResolvers(rs, mavenCentral = false, scalaTools = false)
                             },
 
-                            addSbtPlugin("com.github.gseitz" % "sbt-release" % "0.4"),
+                            // necesary due toa bug in sbt with a plugin depending on multiple other plugins
+                            libraryDependencies <++= (scalaVersion, sbtVersion) { (scalaV, sbtV) =>
+                              Seq(
+                                "com.github.gseitz" % "sbt-release_%s_%s".format(scalaV, sbtV) % "0.4",
+                                "com.eed3si9n" % "sbt-assembly_%s_%s".format(scalaV, sbtV) % "0.8.1"
+                              )
+                            },
+
                             libraryDependencies += "net.databinder" %% "dispatch-http" % "0.7.8",
 
                             publishTo <<= (version) { v =>
