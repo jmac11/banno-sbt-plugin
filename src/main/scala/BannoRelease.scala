@@ -128,7 +128,8 @@ object BannoRelease {
   def pushCurrentBranch(st: State) = {
     val extract = Project.extract(st)
     if (extract.get(pushChanges)) {
-      Git.pushCurrentBranch !! st.log
+      val currentBranch = Git.currentBranch
+      Process("git" :: "push" :: "origin" :: "%s:%s".format(currentBranch, currentBranch) :: Nil) !! st.log
     }
     st
   }
