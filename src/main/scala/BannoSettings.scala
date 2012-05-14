@@ -12,6 +12,7 @@ object BannoSettings {
     Seq(publishArtifact in (Compile, packageSrc) := false,
         publishArtifact in (Compile, packageDoc) := false) ++
     Seq(checksums in update := Nil) ++
+    BannoCi.settings ++
     BannoNexus.settings ++
     BannoCommonDeps.settings ++
     BannoRelease.settings
