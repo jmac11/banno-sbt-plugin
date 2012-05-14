@@ -9,6 +9,7 @@ object BannoNexus {
 
   val settings: Seq[Project.Setting[_]] = Seq(
     resolvers := Seq(
+      Resolver.defaultLocal,
       "Banno External Repo" at "http://nexus.banno.com/nexus/content/groups/external/",
       bannoSnapshots,
       bannoReleases
