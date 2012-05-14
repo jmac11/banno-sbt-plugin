@@ -31,8 +31,7 @@ object BannoRelease {
         tagRelease,
         releaseTask(publish in Global in ref),
         setNextVersion,
-        commitNextVersion,
-        push
+        commitNextVersion
       )
     }
 
@@ -121,7 +120,7 @@ object BannoRelease {
     } getOrElse true
   }
 
-  def push(st: State) = {
+  def push(st: State) = { // doesn't always work right
     Git.pushCurrentBranch !! st.log
     Git.pushTags !! st.log
     st
