@@ -9,6 +9,8 @@ object BannoSettings {
       ) ++
     Seq[Setting[_]](bannoDependencies := Seq.empty,
                     libraryDependencies <++= bannoDependencies) ++
+    Seq(publishArtifact in (Compile, packageSrc) := false,
+        publishArtifact in (Compile, packageDoc) := false) ++
     Seq(checksums in update := Nil) ++
     BannoNexus.settings ++
     BannoCommonDeps.settings ++

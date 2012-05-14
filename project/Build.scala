@@ -14,6 +14,9 @@ object MyBuild extends Build {
                             version := "1.1-SNAPSHOT",
                             organization := "com.banno",
 
+                            publishArtifact in (Compile, packageSrc) := false,
+                            publishArtifact in (Compile, packageDoc) := false,
+
                             resolvers := Seq(
                               "Banno External Repo" at "http://nexus.banno.com/nexus/content/groups/external/",
                               bannoSnapshots,
