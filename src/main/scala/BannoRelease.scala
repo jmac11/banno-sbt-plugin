@@ -8,11 +8,11 @@ import ReleaseStateTransformations._
 object BannoRelease {
 
   val ignorableCodeChangePaths = SettingKey[Seq[String]]("ignorable-code-change-paths")
-  val pushChanges = SettingKey[Boolean]("push-changes-during-release")
+  val pushChanges = SettingKey[Boolean]("release-push-changes")
 
   val settings = Release.releaseSettings ++ Seq(
     ignorableCodeChangePaths := Seq(bannoDependenciesFileName, "version.sbt"),
-    pushChanges := true,
+    pushChanges := Option(System.getProperty("release.push")).map(_.toBoolean).getOrElse(true),
 
     commands += releaseIfChanged,
 
@@ -129,7 +129,14 @@ object BannoRelease {
     val extract = Project.extract(st)
     if (extract.get(pushChanges)) {
       val currentBranch = Git.currentBranch
-      Process("git" :: "push" :: "origin" :: "%s:%s".format(currentBranch, currentBranch) :: Nil) !! st.log
+      val remoteBranch = "origin/%s".format(currentBranch)
+
+      Process("git" :: "fetch" :: "origin" :: Nil) !! st.log
+      if ((Process("git" :: "show-ref" :: remoteBranch :: Nil) ! st.log) == 0) {
+        Process("git" :: "merge" :: remoteBranch :: Nil) !! st.log
+      }
+
+      Process("git" :: "push" :: "origin" :: "HEAD:%s".format(currentBranch) :: Nil) !! st.log
     }
     st
   }
