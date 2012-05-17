@@ -17,7 +17,7 @@ object BannoRelease {
     commands += releaseIfChanged,
 
     tagName <<= (version in ThisBuild)(identity),
-    releaseVersion <<= (organization, name, scalaVersion)(getLastVersionFromNexusAndIncrement),
+    releaseVersion <<= (organization, name, scalaVersion)(getLastVersionAndIncrement),
     nextVersion := removeMicroAndAddSnapshot,
 
     releaseProcess <<= thisProjectRef apply { ref =>
@@ -44,10 +44,13 @@ object BannoRelease {
 
   def removeMicroAndAddSnapshot(ver: String) = { Version(ver).map(_.copy(bugfix = None)).map(_.asSnapshot.string).getOrElse(versionFormatError) }
 
-  def getLastVersionFromNexusAndIncrement(org: String, name: String, scalaVers: String): (String => String) = { _ =>
-      val latestReleasedVersion = Nexus.latestReleasedVersionFor(org, name + "_" + scalaVers)
-      latestReleasedVersion.flatMap(v => Version(v).map(_.bumpBugfix.string)).getOrElse(versionFormatError)
+  def getLastVersionAndIncrement(org: String, name: String, scalaVers: String): (String => String) = { _ =>
+    val tags = (Process("git" :: "tag" :: "-l" :: Nil) !!).split("\n").map(Version.apply).flatten
+    val sortedTags = tags.sortWith { (a, b) =>
+       a.major > b.major || a.minor.get > b.minor.get || a.bugfix.get >= b.bugfix.get
     }
+    sortedTags.headOption.map(_.bumpBugfix.string).getOrElse(versionFormatError)
+  }
 
   val releaseIfChanged: Command = Command.command("release-if-changed") {
     st: State =>
