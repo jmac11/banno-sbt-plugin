@@ -18,7 +18,7 @@ object Akka {
     (if (v.startsWith("1")) "se.scalablesolutions.akka" else "com.typesafe.akka") % ("akka-" + module) % v
 
   val settings: Seq[Project.Setting[_]] = Seq(
-    version := "2.0.1",
+    version := "2.0.1-npe-fix",
     libraryDependencies <++= (version) { v =>
       Seq(akkaModule("actor", v),
           akkaModule("remote", v),
