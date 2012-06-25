@@ -22,7 +22,7 @@ object Akka {
     libraryDependencies <++= (version) { v =>
       Seq(akkaModule("actor", v),
           akkaModule("remote", v),
-          akkaModule("slf4j", v + "-npe-fix"),
+          akkaModule("slf4j", if (v == "2.0.1") v + "-npe-fix" else v),
           akkaModule("testkit", v) % "test")
     }
   )
