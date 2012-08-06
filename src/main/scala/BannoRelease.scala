@@ -27,6 +27,7 @@ object BannoRelease {
         updateReleaseBannoDeps,
         setReleaseVersion,
         // checkSnapshotDependencies,
+        doClean,
         runTest,
         commitReleaseBannoDepsVersions,
         commitReleaseVersion,
@@ -103,6 +104,13 @@ object BannoRelease {
     }
 
     ReleaseStateTransformations.reapply(newReleaseVersionSettings, st)
+  }
+
+  def doClean(st: State) = {
+    val extracted = Project.extract(st)
+    val ref = extracted.get(thisProjectRef)
+    extracted.runAggregated(clean, st)
+    st
   }
 
   def commitReleaseBannoDepsVersions(st: State): State = {
