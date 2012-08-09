@@ -2,7 +2,7 @@ package com.banno
 import sbt._
 import Keys._
 import sbtrelease._
-import sbtrelease.ReleaseKeys._
+import ReleasePlugin.ReleaseKeys._
 import ReleaseStateTransformations._
 
 object BannoRelease {
@@ -10,7 +10,7 @@ object BannoRelease {
   val ignorableCodeChangePaths = SettingKey[Seq[String]]("ignorable-code-change-paths")
   val pushChanges = SettingKey[Boolean]("release-push-changes")
 
-  val settings = Release.releaseSettings ++ Seq(
+  val settings = ReleasePlugin.releaseSettings ++ Seq(
     ignorableCodeChangePaths := Seq(bannoDependenciesFileName, "version.sbt"),
     pushChanges := Option(System.getProperty("release.push")).map(_.toBoolean).getOrElse(true),
 
@@ -22,19 +22,22 @@ object BannoRelease {
 
     releaseProcess <<= thisProjectRef apply { ref =>
       Seq(
-        initialGitChecks,
         inquireVersions,
         updateReleaseBannoDeps,
         setReleaseVersion,
+
         // checkSnapshotDependencies,
         doClean,
         runTest,
+
         commitReleaseBannoDepsVersions,
         commitReleaseVersion,
         tagRelease,
-        releaseTask(publish in Global in ref),
+        publishArtifacts,
+
         pushCurrentBranch,
         pushTag,
+
         setNextVersion,
         commitNextVersion,
         pushCurrentBranch
@@ -57,8 +60,13 @@ object BannoRelease {
     st: State =>
     if (bannoDependenciesHaveBeenUpdated(st) || codeChangedSinceLastRelease(st)) {
       val extracted = Project.extract(st)
-      val process = extracted.get(releaseProcess)
+      val releaseParts = extracted.get(releaseProcess)
       val startState = st.put(useDefaults, true)
+
+      val initialChecks = releaseParts.map(_.check)
+      val process = releaseParts.map(_.action)
+
+      initialChecks.foreach(_(startState))
       Function.chain(process)(startState)
     } else {
       st.log.info("No changes so no release")
@@ -81,7 +89,7 @@ object BannoRelease {
     }
   }
 
-  def updateReleaseBannoDeps(st: State): State = {
+  val updateReleaseBannoDeps = ReleaseStep(action = (st: State) => {
     st.log.info("Updating banno dependencies to latest releases")
     val withLatestRelease = latestReleasedVersionsForBannoDeps(st)
 
@@ -104,23 +112,18 @@ object BannoRelease {
     }
 
     ReleaseStateTransformations.reapply(newReleaseVersionSettings, st)
-  }
+  })
 
-  def doClean(st: State) = {
-    val extracted = Project.extract(st)
-    val ref = extracted.get(thisProjectRef)
-    extracted.runAggregated(clean, st)
-    st
-  }
+  val doClean = releaseTask(clean)
 
-  def commitReleaseBannoDepsVersions(st: State): State = {
+  val commitReleaseBannoDepsVersions = ReleaseStep(action = (st: State) => {
     val modified = Process("git" :: "status" :: "--porcelain" :: "--" :: bannoDependenciesFileName :: Nil) !! st.log
     if (!modified.isEmpty) {
       Git.add(bannoDependenciesFileName) !! st.log
       Git.commit("Updating banno dependencies to released versions") !! st.log
     }
     st
-  }
+  })
 
 
   def codeChangedSinceLastRelease(st: State): Boolean = {
@@ -136,7 +139,7 @@ object BannoRelease {
     } getOrElse true
   }
 
-  def pushCurrentBranch(st: State) = {
+  val pushCurrentBranch = ReleaseStep(action = (st: State) => {
     val extract = Project.extract(st)
     if (extract.get(pushChanges)) {
       val currentBranch = Git.currentBranch
@@ -150,14 +153,14 @@ object BannoRelease {
       Process("git" :: "push" :: "origin" :: "HEAD:%s".format(currentBranch) :: Nil) !! st.log
     }
     st
-  }
+  })
 
-  def pushTag(st: State) = {
+  val pushTag = ReleaseStep((st: State) => {
     val extract = Project.extract(st)
     if (extract.get(pushChanges)) {
       val currentTagName = extract.get(tagName)
       Process("git" :: "push" :: "origin" :: currentTagName :: Nil) !! st.log
     }
     st
-  }
+  })
 }

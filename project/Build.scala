@@ -11,7 +11,7 @@ object MyBuild extends Build {
 
   val myBuildSettings = Seq(sbtPlugin := true,
                             name := "banno-sbt-plugin",
-                            version := "1.1.5",
+                            version := "1.2.0",
                             organization := "com.banno",
 
                             publishArtifact in (Compile, packageSrc) := false,
@@ -23,18 +23,18 @@ object MyBuild extends Build {
                               bannoReleases
                             ),
                             externalResolvers <<= resolvers map { rs =>
-                              Resolver.withDefaultResolvers(rs, mavenCentral = false, scalaTools = false)
+                              Resolver.withDefaultResolvers(rs, mavenCentral = true)
                             },
 
                             // necesary due toa bug in sbt with a plugin depending on multiple other plugins
                             libraryDependencies <++= (scalaVersion, sbtVersion) { (scalaV, sbtV) =>
                               Seq(
-                                "com.github.gseitz" % "sbt-release_%s_%s".format(scalaV, sbtV) % "0.4",
-                                "com.eed3si9n" % "sbt-assembly_%s_%s".format(scalaV, sbtV) % "0.8.1"
+                                "com.github.gseitz" % "sbt-release_%s_%s".format(scalaV, sbtV) % "0.5",
+                                "com.eed3si9n" % "sbt-assembly_%s_%s".format(scalaV, sbtV) % "0.8.3"
                               )
                             },
 
-                            libraryDependencies += "net.databinder" %% "dispatch-http" % "0.7.8",
+                            libraryDependencies += "net.databinder" %% "dispatch-http" % "0.8.8",
 
                             publishTo <<= (version) { v =>
                               if (v.trim.endsWith("SNAPSHOT")) Some(bannoSnapshots)

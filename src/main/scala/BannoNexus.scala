@@ -15,7 +15,7 @@ object BannoNexus {
       bannoReleases
     ),
     externalResolvers <<= resolvers map { rs =>
-      Resolver.withDefaultResolvers(rs, mavenCentral = false, scalaTools = false)
+      Resolver.withDefaultResolvers(rs, mavenCentral = false)
     },
     publishTo <<= (version) { v =>
       if (v.trim.endsWith("SNAPSHOT")) {
@@ -33,4 +33,3 @@ object BannoNexus {
     }
   )
 }
-
