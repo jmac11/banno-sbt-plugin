@@ -16,7 +16,7 @@ object BannoRelease {
 
     commands += releaseIfChanged,
 
-    tagName <<= (version in ThisBuild)(identity),
+    tagName <<= (version in ThisBuild) map identity,
     releaseVersion <<= (organization, name, scalaVersion)(getLastVersionAndIncrement),
     nextVersion := removeMicroAndAddSnapshot,
 
@@ -158,7 +158,7 @@ object BannoRelease {
   val pushTag = ReleaseStep((st: State) => {
     val extract = Project.extract(st)
     if (extract.get(pushChanges)) {
-      val currentTagName = extract.get(tagName)
+      val (_, currentTagName) = extract.runTask(tagName, st)
       Process("git" :: "push" :: "origin" :: currentTagName :: Nil) !! st.log
     }
     st
