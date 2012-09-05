@@ -53,7 +53,7 @@ object BannoRelease {
     val sortedTags = tags.sortWith { (a, b) =>
        a.major > b.major || a.minor.get > b.minor.get || a.bugfix.get >= b.bugfix.get
     }
-    sortedTags.headOption.map(_.bumpBugfix.string).getOrElse(versionFormatError)
+    sortedTags.headOption.map(_.bumpBugfix.string).getOrElse("1.0.0")
   }
 
   val releaseIfChanged: Command = Command.command("release-if-changed") {
