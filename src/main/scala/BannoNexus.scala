@@ -1,6 +1,7 @@
 package com.banno
 import sbt._
 import Keys._
+import aether.Aether
 
 object BannoNexus {
   val bannoSnapshots = "Banno Snapshots Repo" at "http://nexus.banno.com/nexus/content/repositories/snapshots"
@@ -23,12 +24,6 @@ object BannoNexus {
         Some(bannoReleases)
       }
     },
-    credentials += Credentials(Path.userHome / ".ivy2" / ".banno_credentials"),
-    publishMavenStyle := true,
-    publish <<= publish map { (u: Unit) =>
-      Nexus.runScheduledJob(NEXUS_UPDATE_METADATA_JOB_ID) { (status, created) =>
-        println("Updated nexus, status = %s, created = %s".format(status, created))
-      }
-    }
-  )
+    credentials += Credentials(Path.userHome / ".ivy2" / ".banno_credentials")
+  ) ++ Aether.aetherPublishSettings
 }
