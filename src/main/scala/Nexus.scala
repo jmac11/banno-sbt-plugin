@@ -5,29 +5,23 @@ object Nexus {
   import dispatch._
   import Http._
 
-  def runScheduledJob(jobId: String)(f: (String, String) => Unit) {
-    val request =  nexusBaseAuthenticated / "schedule_run" / jobId
-    Http(request <> { xml =>
-      val status = (xml \\ "status")(0).text
-      val created = (xml \\ "created")(0).text
-      f(status,created)
-   })
-  }
-
   def latestReleasedVersionFor(groupId: String, artifactId: String): Option[String] = {
-    val params = Map("g" -> groupId, "a" -> artifactId, "v" -> "LATEST", "r" -> "releases", "e" -> "pom")
-    val request = nexusBase / "artifact/maven/resolve" <<? params
     try {
-      Http(request <> { xml => Some((xml \\ "version").text) })
+      Http(releaseMetadataPath(groupId, artifactId) <> { xml => Some((xml \\ "release").text) })
     } catch {
       case StatusCode(404, _) => None
     }
   }
 
-  lazy val nexusBase = :/("nexus.banno.com") / "nexus/service/local"
+  def releaseMetadataPath(org: String, name: String) = {
+    val metadataPath = org.replaceAll("\\.", "/") + "/" + name + "/maven-metadata.xml"
+    nexusBase / "content/repositories/releases/" / metadataPath
+  }
 
-  lazy val nexusBaseAuthenticated = {
+  lazy val nexusBase = :/("nexus.banno.com") / "nexus"
+
+  def nexusAuthenticated(req: Request) = {
     val creds = CredentialsStore.INSTANCE.getCredentials("Sonatype Nexus Repository Manager", "nexus.banno.com")
-    nexusBase as (creds.getUserName, creds.getPasswd)
+    req as (creds.getUserName, creds.getPasswd)
   }
 }
