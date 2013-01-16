@@ -11,7 +11,7 @@ object MyBuild extends Build {
 
   val myBuildSettings = Seq(sbtPlugin := true,
                             name := "banno-sbt-plugin",
-                            version := "1.2.0",
+                            version := "1.2.1",
                             organization := "com.banno",
 
                             publishArtifact in (Compile, packageSrc) := false,
@@ -31,7 +31,8 @@ object MyBuild extends Build {
                               Seq(
                                 "com.github.gseitz" % "sbt-release_%s_%s".format(scalaV, sbtV) % "0.6",
                                 "com.eed3si9n" % "sbt-assembly_%s_%s".format(scalaV, sbtV) % "0.8.4",
-                                "no.arktekk.sbt" % "aether-deploy_%s_%s".format(scalaV, sbtV) % "0.6"
+                                "no.arktekk.sbt" % "aether-deploy_%s_%s".format(scalaV, sbtV) % "0.6",
+                                "io.spray" % "sbt-revolver_%s_%s".format(scalaV, sbtV) % "0.6.2"
                               )
                             },
 
