@@ -1,6 +1,7 @@
 package com.banno
 import sbt._
 import Keys._
+import spray.revolver.RevolverPlugin._
 
 object BannoSettings {
   val settings =
@@ -12,6 +13,7 @@ object BannoSettings {
     Seq(publishArtifact in (Compile, packageSrc) := false,
         publishArtifact in (Compile, packageDoc) := false) ++
     Seq(checksums in update := Nil) ++
+    Revolver.settings ++
     BannoCi.settings ++
     BannoNexus.settings ++
     BannoCommonDeps.settings ++
