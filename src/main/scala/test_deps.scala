@@ -6,7 +6,7 @@ object Specs2 {
   val version = SettingKey[String]("specs2-version")
 
   val settings: Seq[Project.Setting[_]] = Seq(
-    version := "1.11",
+    version := "1.12.3",
     libraryDependencies <+= (version) { v =>
       "org.specs2" %% "specs2" % v % "test"
     }
