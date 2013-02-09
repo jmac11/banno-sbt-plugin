@@ -18,7 +18,7 @@ object ScalaTest {
   val version = SettingKey[String]("scalatest-version")
 
   val settings: Seq[Project.Setting[_]] = Seq(
-    version := "1.8",
+    version := "1.9.1",
     libraryDependencies <+= (version) { v =>
       "org.scalatest" %% "scalatest" % v % "test"
     }
