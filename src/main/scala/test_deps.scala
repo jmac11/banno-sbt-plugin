@@ -13,6 +13,17 @@ object Specs2 {
   )
 }
 
+object Scalacheck {
+  val version = SettingKey[String]("scalacheck-version")
+
+  val settings: Seq[Project.Setting[_]] = Seq(
+    version := "1.9",
+    libraryDependencies <+= (version) { v =>
+      "org.scalacheck" %% "scalacheck" % v % "test"
+    }
+  )
+}
+
 
 object ScalaTest {
   val version = SettingKey[String]("scalatest-version")
