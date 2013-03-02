@@ -23,7 +23,7 @@ object Akka {
   val settings: Seq[Project.Setting[_]] = Seq(
     version <<= scalaVersion.apply {
       case sv if sv.startsWith("2.9.") => "2.0.2"
-      case _ => "2.1.0"
+      case _ => "2.1.1"
     },
     libraryDependencies <++= (version, scalaVersion) { (v, sv) =>
       Seq(akkaModule("actor", v, sv),
