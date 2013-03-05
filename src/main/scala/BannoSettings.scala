@@ -17,5 +17,6 @@ object BannoSettings {
     BannoCi.settings ++
     BannoNexus.settings ++
     BannoCommonDeps.settings ++
+    BannoCompile.settings ++
     BannoRelease.settings
 }
