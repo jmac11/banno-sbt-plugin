@@ -29,7 +29,7 @@ object MyBuild extends Build {
                             // necesary due toa bug in sbt with a plugin depending on multiple other plugins
                             libraryDependencies <++= (scalaVersion, sbtBinaryVersion) { (scalaV, sbtV) =>
                               Seq(
-                                "com.github.gseitz" % "sbt-release_%s_%s".format(scalaV, sbtV) % "0.6",
+                                "com.github.gseitz" % "sbt-release_%s_%s".format(scalaV, sbtV) % "0.7",
                                 "com.eed3si9n" % "sbt-assembly_%s_%s".format(scalaV, sbtV) % "0.8.6",
                                 "no.arktekk.sbt" % "aether-deploy_%s_%s".format(scalaV, sbtV) % "0.8",
                                 "io.spray" % "sbt-revolver_%s_%s".format(scalaV, sbtV) % "0.6.2"
