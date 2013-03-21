@@ -6,7 +6,8 @@ object BannoCommonDeps {
   val settings: Seq[Project.Setting[_]] = Seq(
     libraryDependencies ++= Seq(
       "org.joda" % "joda-convert" % "1.1",
-      "joda-time" % "joda-time" % "2.0"
+      "joda-time" % "joda-time" % "2.0",
+      "org.slf4j" % "slf4j-api" % "1.7.4"
     )
   )
 }
@@ -18,12 +19,11 @@ object Akka {
     case sv if sv.startsWith("2.9.") => "com.typesafe.akka" % ("akka-" + module) % v
     case _                           => "com.typesafe.akka" %% ("akka-" + module) % v
   }
-    
 
   val settings: Seq[Project.Setting[_]] = Seq(
     version <<= scalaVersion.apply {
       case sv if sv.startsWith("2.9.") => "2.0.2"
-      case _ => "2.1.1"
+      case _ => "2.1.2"
     },
     libraryDependencies <++= (version, scalaVersion) { (v, sv) =>
       Seq(akkaModule("actor", v, sv),
