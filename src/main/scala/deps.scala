@@ -38,13 +38,13 @@ object Metrics {
   val version = SettingKey[String]("metrics-version")
 
   val settings: Seq[Project.Setting[_]] = Seq(
-    version := "2.1.2",
+    version := "2.2.0",
     libraryDependencies <++= (version) { v=>
       Seq(
         "com.yammer.metrics" % "metrics-core" % v,
         "com.yammer.metrics" % "metrics-graphite" % v,
         "com.yammer.metrics" % "metrics-logback" % v,
-        "com.yammer.metrics" %% "metrics-scala" % v
+        "nl.grons" %% "metrics-scala" % v
       )
     }
   )
