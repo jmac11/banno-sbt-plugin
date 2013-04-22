@@ -97,7 +97,7 @@ object BannoRelease {
     val newSettingsContent =  withLatestRelease.map {
       case (dep, latest) =>
         st.log.info("updating \"%s\" to %s".format(dep, latest))
-        "SettingKey[String](\"%s-released-version\") := \"%s\"\n\n".format(dep.name, latest)
+        "SettingKey[String](\"%s-released-version\") in Global := \"%s\"\n\n".format(dep.name, latest)
     }
 
     if (!newSettingsContent.isEmpty) {
