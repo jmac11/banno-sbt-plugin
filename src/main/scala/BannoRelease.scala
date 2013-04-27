@@ -108,7 +108,7 @@ object BannoRelease {
     val newReleaseVersionSettings = withLatestRelease.map {
       case (dep, latest) =>
         val key = SettingKey[String]("%s-released-version".format(dep.name))
-        key := latest
+        key in Global := latest
     }
 
     ReleaseStateTransformations.reapply(newReleaseVersionSettings, st)
