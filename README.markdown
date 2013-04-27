@@ -17,7 +17,7 @@ resolvers ++= Seq("Banno Snapshots Repo" at "http://nexus.banno.com/nexus/conten
                   "Banno Releases Repo" at "http://nexus.banno.com/nexus/content/repositories/releases",
                   "Banno External Repo" at "http://nexus.banno.com/nexus/content/groups/external/")
 
-addSbtPlugin("com.banno" % "banno-sbt-plugin" % "1.2.3")
+addSbtPlugin("com.banno" % "banno-sbt-plugin" % "1.2.4")
 ```
 
 and in the `build.sbt`, add
