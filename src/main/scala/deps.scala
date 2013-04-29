@@ -34,6 +34,28 @@ object Akka {
   )
 }
 
+object Spray {
+  val version = SettingKey[String]("spray-version")
+
+  def sprayMoule(module: String, v: String, sv: String) = sv match {
+    case sv if sv.startsWith("2.9.") => "io.spray" % ("spray-" + module) % v
+    case _                           => "io.spray" %% ("spray-" + module) % v
+  }
+
+  val settings: Seq[Project.Setting[_]] = Seq(
+    version <<= scalaVersion.apply {
+      case sv if sv.startsWith("2.9.") => "1.0-M7"
+      case _ => "1.1-M7"
+    },
+    libraryDependencies <++= (version, scalaVersion) { (v, sv) =>
+      Seq(sprayMoule("can", v, sv),
+          sprayMoule("routing", v, sv),
+          sprayMoule("client", v, sv),
+          sprayMoule("testkit", v, sv) % "test")
+    }
+  )
+}
+
 object Metrics {
   val version = SettingKey[String]("metrics-version")
 
