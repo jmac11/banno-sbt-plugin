@@ -39,7 +39,7 @@ object Spray {
 
   def sprayMoule(module: String, v: String, sv: String) = sv match {
     case sv if sv.startsWith("2.9.") => "io.spray" % ("spray-" + module) % v
-    case _                           => "io.spray" %% ("spray-" + module) % v
+    case _                           => "io.spray" % ("spray-" + module) % v
   }
 
   val settings: Seq[Project.Setting[_]] = Seq(
