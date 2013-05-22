@@ -7,7 +7,10 @@ object BannoCommonDeps {
     libraryDependencies ++= Seq(
       "org.joda" % "joda-convert" % "1.1",
       "joda-time" % "joda-time" % "2.0",
-      "org.slf4j" % "slf4j-api" % "1.7.4"
+
+      "org.slf4j" % "slf4j-api" % "1.7.5",
+      "org.slf4j" % "log4j-over-slf4j" % "1.7.5",
+      "org.slf4j" % "jcl-over-slf4j" % "1.7.5"
     )
   )
 }
@@ -23,7 +26,7 @@ object Akka {
   val settings: Seq[Project.Setting[_]] = Seq(
     version <<= scalaVersion.apply {
       case sv if sv.startsWith("2.9.") => "2.0.2"
-      case _ => "2.1.2"
+      case _ => "2.1.4"
     },
     libraryDependencies <++= (version, scalaVersion) { (v, sv) =>
       Seq(akkaModule("actor", v, sv),
@@ -66,7 +69,7 @@ object Metrics {
         "com.yammer.metrics" % "metrics-core" % v,
         "com.yammer.metrics" % "metrics-graphite" % v,
         "com.yammer.metrics" % "metrics-logback" % v,
-        "nl.grons" %% "metrics-scala" % v
+        "nl.grons"           %% "metrics-scala" % v
       )
     }
   )

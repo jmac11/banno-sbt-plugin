@@ -20,7 +20,7 @@ object Scalacheck {
   val version = SettingKey[String]("scalacheck-version")
 
   val settings: Seq[Project.Setting[_]] = Seq(
-    version := "1.10.0",
+    version := "1.10.1",
     libraryDependencies <+= (version) { v =>
       "org.scalacheck" %% "scalacheck" % v % "test"
     }
