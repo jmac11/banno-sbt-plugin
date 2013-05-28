@@ -6,9 +6,9 @@ object BannoCompile {
   val settings = Seq(
     scalacOptions <++= (scalaVersion) map {
       case sv if sv.startsWith("2.9") =>
-        Seq("-deprecation", "-explaintypes", "-unchecked")
+        Seq("-deprecation", "-unchecked")
       case _ =>
-        Seq("-deprecation", "-feature", "-explaintypes", "-unchecked")
+        Seq("-deprecation", "-feature", "-unchecked")
     },
     scalacOptions <++= (scalaVersion) map { sv =>
       if (sv.startsWith("2.9")) Seq("-Ydependent-method-types") else Nil
