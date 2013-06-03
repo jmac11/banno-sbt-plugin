@@ -31,8 +31,8 @@ object Akka {
     libraryDependencies <++= (version, scalaVersion) { (v, sv) =>
       Seq(akkaModule("actor", v, sv),
           akkaModule("remote", v, sv),
-          akkaModule("testkit", v, sv) % "test") ++
-      (if (sv.startsWith("2.9.")) Seq(akkaModule("slf4j", v, sv)) else Nil)
+          akkaModule("slf4j", v, sv),
+          akkaModule("testkit", v, sv) % "test")
     }
   )
 }
