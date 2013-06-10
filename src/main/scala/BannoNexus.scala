@@ -26,12 +26,15 @@ object BannoNexus {
       }
     },
     credentials += Credentials(Path.userHome / ".ivy2" / ".banno_credentials"),
-    clearLocalBannoArtifacts := { 
+    clearLocalBannoArtifacts := {
       import IO._
       import Path._
       delete(userHome / ".ivy2" / "cache" / "com.banno")
       delete(userHome / ".ivy2" / "local" / "com.banno")
+      delete(userHome / ".ivy2" / "cache" / "scala_2.9.1" / "sbt_0.12" / "com.banno")
       delete(userHome / ".ivy2" / "cache" / "scala_2.9.2" / "sbt_0.12" / "com.banno")
+      delete(userHome / ".ivy2" / "cache" / "scala_2.10.0" / "sbt_0.12" / "com.banno")
+      delete(userHome / ".ivy2" / "cache" / "scala_2.10.1" / "sbt_0.12" / "com.banno")
     }
   ) ++ Aether.aetherPublishSettings
 }
