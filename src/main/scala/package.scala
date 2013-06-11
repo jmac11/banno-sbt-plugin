@@ -12,6 +12,7 @@ package object banno {
 
     val bannoDepVersion = SettingKey[String]("%s-version".format(artifactId))
     val bannoDepReleasedVersion = SettingKey[String]("%s-released-version".format(artifactId))
+    val bannoDepReleasedVersionDefault = (bannoDepReleasedVersion in Global := "1.0.0")
 
     val depVersion = bannoDepVersion <<= (version, bannoDepReleasedVersion) { (v, rv) =>
       if (v.trim.endsWith("SNAPSHOT")) {
@@ -25,7 +26,7 @@ package object banno {
       groupId %% artifactId % bv
     }
 
-    Seq(depVersion, withDep)
+    Seq(depVersion, bannoDepReleasedVersionDefault, withDep)
   }
 
   def addBannoDependencies(artifactIds: String*) =
