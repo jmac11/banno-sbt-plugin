@@ -1,6 +1,7 @@
 package com.banno
 import sbt._
 import Keys._
+import scala.xml._
 
 object BannoIvy {
   val excludes =
@@ -33,12 +34,14 @@ object BannoIvy {
     val allExcludes = excludes ++ additionalExcludes
     val allExcludesXml = allExcludes.map {
       case (org, module) =>
-        <exclude org="{org}" module="{module}"/>
+        <exclude org={org} module={module}/>
     }
     ivyXML ~= { deps => 
       deps match {
         case <dependencies>{children @ _*}</dependencies> =>
           <dependencies>{children ++ allExcludesXml}</dependencies>
+        case NodeSeq.Empty =>
+          <dependencies>{allExcludesXml}</dependencies>
       }
     }
   }
