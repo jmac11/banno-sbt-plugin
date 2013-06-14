@@ -3,9 +3,9 @@ import sbt._
 import Keys._
 
 object Deployable {
-  val settings = defaults()
-
   val noScalaVersionInArtifact = (crossPaths := false)
+
+  val settings = defaults()
 
   def defaults(fatjar: Boolean = true): Seq[Project.Setting[_]] =
     if (fatjar)
