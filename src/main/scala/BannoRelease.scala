@@ -128,8 +128,12 @@ object BannoRelease {
 
   def codeChangedSinceLastRelease(st: State): Boolean = {
     val extract = Project.extract(st)
-    val maybeLastRelease = Nexus.latestReleasedVersionFor(extract.get(organization),
-                                                     extract.get(name) + "_" + extract.get(scalaVersion))
+    val artifactId = if (extract.get(crossPaths)) {
+      extract.get(name) + "_" + CrossVersion.binaryScalaVersion(extract.get(scalaVersion))
+    } else {
+      extract.get(name)
+    }
+    val maybeLastRelease = Nexus.latestReleasedVersionFor(extract.get(organization), artifactId)
     maybeLastRelease.map { lastRelease =>
       val ignorablePaths = extract.get(ignorableCodeChangePaths)
       val diffRevisions = "%s..HEAD".format(lastRelease)
