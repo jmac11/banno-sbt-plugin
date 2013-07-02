@@ -13,6 +13,7 @@ object BannoSettings {
     Seq(publishArtifact in (Compile, packageSrc) := false,
         publishArtifact in (Compile, packageDoc) := false) ++
     Seq(checksums in update := Nil) ++
+    Seq(javaOptions ++= Seq("-Djava.awt.headless=true", "-Xmx1024M", "-XX:MaxPermSize=512m")) ++
     Revolver.settings ++
     BannoCi.settings ++
     BannoNexus.settings ++
