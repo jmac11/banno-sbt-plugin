@@ -32,7 +32,7 @@ object MyBuild extends Build {
                                 "com.github.gseitz" % "sbt-release_%s_%s".format(scalaV, sbtV) % "0.7",
                                 "com.eed3si9n" % "sbt-assembly_%s_%s".format(scalaV, sbtV) % "0.9.0",
                                 "no.arktekk.sbt" % "aether-deploy_%s_%s".format(scalaV, sbtV) % "0.9",
-                                "io.spray" % "sbt-revolver_%s_%s".format(scalaV, sbtV) % "0.6.2"
+                                "io.spray" % "sbt-revolver_%s_%s".format(scalaV, sbtV) % "0.7.1"
                               )
                             },
 
