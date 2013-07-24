@@ -48,7 +48,7 @@ object Spray {
   val settings: Seq[Project.Setting[_]] = Seq(
     version <<= scalaVersion.apply {
       case sv if sv.startsWith("2.9.") => "1.0-M7"
-      case _ => "1.1-M7"
+      case _ => "1.1-M8"
     },
     libraryDependencies <++= (version, scalaVersion) { (v, sv) =>
       Seq(sprayMoule("can", v, sv),
