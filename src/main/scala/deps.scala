@@ -45,6 +45,10 @@ object Spray {
     case _                           => "io.spray" % ("spray-" + module) % v
   }
 
+  val caching: Seq[Project.Setting[_]] = Seq(
+    libraryDependencies <+= (version, scalaVersion) { (v, sv) => sprayMoule("caching", v, sv) }
+  )
+
   val settings: Seq[Project.Setting[_]] = Seq(
     version <<= scalaVersion.apply {
       case sv if sv.startsWith("2.9.") => "1.0-M7"
