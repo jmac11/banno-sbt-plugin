@@ -6,7 +6,7 @@ import spray.revolver.RevolverPlugin._
 object BannoSettings {
   val settings =
     Seq(organization := "com.banno",
-        scalaVersion := "2.10.2"
+        scalaVersion := "2.10.3"
       ) ++
     Seq[Setting[_]](bannoDependencies := Seq.empty,
                     libraryDependencies <++= bannoDependencies) ++
