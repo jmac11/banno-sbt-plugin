@@ -37,6 +37,14 @@ object Akka {
   )
 }
 
+object Ning {
+  val version = SettingKey[String]("ning-version")
+
+  val settings: Seq[Project.Setting[_]] = Seq(
+    libraryDependencies += "com.ning" % "async-http-client" % "1.7.19"
+  )
+}
+
 object Spray {
   val version = SettingKey[String]("spray-version")
 
