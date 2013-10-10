@@ -37,11 +37,12 @@ object Akka {
   )
 }
 
-object Ning {
+object AsyncHttpClient {
   val version = SettingKey[String]("ning-version")
 
   val settings: Seq[Project.Setting[_]] = Seq(
-    libraryDependencies += "com.ning" % "async-http-client" % "1.7.19"
+    version := "1.7.19",
+    libraryDependencies <+= (version)("com.ning" % "async-http-client" % _)
   )
 }
 
