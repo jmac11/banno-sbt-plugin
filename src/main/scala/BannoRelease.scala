@@ -10,9 +10,12 @@ object BannoRelease {
   val ignorableCodeChangePaths = SettingKey[Seq[String]]("ignorable-code-change-paths")
   val pushChanges = SettingKey[Boolean]("release-push-changes")
 
+  val releaseClean = TaskKey[Unit]("release-clean")
+
   val settings = ReleasePlugin.releaseSettings ++ Seq(
     ignorableCodeChangePaths := Seq(bannoDependenciesFileName, "version.sbt"),
     pushChanges := Option(System.getProperty("release.push")).map(_.toBoolean).getOrElse(true),
+    releaseClean <<= target.map(IO.delete),
 
     commands += releaseIfChanged,
 
@@ -27,7 +30,7 @@ object BannoRelease {
         setReleaseVersion,
 
         // checkSnapshotDependencies,
-        doClean,
+        releaseTask(releaseClean),
         runTest,
 
         commitReleaseBannoDepsVersions,
