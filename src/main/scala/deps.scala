@@ -87,3 +87,19 @@ object Metrics {
     }
   )
 }
+
+object Scalaz {
+  val version = SettingKey[String]("scalaz-version")
+  val contribVersion = SettingKey[String]("scalaz-contrib-version")
+
+  val settings: Seq[Project.Setting[_]] = Seq(
+    version := "7.0.4",
+    contribVersion := "0.1.5",
+    libraryDependencies <++= (version, contribVersion) { (v, cv) =>
+      Seq(
+        "org.scalaz" %% "scalaz-core" % v,
+        "org.typelevel" %% "scalaz-contrib-210" % cv
+      )
+    }
+  )
+}
