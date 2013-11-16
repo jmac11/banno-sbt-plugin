@@ -13,6 +13,7 @@ object MyBuild extends Build {
                             name := "banno-sbt-plugin",
                             version := "1.2.18",
                             organization := "com.banno",
+                            shellPrompt <<= (name) { (name) => _ => name + " > " },
 
                             publishArtifact in (Compile, packageSrc) := false,
                             publishArtifact in (Compile, packageDoc) := false,
