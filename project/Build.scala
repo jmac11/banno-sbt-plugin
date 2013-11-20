@@ -11,7 +11,7 @@ object MyBuild extends Build {
 
   val myBuildSettings = Seq(sbtPlugin := true,
                             name := "banno-sbt-plugin",
-                            version := "1.2.19",
+                            version := "1.3.0",
                             organization := "com.banno",
                             shellPrompt <<= (name) { (name) => _ => name + " > " },
 
@@ -27,16 +27,6 @@ object MyBuild extends Build {
                               Resolver.withDefaultResolvers(rs, mavenCentral = true)
                             },
 
-                            // necesary due toa bug in sbt with a plugin depending on multiple other plugins
-                            libraryDependencies <++= (scalaVersion, sbtBinaryVersion) { (scalaV, sbtV) =>
-                              Seq(
-                                "com.github.gseitz" % "sbt-release_%s_%s".format(scalaV, sbtV) % "0.7",
-                                "com.eed3si9n" % "sbt-assembly_%s_%s".format(scalaV, sbtV) % "0.9.0",
-                                "no.arktekk.sbt" % "aether-deploy_%s_%s".format(scalaV, sbtV) % "0.9",
-                                "io.spray" % "sbt-revolver_%s_%s".format(scalaV, sbtV) % "0.7.1"
-                              )
-                            },
-
                             libraryDependencies += "net.databinder" %% "dispatch-http" % "0.8.8",
 
                             publishTo <<= (version) { v =>
@@ -44,6 +34,11 @@ object MyBuild extends Build {
                               else Some(bannoReleases)
                             },
                             credentials += Credentials(Path.userHome / ".ivy2" / ".banno_credentials"),
-                            publishMavenStyle := true)
-
+                            publishMavenStyle := true
+                          ) ++
+                        Seq(
+                          addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.10.1"),
+                          addSbtPlugin("com.github.gseitz" % "sbt-release" % "0.8"),
+                          addSbtPlugin("no.arktekk.sbt" % "aether-deploy" % "0.10"),
+                          addSbtPlugin("io.spray" % "sbt-revolver" % "0.7.1"))
 }
