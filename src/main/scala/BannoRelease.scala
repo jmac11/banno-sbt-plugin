@@ -10,6 +10,8 @@ object BannoRelease {
   val ignorableCodeChangePaths = SettingKey[Seq[String]]("ignorable-code-change-paths")
   val pushChanges = SettingKey[Boolean]("release-push-changes")
 
+  val artifactsAssembledForRelease = SettingKey[Boolean]("artifacts-assembled-for-release")
+
   val releaseClean = TaskKey[Unit]("release-clean")
 
   val settings = ReleasePlugin.releaseSettings ++ Seq(
@@ -23,30 +25,35 @@ object BannoRelease {
     releaseVersion <<= (organization, name, scalaVersion)(getLastVersionAndIncrement),
     nextVersion := removeMicroAndAddSnapshot,
 
-    releaseProcess <<= thisProjectRef apply { ref =>
-      Seq(
-        inquireVersions,
-        updateReleaseBannoDeps,
-        setReleaseVersion,
+    artifactsAssembledForRelease := false,
 
-        // checkSnapshotDependencies,
-        releaseTask(releaseClean),
-        runTest,
+    releaseProcess <<= (thisProjectRef, artifactsAssembledForRelease) { (ref, alreadyAssembled) =>
+      if (alreadyAssembled) {
+        Seq(publishArtifacts)
+      } else {
+        Seq(
+          inquireVersions,
+          updateReleaseBannoDeps,
+          setReleaseVersion,
 
-        commitReleaseBannoDepsVersions,
-        commitReleaseVersion,
-        tagRelease,
-        publishArtifacts,
+          // checkSnapshotDependencies,
+          releaseTask(releaseClean),
+          runTest,
 
-        pushCurrentBranch,
-        pushTag,
+          commitReleaseBannoDepsVersions,
+          commitReleaseVersion,
+          tagRelease,
+          publishArtifacts,
 
-        setNextVersion,
-        commitNextVersion,
-        pushCurrentBranch
-      )
+          pushCurrentBranch,
+          pushTag,
+
+          setNextVersion,
+          commitNextVersion,
+          pushCurrentBranch
+        )
+      }
     }
-
   )
 
   def removeMicroAndAddSnapshot(ver: String) = { Version(ver).map(_.copy(bugfix = None)).map(_.asSnapshot.string).getOrElse(versionFormatError) }
@@ -59,8 +66,7 @@ object BannoRelease {
     sortedTags.headOption.map(_.bumpBugfix.string).getOrElse("1.0.0")
   }
 
-  val releaseIfChanged: Command = Command.command("release-if-changed") {
-    st: State =>
+  val releaseIfChanged: Command = Command.command("release-if-changed") { st: State =>
     if (bannoDependenciesHaveBeenUpdated(st) || codeChangedSinceLastRelease(st)) {
       val extracted = Project.extract(st)
       val releaseParts = extracted.get(releaseProcess)
@@ -86,13 +92,14 @@ object BannoRelease {
 
   def latestReleasedVersionsForBannoDeps(st: State): Seq[Pair[ModuleID, String]] = {
     val extract = Project.extract(st)
-    extract.get(bannoDependencies).map { dep =>
+    extract.get(bannoDependencies).flatMap { dep =>
       val depArtifactId =
         if (dep.crossVersion == CrossVersion.Disabled)
           dep.name
         else
           dep.name + "_" + CrossVersion.binaryScalaVersion(extract.get(scalaVersion))
-      dep -> Nexus.latestReleasedVersionFor(dep.organization, depArtifactId).getOrElse(sys.error("No release found for %s".format(depArtifactId)))
+      Nexus.latestReleasedVersionFor(dep.organization, depArtifactId).map(dep -> _)
+      // dep -> Nexus.latestReleasedVersionFor(dep.organization, depArtifactId).getOrElse(sys.error("No release found for %s".format(depArtifactId)))
     }
   }
 
