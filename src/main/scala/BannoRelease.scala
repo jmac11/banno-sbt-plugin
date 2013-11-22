@@ -92,14 +92,13 @@ object BannoRelease {
 
   def latestReleasedVersionsForBannoDeps(st: State): Seq[Pair[ModuleID, String]] = {
     val extract = Project.extract(st)
-    extract.get(bannoDependencies).flatMap { dep =>
+    extract.get(bannoDependencies).map { dep =>
       val depArtifactId =
         if (dep.crossVersion == CrossVersion.Disabled)
           dep.name
         else
           dep.name + "_" + CrossVersion.binaryScalaVersion(extract.get(scalaVersion))
-      Nexus.latestReleasedVersionFor(dep.organization, depArtifactId).map(dep -> _)
-      // dep -> Nexus.latestReleasedVersionFor(dep.organization, depArtifactId).getOrElse(sys.error("No release found for %s".format(depArtifactId)))
+      dep -> Nexus.latestReleasedVersionFor(dep.organization, depArtifactId).getOrElse(sys.error("No release found for %s".format(depArtifactId)))
     }
   }
 
