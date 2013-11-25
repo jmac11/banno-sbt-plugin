@@ -6,17 +6,18 @@ import sbtassembly.Plugin.MergeStrategy
 object BannoAssembly {
   lazy val MergeStrategyConcatWithNewLine: MergeStrategy = new MergeStrategy {
     val name = "concatWithNewLine"
-    def apply(args: (File, String, Seq[File])): Either[String, Seq[(File, String)]] = {
-      val file = File.createTempFile("sbtMergeTarget", ".tmp", args._1)
+
+    def apply(tempDir: File, path: String, files: Seq[File]): Either[String, Seq[(File, String)]] = {
+      val file = File.createTempFile("sbtMergeTarget", ".tmp", tempDir)
       val out = new FileOutputStream(file)
       val writer = new PrintWriter(out)
       try {
-        args._3 foreach { file =>
+        files foreach { file =>
           IO.transfer(file, out)
           writer.print("\n")
           writer.flush()
         }
-        Right(Seq(file -> args._2))
+        Right(Seq(file -> path))
       } finally {
         out.close()
         writer.close()
