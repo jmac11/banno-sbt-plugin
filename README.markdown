@@ -8,7 +8,7 @@ This is Banno's [sbt][] plugin which provides a structured method of which all B
 
 ## Usage ##
 
-For sbt versions 0.12.x, please use the latest banno-sbt-plugin 1.2.x version.
+For sbt versions 0.13.x, please use the latest banno-sbt-plugin 1.3.x version.
 
 In `project/plugins.sbt`, add
 
