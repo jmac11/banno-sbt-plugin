@@ -49,25 +49,37 @@ object AsyncHttpClient {
 object Spray {
   val version = SettingKey[String]("spray-version")
 
-  def sprayMoule(module: String, v: String, sv: String) = sv match {
-    case sv if sv.startsWith("2.9.") => "io.spray" % ("spray-" + module) % v
-    case _                           => "io.spray" % ("spray-" + module) % v
-  }
+  def sprayMoule(module: String, v: String) =
+    "io.spray" % ("spray-" + module) % v
+
+  val setVersion = 
+    version <<= (scalaVersion, Akka.version) { (sv, av) =>
+      if (sv.startsWith("2.9"))
+        "1.0"
+      else {
+        if (av.startsWith("2.1"))
+          "1.1"
+        else
+          "1.2"
+      }
+    }
 
   val caching: Seq[Project.Setting[_]] = Seq(
-    libraryDependencies <+= (version, scalaVersion) { (v, sv) => sprayMoule("caching", v, sv) }
+    setVersion,
+    libraryDependencies <+= (version) { (v) => sprayMoule("caching", v) }
   )
-
-  val settings: Seq[Project.Setting[_]] = Seq(
-    version <<= scalaVersion.apply {
-      case sv if sv.startsWith("2.9.") => "1.0-RC1"
-      case _                           => "1.1-RC1"
-    },
-    libraryDependencies <++= (version, scalaVersion) { (v, sv) =>
-      Seq(sprayMoule("can", v, sv),
-          sprayMoule("routing", v, sv),
-          sprayMoule("client", v, sv),
-          sprayMoule("testkit", v, sv) % "test")
+  
+  val client: Seq[Project.Setting[_]] = Seq(
+    setVersion,
+    libraryDependencies <+= (version) { (v) => sprayMoule("client", v) }
+  )
+  
+  val server: Seq[Project.Setting[_]] = Seq(
+    setVersion,
+    libraryDependencies <++= (version) { (v) =>
+      Seq(sprayMoule("can", v),
+          sprayMoule("routing", v),
+          sprayMoule("testkit", v) % "test")
     }
   )
 }
