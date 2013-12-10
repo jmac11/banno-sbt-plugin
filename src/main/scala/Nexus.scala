@@ -15,13 +15,13 @@ object Nexus {
 
   def releaseMetadataPath(org: String, name: String) = {
     val metadataPath = org.replaceAll("\\.", "/") + "/" + name + "/maven-metadata.xml"
-    nexusBase / "content/repositories/releases/" / metadataPath
+    nexusBase / "releases/" / metadataPath
   }
 
-  lazy val nexusBase = :/("nexus.banno.com") / "nexus"
+  lazy val nexusBase = :/("localhost:8081") / "artifactory"
 
   def nexusAuthenticated(req: Request) = {
-    val creds = CredentialsStore.INSTANCE.getCredentials("Sonatype Nexus Repository Manager", "nexus.banno.com")
+    val creds = CredentialsStore.INSTANCE.getCredentials("Artifactory Realm", "localhost")
     req as (creds.getUserName, creds.getPasswd)
   }
 }

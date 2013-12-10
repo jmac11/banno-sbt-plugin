@@ -4,8 +4,8 @@ import Keys._
 import aether.Aether
 
 object BannoNexus {
-  val bannoSnapshots = "Banno Snapshots Repo" at "http://nexus.banno.com/nexus/content/repositories/snapshots"
-  val bannoReleases = "Banno Releases Repo" at "http://nexus.banno.com/nexus/content/repositories/releases"
+  val bannoSnapshots = "Banno Snapshots Repo" at "http://localhost:8081/artifactory/snapshots-local"
+  val bannoReleases = "Banno Releases Repo" at "http://localhost:8081/artifactory/releases-local"
 
   val clearLocalBannoArtifacts = TaskKey[Unit]("clear-local-banno-artifacts", "Clear locally published and downloaded artifacts from ivy cache")
 
