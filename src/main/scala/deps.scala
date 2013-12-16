@@ -52,15 +52,15 @@ object Spray {
   def sprayMoule(module: String, v: String) =
     "io.spray" % ("spray-" + module) % v
 
-  val setVersion = 
+  val setVersion =
     version <<= (scalaVersion, Akka.version) { (sv, av) =>
       if (sv.startsWith("2.9"))
-        "1.0"
+        "1.0.0"
       else {
         if (av.startsWith("2.1"))
-          "1.1"
+          "1.1.0"
         else
-          "1.2"
+          "1.2.0"
       }
     }
 
@@ -68,12 +68,12 @@ object Spray {
     setVersion,
     libraryDependencies <+= (version) { (v) => sprayMoule("caching", v) }
   )
-  
+
   val client: Seq[Project.Setting[_]] = Seq(
     setVersion,
     libraryDependencies <+= (version) { (v) => sprayMoule("client", v) }
   )
-  
+
   val server: Seq[Project.Setting[_]] = Seq(
     setVersion,
     libraryDependencies <++= (version) { (v) =>
