@@ -9,7 +9,8 @@ package object banno {
   def addBannoDependency(artifactId: String,
                          groupId: String = "com.banno",
                          crossVersion: Boolean = true,
-                         snapshotVersion: String = "1.0-SNAPSHOT"): Seq[Setting[_]] = {
+                         snapshotVersion: String = "1.0-SNAPSHOT",
+                         isProvided: Boolean = true): Seq[Setting[_]] = {
 
     val bannoDepVersion = SettingKey[String]("%s-version".format(artifactId))
     val bannoDepReleasedVersion = SettingKey[String]("%s-released-version".format(artifactId),
@@ -24,11 +25,9 @@ package object banno {
     }
 
     val withDep = bannoDependencies <+= (bannoDepVersion) { (bv) =>
-      if (crossVersion)
-        groupId %% artifactId % bv
-      else
-        groupId % artifactId % bv
-
+      val dep = if (crossVersion) groupId %% artifactId % bv
+                else groupId % artifactId % bv
+      if(isProvided) dep else dep % "provided"
     }
 
     Seq(depVersion, withDep)
