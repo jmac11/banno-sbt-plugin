@@ -64,6 +64,8 @@ object Spray {
       }
     }
 
+  val removeWarnAdaptedArgs = scalacOptions ~= (_.filterNot(_ == "-Ywarn-adapted-args"))
+
   val caching: Seq[Project.Setting[_]] = Seq(
     setVersion,
     libraryDependencies <+= (version) { (v) => sprayMoule("caching", v) }
@@ -71,11 +73,13 @@ object Spray {
 
   val client: Seq[Project.Setting[_]] = Seq(
     setVersion,
+    removeWarnAdaptedArgs,
     libraryDependencies <+= (version) { (v) => sprayMoule("client", v) }
   )
 
   val server: Seq[Project.Setting[_]] = Seq(
     setVersion,
+    removeWarnAdaptedArgs,
     libraryDependencies <++= (version) { (v) =>
       Seq(sprayMoule("can", v),
           sprayMoule("routing", v),
