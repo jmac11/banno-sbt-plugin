@@ -106,14 +106,21 @@ object Metrics {
 
 object Scalaz {
   val version = SettingKey[String]("scalaz-version")
+  val streamVersion = SettingKey[String]("scalaz-stream-version")
   val contribVersion = SettingKey[String]("scalaz-contrib-version")
 
   val settings: Seq[Project.Setting[_]] = Seq(
-    version := "7.0.4",
+    version := "7.0.5",
+    streamVersion := "0.3",
     contribVersion := "0.1.5",
-    libraryDependencies <++= (version, contribVersion) { (v, cv) =>
+    libraryDependencies <++= (version, streamVersion, contribVersion) { (v, sv, cv) =>
       Seq(
         "org.scalaz" %% "scalaz-core" % v,
+        "org.scalaz" %% "scalaz-concrrent" % v,
+        "org.scalaz" %% "scalaz-stream" % v,
+        "org.scalaz" %% "scalaz-effect" % v,
+        "org.scalaz" %% "scalaz-scalacheck-binding" % v % "test",
+        "org.scalaz.stream" %% "scalaz-stream" % sv,
         "org.typelevel" %% "scalaz-contrib-210" % cv
       )
     }
