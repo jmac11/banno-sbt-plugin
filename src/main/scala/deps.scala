@@ -61,7 +61,7 @@ object AsyncHttpClient {
 object Spray {
   val version = SettingKey[String]("spray-version")
 
-  def sprayMoule(module: String, v: String) =
+  def sprayModule(module: String, v: String) =
     "io.spray" % ("spray-" + module) % v
 
   val setVersion =
@@ -80,22 +80,22 @@ object Spray {
 
   val caching: Seq[Project.Setting[_]] = Seq(
     setVersion,
-    libraryDependencies <+= (version) { (v) => sprayMoule("caching", v) }
+    libraryDependencies <+= (version) { (v) => sprayModule("caching", v) }
   )
 
   val client: Seq[Project.Setting[_]] = Seq(
     setVersion,
     removeWarnAdaptedArgs,
-    libraryDependencies <+= (version) { (v) => sprayMoule("client", v) }
+    libraryDependencies <+= (version) { (v) => sprayModule("client", v) }
   )
 
   val server: Seq[Project.Setting[_]] = Seq(
     setVersion,
     removeWarnAdaptedArgs,
     libraryDependencies <++= (version) { (v) =>
-      Seq(sprayMoule("can", v),
-          sprayMoule("routing", v),
-          sprayMoule("testkit", v) % "test")
+      Seq(sprayModule("can", v),
+          sprayModule("routing", v),
+          sprayModule("testkit", v) % "test")
     }
   )
 }
