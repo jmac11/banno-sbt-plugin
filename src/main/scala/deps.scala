@@ -12,6 +12,18 @@ object BannoCommonDeps {
       "org.slf4j" % "log4j-over-slf4j" % "1.7.5",
       "org.slf4j" % "jcl-over-slf4j" % "1.7.5"
     )
+  ) ++ LogbackDeps.settings
+}
+
+object LogbackDeps {
+  val version = SettingKey[String]("logback-version")
+
+  val settings: Seq[Project.Setting[_]] = Seq(
+    version := "1.0.13",
+    libraryDependencies ++= Seq(
+      "ch.qos.logback" % "logback-core" % version.value,
+      "ch.qos.logback" % "logback-classic" % version.value
+    )
   )
 }
 
@@ -116,8 +128,7 @@ object Scalaz {
     libraryDependencies <++= (version, streamVersion, contribVersion) { (v, sv, cv) =>
       Seq(
         "org.scalaz" %% "scalaz-core" % v,
-        "org.scalaz" %% "scalaz-concrrent" % v,
-        "org.scalaz" %% "scalaz-stream" % v,
+        "org.scalaz" %% "scalaz-concurrent" % v,
         "org.scalaz" %% "scalaz-effect" % v,
         "org.scalaz" %% "scalaz-scalacheck-binding" % v % "test",
         "org.scalaz.stream" %% "scalaz-stream" % sv,

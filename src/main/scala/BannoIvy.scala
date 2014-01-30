@@ -34,18 +34,27 @@ object BannoIvy {
       "org.apache.thrift" -> "thrift"
     )
 
-  def defaultExcludes(additionalExcludes: Pair[String,String]*) = {
+  def default(additionalExcludes: Pair[String,String]*) = {
     val allExcludes = excludes ++ additionalExcludes
     val allExcludesXml = allExcludes.map {
       case (org, module) =>
         <exclude org={org} module={module}/>
     }
-    ivyXML ~= { deps => 
-      deps match {
-        case <dependencies>{children @ _*}</dependencies> =>
-          <dependencies>{children ++ allExcludesXml}</dependencies>
+    ivyXML := {
+      val logbackVersion: String = LogbackDeps.version.value
+      (ivyXML.value: NodeSeq) match {
+        case <dependencies>{children}</dependencies> =>
+          <dependencies>
+            {children ++ allExcludesXml}
+            <override org="ch.qos.logback" module="logback-core" rev={logbackVersion}/>
+            <override org="ch.qos.logback" module="logback-classic" rev={logbackVersion}/>
+          </dependencies>
         case NodeSeq.Empty =>
-          <dependencies>{allExcludesXml}</dependencies>
+          <dependencies>
+            {allExcludesXml}
+            <override org="ch.qos.logback" module="logback-core" rev={logbackVersion}/>
+            <override org="ch.qos.logback" module="logback-classic" rev={logbackVersion}/>
+          </dependencies>
       }
     }
   }
