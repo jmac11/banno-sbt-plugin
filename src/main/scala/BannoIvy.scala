@@ -37,12 +37,12 @@ object BannoIvy {
   def overrideVersion(version: String, modules: Pair[String,String]*):NodeSeq = {
     val allOverridesXml:NodeSeq = modules.map {
       case (org, module) =>
-        <override org={org} module={module} rev={logbackVersion}/>
+        <override org={org} module={module} rev={version}/>
     }
     allOverridesXml
   }
 
-  def default(overrides: NodeSeq, additionalExcludes: Pair[String,String]*) = {
+  def default(allOverridesXml: NodeSeq, additionalExcludes: Pair[String,String]*) = {
     val allExcludes = excludes ++ additionalExcludes
     val allExcludesXml = allExcludes.map {
       case (org, module) =>
@@ -53,7 +53,7 @@ object BannoIvy {
       (ivyXML.value: NodeSeq) match {
         case NodeSeq.Empty =>
           <dependencies>
-            {allExcludesXml ++ overrides}
+            {allExcludesXml ++ allOverridesXml}
             <override org="ch.qos.logback" module="logback-core" rev={logbackVersion}/>
             <override org="ch.qos.logback" module="logback-classic" rev={logbackVersion}/>
           </dependencies>
