@@ -39,8 +39,12 @@ object BannoIvy {
       case (org, module) => <override org={org} module={module} rev={version}/>
     }
     ivyXML := {
-      val ivyElem = ivyXML.value.asInstanceOf[Elem]
-      ivyElem.copy(child = (ivyElem.child ++ allOverridesXml))
+      ivyXML.value match {
+        case ivyElem: Elem =>
+          ivyElem.copy(child = (ivyElem.child ++ allOverridesXml))
+        case NodeSeq.Empty =>
+          <dependencies>{allOverridesXml}</dependencies>
+      }
     }
  }
 
@@ -57,8 +61,12 @@ object BannoIvy {
         <override org="ch.qos.logback" module="logback-classic" rev={logbackVersion}/>
       )
 
-      val ivyElem = ivyXML.value.asInstanceOf[Elem]
-      ivyElem.copy(child = (ivyElem.child ++ allExcludesXml ++ logbackOverrides))
+      ivyXML.value match {
+        case ivyElem: Elem =>
+          ivyElem.copy(child = (ivyElem.child ++ allExcludesXml ++ logbackOverrides))
+        case NodeSeq.Empty =>
+          <dependencies>{allExcludesXml ++ logbackOverrides}</dependencies>
+      }
     }
   }
 
