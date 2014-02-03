@@ -34,19 +34,15 @@ object BannoIvy {
       "org.apache.thrift" -> "thrift"
     )
 
-  def defaultOverrides(logbackVersion: String,overrides: Pair[String,String]*) = {
-    val allOverridesXml = overrides.map {
+  def overrideVersion(version: String, modules: Pair[String,String]*):NodeSeq = {
+    val allOverridesXml:NodeSeq = modules.map {
       case (org, module) =>
         <override org={org} module={module} rev={logbackVersion}/>
     }
-    ivyXML := {
-      <dependencies>
-      {allOverridesXml}
-      </dependencies>
-    }
+    allOverridesXml
   }
 
-  def default(additionalExcludes: Pair[String,String]*) = {
+  def default(overrides: NodeSeq, additionalExcludes: Pair[String,String]*) = {
     val allExcludes = excludes ++ additionalExcludes
     val allExcludesXml = allExcludes.map {
       case (org, module) =>
@@ -55,15 +51,9 @@ object BannoIvy {
     ivyXML := {
       val logbackVersion: String = LogbackDeps.version.value
       (ivyXML.value: NodeSeq) match {
-        case <dependencies>{children}</dependencies> =>
-          <dependencies>
-            {children ++ allExcludesXml}
-            <override org="ch.qos.logback" module="logback-core" rev={logbackVersion}/>
-            <override org="ch.qos.logback" module="logback-classic" rev={logbackVersion}/>
-          </dependencies>
         case NodeSeq.Empty =>
           <dependencies>
-            {allExcludesXml}
+            {allExcludesXml ++ overrides}
             <override org="ch.qos.logback" module="logback-core" rev={logbackVersion}/>
             <override org="ch.qos.logback" module="logback-classic" rev={logbackVersion}/>
           </dependencies>
