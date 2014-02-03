@@ -4,7 +4,7 @@ import Keys._
 import scala.xml._
 
 object BannoIvy {
-  val excludes =
+  val defaultExcludes =
     Seq(
       // all other crappy logging systems
       "commons-logging" -> "commons-logging",
@@ -33,7 +33,25 @@ object BannoIvy {
       "org.apache.avro" -> "avro-ipc",
       "org.apache.thrift" -> "thrift"
     )
+  val excludes = SettingKey[Seq[Pair[String, String]]]("banno-ivy-excludes")
 
+  val settings = Seq(
+    excludes := defaultExcludes,
+    excludesIvyXML
+  )
+
+  def addExclude(org: String, module: String) = {
+    val excludeXml = <exclude org={org} module={module}/>
+    ivyXML := {
+      ivyXML.value match {
+        case ivyElem: Elem =>
+          ivyElem.copy(child = (ivyElem.child :+ excludeXml))
+        case NodeSeq.Empty =>
+          <dependencies>{excludeXml}</dependencies>
+      }
+    }
+  }
+  
   def overrideVersion(version: String, modules: Pair[String,String]*) = {
     val allOverridesXml: NodeSeq = modules.map {
       case (org, module) => <override org={org} module={module} rev={version}/>
@@ -48,13 +66,12 @@ object BannoIvy {
     }
  }
 
-  def default(allOverridesXml: NodeSeq, additionalExcludes: Pair[String,String]*) = {
-    val allExcludes = excludes ++ additionalExcludes
-    val allExcludesXml = allExcludes.map {
-      case (org, module) =>
-        <exclude org={org} module={module}/>
-    }
+  def excludesIvyXML = {
     ivyXML := {
+      val excludesXml = excludes.value.map {
+        case (org, module) => <exclude org={org} module={module}/>
+      }
+
       val logbackVersion: String = LogbackDeps.version.value
       val logbackOverrides = Seq(
         <override org="ch.qos.logback" module="logback-core" rev={logbackVersion}/>,
@@ -63,9 +80,9 @@ object BannoIvy {
 
       ivyXML.value match {
         case ivyElem: Elem =>
-          ivyElem.copy(child = (ivyElem.child ++ allExcludesXml ++ logbackOverrides))
+          ivyElem.copy(child = (ivyElem.child ++ excludesXml ++ logbackOverrides))
         case NodeSeq.Empty =>
-          <dependencies>{allExcludesXml ++ logbackOverrides}</dependencies>
+          <dependencies>{excludesXml ++ logbackOverrides}</dependencies>
       }
     }
   }

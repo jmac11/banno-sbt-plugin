@@ -20,5 +20,6 @@ object BannoSettings {
     BannoCommonDeps.settings ++
     BannoCompile.settings ++
     BannoRelease.settings ++
-    BannoPrompt.settings
+    BannoPrompt.settings ++
+    BannoIvy.settings
 }
