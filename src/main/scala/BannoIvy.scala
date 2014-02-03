@@ -40,14 +40,17 @@ object BannoIvy {
     excludesIvyXML
   )
 
-  def addExclude(org: String, module: String) = {
-    val excludeXml = <exclude org={org} module={module}/>
+  def addExclude(org: String, module: String) = addExcludes(org -> module)
+  def addExcludes(modules: (String, String)*) = {
+    val excludesXml: NodeSeq = modules.map {
+      case (org, module) => <exclude org={org} module={module}/>
+    }
     ivyXML := {
       ivyXML.value match {
         case ivyElem: Elem =>
-          ivyElem.copy(child = (ivyElem.child :+ excludeXml))
+          ivyElem.copy(child = (ivyElem.child ++ excludesXml))
         case NodeSeq.Empty =>
-          <dependencies>{excludeXml}</dependencies>
+          <dependencies>{excludesXml}</dependencies>
       }
     }
   }
