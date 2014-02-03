@@ -55,9 +55,9 @@ object BannoIvy {
     ivyXML := {
       val logbackVersion: String = LogbackDeps.version.value
       (ivyXML.value: NodeSeq) match {
-        case <dependencies>{m}</dependencies> =>
+        case <dependencies>{children}</dependencies> =>
           <dependencies>
-            {m ++ allExcludesXml}
+            {children ++ allExcludesXml}
             <override org="ch.qos.logback" module="logback-core" rev={logbackVersion}/>
             <override org="ch.qos.logback" module="logback-classic" rev={logbackVersion}/>
           </dependencies>
