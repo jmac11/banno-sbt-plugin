@@ -3,21 +3,22 @@ import sbt._
 import Keys._
 import sbtrelease._
 import ReleasePlugin.ReleaseKeys._
+import sbtrelease.Utilities._
 import ReleaseStateTransformations._
+import complete.DefaultParsers._
 
 object BannoRelease {
 
   val ignorableCodeChangePaths = SettingKey[Seq[String]]("ignorable-code-change-paths")
-  val pushChanges = SettingKey[Boolean]("release-push-changes")
+  val releaseFullClean = TaskKey[Unit]("release-full-clean")
 
-  val artifactsAssembledForRelease = SettingKey[Boolean]("artifacts-assembled-for-release")
-
-  val releaseClean = TaskKey[Unit]("release-clean")
+  val passedTests = SettingKey[Boolean]("release-passed-tests")
 
   val settings = ReleasePlugin.releaseSettings ++ Seq(
     ignorableCodeChangePaths := Seq(bannoDependenciesFileName, "version.sbt"),
-    pushChanges := Option(System.getProperty("release.push")).map(_.toBoolean).getOrElse(true),
-    releaseClean <<= target.map(IO.delete),
+
+    releaseFullClean <<= target.map(IO.delete),
+    aggregate in releaseFullClean := true,
 
     commands += releaseIfChanged,
 
@@ -25,52 +26,55 @@ object BannoRelease {
     releaseVersion <<= (organization, name, scalaVersion)(getLastVersionAndIncrement),
     nextVersion := removeMicroAndAddSnapshot,
 
-    artifactsAssembledForRelease := false,
+    passedTests := false,
 
-    releaseProcess <<= (thisProjectRef, artifactsAssembledForRelease) { (ref, alreadyAssembled) =>
-      if (alreadyAssembled) {
-        Seq(publishArtifacts)
-      } else {
-        Seq(
-          inquireVersions,
-          updateReleaseBannoDeps,
-          setReleaseVersion,
+    releaseProcess := Seq[ReleaseStep](
+      inquireVersions,
+      updateReleaseBannoDeps,
+      setReleaseVersion,
 
-          // checkSnapshotDependencies,
-          releaseTask(releaseClean),
-          runTest,
+      // checkSnapshotDependencies,
+      releaseTask(releaseFullClean),
+      runTests,
+      checkTests,
 
-          commitReleaseBannoDepsVersions,
-          commitReleaseVersion,
-          tagRelease,
-          publishArtifacts,
+      commitReleaseBannoDepsVersions,
+      commitReleaseVersion,
+      tagRelease,
+      pushCurrentBranch,
+      pushReleaseTag,
+      publishArtifacts,
 
-          pushCurrentBranch,
-          pushTag,
-
-          setNextVersion,
-          commitNextVersion,
-          pushCurrentBranch
-        )
-      }
-    }
+      setNextVersion,
+      commitNextVersion,
+      pushCurrentBranch
+    )
   )
 
-  def removeMicroAndAddSnapshot(ver: String) = { Version(ver).map(_.copy(bugfix = None)).map(_.asSnapshot.string).getOrElse(versionFormatError) }
-
-  def getLastVersionAndIncrement(org: String, name: String, scalaVers: String): (String => String) = { _ =>
-    val tags = (Process("git" :: "tag" :: "-l" :: Nil) !!).split("\n").map(Version.apply).flatten
-    val sortedTags = tags.sortWith { (a, b) =>
-       a.major > b.major || a.minor.get > b.minor.get || a.bugfix.get >= b.bugfix.get
+  def codeChangedSinceLastRelease(st: State): Boolean = {
+    val extract = Project.extract(st)
+    val artifactId = if (extract.get(crossPaths)) {
+      extract.get(name) + "_" + CrossVersion.binaryScalaVersion(extract.get(scalaVersion))
+    } else {
+      extract.get(name)
     }
-    sortedTags.headOption.map(_.bumpBugfix.string).getOrElse("1.0.0")
+    val maybeLastRelease = Nexus.latestReleasedVersionFor(extract.get(organization), artifactId)
+    maybeLastRelease.map { lastRelease =>
+      val ignorablePaths = extract.get(ignorableCodeChangePaths)
+      val diffRevisions = "%s..HEAD".format(lastRelease)
+      val diff = (Git.cmd("diff", diffRevisions, "--name-only") !!).split("\n").toSet
+      val realDiff = diff -- ignorablePaths
+      !realDiff.isEmpty
+    } getOrElse true
   }
 
-  val releaseIfChanged: Command = Command.command("release-if-changed") { st: State =>
+  val releaseIfChanged: Command = Command("release-if-changed")(_ => (Space ~> "skip-tests").*) { (st, args) =>
     if (bannoDependenciesHaveBeenUpdated(st) || codeChangedSinceLastRelease(st)) {
       val extracted = Project.extract(st)
       val releaseParts = extracted.get(releaseProcess)
-      val startState = st.put(useDefaults, true)
+      val startState =
+        st.put(useDefaults, true)
+          .put(skipTests, args.contains("skip-tests"))
 
       val initialChecks = releaseParts.map(_.check)
       val process = releaseParts.map(_.action)
@@ -90,6 +94,16 @@ object BannoRelease {
       extract.get(key) != latestVersion
   }
 
+  def removeMicroAndAddSnapshot(ver: String) = { Version(ver).map(_.copy(bugfix = None)).map(_.asSnapshot.string).getOrElse(versionFormatError) }
+
+  def getLastVersionAndIncrement(org: String, name: String, scalaVers: String): (String => String) = { _ =>
+    val tags = (Git.cmd("tag", "-l") !!).split("\n").map(Version.apply).flatten
+    val sortedTags = tags.sortWith { (a, b) =>
+      a.major > b.major || a.minor.get > b.minor.get || a.bugfix.get >= b.bugfix.get
+    }
+    sortedTags.headOption.map(_.bumpBugfix.string).getOrElse("1.0.0")
+  }
+
   def latestReleasedVersionsForBannoDeps(st: State): Seq[Pair[ModuleID, String]] = {
     val extract = Project.extract(st)
     extract.get(bannoDependencies).map { dep =>
@@ -102,82 +116,114 @@ object BannoRelease {
     }
   }
 
-  val updateReleaseBannoDeps = ReleaseStep(action = (st: State) => {
-    st.log.info("Updating banno dependencies to latest releases")
-    val withLatestRelease = latestReleasedVersionsForBannoDeps(st)
+  val updateReleaseBannoDeps =
+    ReleaseStep(action = (st: State) => {
+                  st.log.info("Updating banno dependencies to latest releases")
+                  val withLatestRelease = latestReleasedVersionsForBannoDeps(st)
 
-    // write to file
-    val newSettingsContent =  withLatestRelease.map {
-      case (dep, latest) =>
-        st.log.info("updating \"%s\" to %s".format(dep, latest))
-        "SettingKey[String](\"%s-released-version\") in Global := \"%s\"\n\n".format(dep.name, latest)
+                  // write to file
+                  val newSettingsContent =  withLatestRelease.map {
+                    case (dep, latest) =>
+                      st.log.info("updating \"%s\" to %s".format(dep, latest))
+                      "SettingKey[String](\"%s-released-version\") in Global := \"%s\"\n\n".format(dep.name, latest)
+                  }
+
+                  if (!newSettingsContent.isEmpty) {
+                    IO.write(new File(bannoDependenciesFileName), newSettingsContent.mkString)
+                  }
+
+                  // reapply settings
+                  val newReleaseVersionSettings = withLatestRelease.map {
+                    case (dep, latest) =>
+                      val key = SettingKey[String]("%s-released-version".format(dep.name))
+                      key in Global := latest
+                  }
+
+                  ReleaseStateTransformations.reapply(newReleaseVersionSettings, st)
+                })
+
+
+  val commitReleaseBannoDepsVersions =
+    ReleaseStep(action = (st: State) => {
+                  val modified = Git.cmd("status", "--porcelain", "--", bannoDependenciesFileName) !! st.log
+                  if (!modified.isEmpty) {
+                    Git.add(bannoDependenciesFileName) !! st.log
+                    Git.commit("Updating banno dependencies to released versions") !! st.log
+                  }
+                  st
+                })
+
+  val runTests = ReleaseStep(
+    action = (st: State) => {
+      if (!st.get(skipTests).getOrElse(false)) {
+        val extracted = Project.extract(st)
+        val ref = extracted.get(thisProjectRef)
+        val (_, results) = SbtCompat.runTaskAggregated(executeTests in Test in ref, st)
+        results match {
+          case Value(outputs) =>
+            val allSuccessful = outputs.forall {
+              case Aggregation.KeyValue(k, output) =>
+                output.overall == TestResult.Passed
+            }
+            if (allSuccessful) {
+              st.log.info("PASSED TESTS")
+              reapply(passedTests in ref := true, st)
+            } else st
+          case _ => st
+        }
+      } else st
+    },
+    enableCrossBuild = true
+  )
+
+  val checkTests = ReleaseStep(
+    action = (st: State) => {
+      val extracted = Project.extract(st)
+      val ref = extracted.get(thisProjectRef)
+      if (st.get(skipTests).getOrElse(false) || extracted.get(passedTests in ref)) {
+        st
+      } else {
+        sys.error("Failed tests! Aborting release.")
+      }
     }
+  )
 
-    if (!newSettingsContent.isEmpty) {
-      IO.write(new File(bannoDependenciesFileName), newSettingsContent.mkString)
-    }
-
-    // reapply settings
-    val newReleaseVersionSettings = withLatestRelease.map {
-      case (dep, latest) =>
-        val key = SettingKey[String]("%s-released-version".format(dep.name))
-        key in Global := latest
-    }
-
-    ReleaseStateTransformations.reapply(newReleaseVersionSettings, st)
-  })
-
-  val doClean = releaseTask(clean)
-
-  val commitReleaseBannoDepsVersions = ReleaseStep(action = (st: State) => {
-    val modified = Process("git" :: "status" :: "--porcelain" :: "--" :: bannoDependenciesFileName :: Nil) !! st.log
-    if (!modified.isEmpty) {
-      Git.add(bannoDependenciesFileName) !! st.log
-      Git.commit("Updating banno dependencies to released versions") !! st.log
-    }
-    st
-  })
-
-
-  def codeChangedSinceLastRelease(st: State): Boolean = {
-    val extract = Project.extract(st)
-    val artifactId = if (extract.get(crossPaths)) {
-      extract.get(name) + "_" + CrossVersion.binaryScalaVersion(extract.get(scalaVersion))
-    } else {
-      extract.get(name)
-    }
-    val maybeLastRelease = Nexus.latestReleasedVersionFor(extract.get(organization), artifactId)
-    maybeLastRelease.map { lastRelease =>
-      val ignorablePaths = extract.get(ignorableCodeChangePaths)
-      val diffRevisions = "%s..HEAD".format(lastRelease)
-      val diff = (Process("git" :: "diff" :: diffRevisions :: "--name-only" :: Nil) !!).split("\n").toSet
-      val realDiff = diff -- ignorablePaths
-      !realDiff.isEmpty
-    } getOrElse true
+  object No {
+    def unapply(str: Option[String]): Option[String] =
+      if (str.exists(_.toLowerCase.startsWith("n"))) str else None
   }
 
-  val pushCurrentBranch = ReleaseStep(action = (st: State) => {
-    val extract = Project.extract(st)
-    if (extract.get(pushChanges)) {
-      val currentBranch = Git.currentBranch
-      val remoteBranch = "origin/%s".format(currentBranch)
+  val pushCurrentBranch = ReleaseStep(
+    action = (st: State) => {
+      val defaultChoice = extractDefault(st, "y")
+                                        (defaultChoice orElse SimpleReader.readLine("Push commits (y/n)? [y] : ")) match {
+        case No() =>
+          st.log.warn("Commits were not pushed. Please push them yourself.")
+        case _ =>
+          val currentBranch = Git.currentBranch
+          val remoteName = Git.trackingRemote
+          val remoteBranch = "%s/%s".format(remoteName, currentBranch)
 
-      Process("git" :: "fetch" :: "origin" :: Nil) !! st.log
-      if ((Process("git" :: "show-ref" :: remoteBranch :: Nil) ! st.log) == 0) {
-        Process("git" :: "merge" :: remoteBranch :: Nil) !! st.log
+          Git.fetch(remoteName)
+          if (Git.isBehindRemote) {
+            Git.cmd("merge", remoteBranch) !! st.log
+          }
+          Git.cmd("push", "origin", "HEAD:%s".format(currentBranch)) !! st.log
       }
+      st
+    })
 
-      Process("git" :: "push" :: "origin" :: "HEAD:%s".format(currentBranch) :: Nil) !! st.log
-    }
-    st
-  })
-
-  val pushTag = ReleaseStep((st: State) => {
-    val extract = Project.extract(st)
-    if (extract.get(pushChanges)) {
-      val (_, currentTagName) = extract.runTask(tagName, st)
-      Process("git" :: "push" :: "origin" :: currentTagName :: Nil) !! st.log
-    }
-    st
-  })
+  val pushReleaseTag = ReleaseStep(
+    action = (st: State) => {
+      val defaultChoice = extractDefault(st, "y")
+      (defaultChoice orElse SimpleReader.readLine("Push tag (y/n)? [y] : ")) match {
+        case No() =>
+          st.log.warn("Tag was not pushed. Please push them yourself.")
+        case _ => 
+          val extract = Project.extract(st)
+          val (_, currentTagName) = extract.runTask(tagName, st)
+          Git.cmd("push", "origin", currentTagName) !! st.log
+      }
+      st
+    })
 }
