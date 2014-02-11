@@ -12,8 +12,6 @@ object BannoRelease {
   val ignorableCodeChangePaths = SettingKey[Seq[String]]("ignorable-code-change-paths")
   val releaseFullClean = TaskKey[Unit]("release-full-clean")
 
-  val passedTests = SettingKey[Boolean]("release-passed-tests")
-
   val settings = ReleasePlugin.releaseSettings ++ Seq(
     ignorableCodeChangePaths := Seq(bannoDependenciesFileName, "version.sbt"),
 
@@ -26,8 +24,6 @@ object BannoRelease {
     releaseVersion <<= (organization, name, scalaVersion)(getLastVersionAndIncrement),
     nextVersion := removeMinorAndAddSnapshot,
 
-    passedTests := false,
-
     releaseProcess := Seq[ReleaseStep](
       inquireVersions,
       updateReleaseBannoDeps,
@@ -36,7 +32,6 @@ object BannoRelease {
       // checkSnapshotDependencies,
       releaseTask(releaseFullClean),
       runTests,
-      checkTests,
 
       commitReleaseBannoDepsVersions,
       commitReleaseVersion,
@@ -161,31 +156,21 @@ object BannoRelease {
         val (_, results) = SbtCompat.runTaskAggregated(executeTests in Test in ref, st)
         results match {
           case Value(outputs) =>
-            val allSuccessful = outputs.forall {
-              case Aggregation.KeyValue(k, output) =>
-                output.overall == TestResult.Passed
+            val failed = outputs.filterNot {
+              case Aggregation.KeyValue(k, output) => output.overall == TestResult.Passed
             }
-            if (allSuccessful) {
+            if (failed.nonEmpty) {
+              val failedProjects = failed.map(_.key.scope.project.asInstanceOf[Select[ProjectRef]].s.project).mkString(",")
+              sys.error(s"Failed tests for ${failedProjects}! Aborting release.")
+            } else {
               st.log.info("PASSED TESTS")
-              reapply(passedTests in ref := true, st)
-            } else st
+            }
+            st
           case _ => st
         }
       } else st
     },
     enableCrossBuild = true
-  )
-
-  val checkTests = ReleaseStep(
-    action = (st: State) => {
-      val extracted = Project.extract(st)
-      val ref = extracted.get(thisProjectRef)
-      if (st.get(skipTests).getOrElse(false) || extracted.get(passedTests in ref)) {
-        st
-      } else {
-        sys.error("Failed tests! Aborting release.")
-      }
-    }
   )
 
   object No {
