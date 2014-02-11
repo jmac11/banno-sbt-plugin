@@ -18,11 +18,14 @@ object BannoCommonDeps {
 object LogbackDeps {
   val version = SettingKey[String]("logback-version")
 
+  def logbackModule(module: String, version: String) =
+    "ch.qos.logback" % ("logback-" + module) % version
+
   val settings: Seq[Project.Setting[_]] = Seq(
     version := "1.0.13",
     libraryDependencies ++= Seq(
-      "ch.qos.logback" % "logback-core" % version.value,
-      "ch.qos.logback" % "logback-classic" % version.value
+      logbackModule("core", version.value),
+      logbackModule("classic", version.value)
     )
   )
 }
