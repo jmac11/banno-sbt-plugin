@@ -16,7 +16,7 @@ object Specs2 {
 
     // pretty output on jenkins
     libraryDependencies += "junit" % "junit" % "4.11" % "test",
-    testOptions in Test += Tests.Argument("junitxml")
+    testOptions in Test += Tests.Argument("junitxml", "console")
   )
 }
 
