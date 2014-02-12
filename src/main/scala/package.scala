@@ -9,7 +9,7 @@ package object banno {
   def addBannoDependency(artifactId: String,
                          groupId: String = "com.banno",
                          crossVersion: Boolean = true,
-                         snapshotVersion: String = "1.0-SNAPSHOT",
+                         snapshotVersion: String = "1-SNAPSHOT",
                          isProvided: Boolean = true): Seq[Setting[_]] = {
 
     val bannoDepVersion = SettingKey[String]("%s-version".format(artifactId))
