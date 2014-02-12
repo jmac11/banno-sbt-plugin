@@ -35,6 +35,7 @@ object BannoNexus {
       delete(userHome / ".ivy2" / "cache" / "scala_2.9.2" / "sbt_0.12" / "com.banno")
       delete(userHome / ".ivy2" / "cache" / "scala_2.10.0" / "sbt_0.12" / "com.banno")
       delete(userHome / ".ivy2" / "cache" / "scala_2.10.1" / "sbt_0.12" / "com.banno")
+      delete(userHome / ".ivy2" / "cache" / "scala_2.10" / "sbt_0.13" / "com.banno")
     }
   ) ++ Aether.aetherPublishSettings
 }
