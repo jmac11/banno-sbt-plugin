@@ -71,7 +71,7 @@ Most of them commonly follow overriding version with: `Akka.version := "2.3.0"` 
 
 ### Releases
 
-`banno-sbt-plugin` mixes in the [sbt-relase][] plugin to do a standard release process:
+`banno-sbt-plugin` mixes in the [sbt-release][] plugin to do a standard release process:
 
  1. set the project version from SNAPSHOT to the next [semver][] version
  1. update banno dependencies to released versions
