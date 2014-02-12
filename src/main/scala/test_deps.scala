@@ -12,7 +12,11 @@ object Specs2 {
     },
     libraryDependencies <+= (version) { v =>
       "org.specs2" %% "specs2" % v % "test"
-    }
+    },
+
+    // pretty output on jenkins
+    libraryDependencies += "junit" % "junit" % "4.11" % "test",
+    testOptions in Test += Tests.Argument("junitxml")
   )
 }
 
