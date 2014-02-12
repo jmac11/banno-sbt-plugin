@@ -186,13 +186,11 @@ object BannoRelease {
           st.log.warn("Commits were not pushed. Please push them yourself.")
         case _ =>
           val currentBranch = Git.currentBranch
-          val remoteName = Git.trackingRemote
+          val remoteName = "origin"
           val remoteBranch = "%s/%s".format(remoteName, currentBranch)
 
           Git.fetch(remoteName)
-          if (Git.isBehindRemote) {
-            Git.cmd("merge", remoteBranch) !! st.log
-          }
+          Git.cmd("merge", remoteBranch) !! st.log
           Git.cmd("push", "origin", "HEAD:%s".format(currentBranch)) !! st.log
       }
       st
