@@ -93,10 +93,8 @@ object BannoRelease {
 
   def getLastVersionAndIncrement(org: String, name: String, scalaVers: String): (String => String) = { _ =>
     val tags = (Git.cmd("tag", "-l") !!).split("\n").map(Version.apply).flatten
-    val sortedTags = tags.sortWith { (a, b) =>
-      a.major > b.major || a.minor.get > b.minor.get || a.bugfix.get >= b.bugfix.get
-    }
-    sortedTags.headOption.map(_.bumpMinor.string).getOrElse("1.0.0")
+    val sortedTags = tags.sortBy(v => Tuple3(v.major, v.minor, v.bugfix)).reverse
+    sortedTags.headOption.map(_.bumpMinor.copy(bugfix = Some(0)).string).getOrElse("1.0.0")
   }
 
   def latestReleasedVersionsForBannoDeps(st: State): Seq[Pair[ModuleID, String]] = {
