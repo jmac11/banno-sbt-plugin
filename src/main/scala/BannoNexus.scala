@@ -9,7 +9,7 @@ object BannoNexus {
 
   val clearLocalBannoArtifacts = TaskKey[Unit]("clear-local-banno-artifacts", "Clear locally published and downloaded artifacts from ivy cache")
 
-  val settings: Seq[Project.Setting[_]] = Seq(
+  val settings: Seq[Setting[_]] = Seq(
     resolvers := Seq(
       "Banno External Repo" at "http://nexus.banno.com/nexus/content/groups/external/",
       bannoSnapshots,

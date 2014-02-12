@@ -7,7 +7,7 @@ object Deployable {
 
   val settings = defaults()
 
-  def defaults(fatjar: Boolean = true): Seq[Project.Setting[_]] =
+  def defaults(fatjar: Boolean = true): Seq[Setting[_]] =
     if (fatjar)
       noScalaVersionInArtifact +: FatJar.settings
     else

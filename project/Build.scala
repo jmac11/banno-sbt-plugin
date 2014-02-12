@@ -29,6 +29,8 @@ object MyBuild extends Build {
 
                             libraryDependencies += "net.databinder" %% "dispatch-http" % "0.8.8",
 
+                            scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature", "-language:postfixOps"),
+
                             publishTo <<= (version) { v =>
                               if (v.trim.endsWith("SNAPSHOT")) Some(bannoSnapshots)
                               else Some(bannoReleases)

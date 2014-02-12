@@ -6,7 +6,7 @@ import sbtassembly.Plugin
 import Plugin.AssemblyKeys._
 
 object FatJar {
-  val settings: Seq[Project.Setting[_]] = Plugin.assemblySettings ++ Seq(
+  val settings: Seq[Setting[_]] = Plugin.assemblySettings ++ Seq(
     mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>
       {
         case "reference.conf" => BannoAssembly.MergeStrategyConcatWithNewLine

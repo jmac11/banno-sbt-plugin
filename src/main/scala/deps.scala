@@ -3,7 +3,7 @@ import sbt._
 import Keys._
 
 object BannoCommonDeps {
-  val settings: Seq[Project.Setting[_]] = Seq(
+  val settings: Seq[Setting[_]] = Seq(
     libraryDependencies ++= Seq(
       "org.joda" % "joda-convert" % "1.1",
       "joda-time" % "joda-time" % "2.0",
@@ -21,7 +21,7 @@ object LogbackDeps {
   def logbackModule(module: String, version: String) =
     "ch.qos.logback" % ("logback-" + module) % version
 
-  val settings: Seq[Project.Setting[_]] = Seq(
+  val settings: Seq[Setting[_]] = Seq(
     version := "1.0.13",
     libraryDependencies ++= Seq(
       logbackModule("core", version.value),
@@ -38,7 +38,7 @@ object Akka {
     case _                           => "com.typesafe.akka" %% ("akka-" + module) % v
   }
 
-  val settings: Seq[Project.Setting[_]] = Seq(
+  val settings: Seq[Setting[_]] = Seq(
     version <<= scalaVersion.apply {
       case sv if sv.startsWith("2.9.") => "2.0.2"
       case _ => "2.1.4"
@@ -55,7 +55,7 @@ object Akka {
 object AsyncHttpClient {
   val version = SettingKey[String]("ning-version")
 
-  val settings: Seq[Project.Setting[_]] = Seq(
+  val settings: Seq[Setting[_]] = Seq(
     version := "1.7.19",
     libraryDependencies <+= (version)("com.ning" % "async-http-client" % _)
   )
@@ -81,18 +81,18 @@ object Spray {
 
   val removeWarnAdaptedArgs = scalacOptions ~= (_.filterNot(_ == "-Ywarn-adapted-args"))
 
-  val caching: Seq[Project.Setting[_]] = Seq(
+  val caching: Seq[Setting[_]] = Seq(
     setVersion,
     libraryDependencies <+= (version) { (v) => sprayModule("caching", v) }
   )
 
-  val client: Seq[Project.Setting[_]] = Seq(
+  val client: Seq[Setting[_]] = Seq(
     setVersion,
     removeWarnAdaptedArgs,
     libraryDependencies <+= (version) { (v) => sprayModule("client", v) }
   )
 
-  val server: Seq[Project.Setting[_]] = Seq(
+  val server: Seq[Setting[_]] = Seq(
     setVersion,
     removeWarnAdaptedArgs,
     libraryDependencies <++= (version) { (v) =>
@@ -106,7 +106,7 @@ object Spray {
 object Metrics {
   val version = SettingKey[String]("metrics-version")
 
-  val settings: Seq[Project.Setting[_]] = Seq(
+  val settings: Seq[Setting[_]] = Seq(
     version := "2.2.0",
     libraryDependencies <++= (version) { v=>
       Seq(
@@ -124,7 +124,7 @@ object Scalaz {
   val streamVersion = SettingKey[String]("scalaz-stream-version")
   val contribVersion = SettingKey[String]("scalaz-contrib-version")
 
-  val settings: Seq[Project.Setting[_]] = Seq(
+  val settings: Seq[Setting[_]] = Seq(
     version := "7.0.5",
     streamVersion := "0.3",
     contribVersion := "0.1.5",
