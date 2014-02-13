@@ -12,6 +12,10 @@ object BannoIvy {
       "org.slf4j" -> "slf4j-log4j12",
       "org.slf4j" -> "slf4j-simple",
 
+      // kryo dupes
+      "asm"-> "asm",
+      "com.esotericsoftware.minlog" -> "minlog",
+
       // why eclipse???
       "org.eclipse.jetty.orbit" -> "javax.servlet",
 
