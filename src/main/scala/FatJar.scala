@@ -11,6 +11,8 @@ object FatJar {
       {
         case "reference.conf" => BannoAssembly.MergeStrategyConcatWithNewLine
         case "application.conf" => BannoAssembly.MergeStrategyConcatWithNewLine
+        case "log4j.properties" => MergeStrategy.first
+        case "about.html" => MergeStrategy.first
         case x => old(x)
       }
     },
