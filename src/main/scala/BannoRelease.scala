@@ -154,14 +154,18 @@ object BannoRelease {
         val (_, results) = SbtCompat.runTaskAggregated(executeTests in Test in ref, st)
         results match {
           case Value(outputs) =>
+            outputs.foreach { case Aggregation.KeyValue(k, output) =>
+              st.log.info(s"For ${projectNameOfScopedKey(k)}")
+              Tests.showResults(st.log, output, "No tests")
+            }
             val failed = outputs.filterNot {
               case Aggregation.KeyValue(k, output) => output.overall == TestResult.Passed
             }
             if (failed.nonEmpty) {
-              val failedProjects = failed.map(_.key.scope.project.asInstanceOf[Select[ProjectRef]].s.project).mkString(",")
+              val failedProjects = failed.map(kv => projectNameOfScopedKey(kv.key)).mkString(",")
               sys.error(s"Failed tests for ${failedProjects}! Aborting release.")
             } else {
-              st.log.info("PASSED TESTS")
+              st.log.info("PASSED ALL TESTS")
             }
             st
           case _ => st
@@ -170,6 +174,9 @@ object BannoRelease {
     },
     enableCrossBuild = true
   )
+
+  private[this] def projectNameOfScopedKey(key: ScopedKey[_]) = 
+    key.scope.project.asInstanceOf[Select[ProjectRef]].s.project
 
   object No {
     def unapply(str: Option[String]): Option[String] =
