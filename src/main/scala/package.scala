@@ -3,8 +3,9 @@ import sbt._
 import Keys._
 
 package object banno {
+  import BannoDependenciesVersionFile._
+
   val bannoDependencies = SettingKey[Seq[ModuleID]]("banno-dependencies")
-  val bannoDependenciesFileName = "versions-banno-deps.sbt"
 
   def addBannoDependency(artifactId: String,
                          groupId: String = "com.banno",
@@ -15,6 +16,8 @@ package object banno {
     val bannoDepVersion = SettingKey[String]("%s-version".format(artifactId))
     val bannoDepReleasedVersion = SettingKey[String]("%s-released-version".format(artifactId),
                                                      "If you get a warning about this, please add a setting to versions-banno-deps.sbt")
+    
+    appendSnapshotBannoDependencyVersionToFileIfMissing(artifactId)
 
     val depVersion = bannoDepVersion <<= (version, bannoDepReleasedVersion) { (v, rv) =>
       if (v.trim.endsWith("SNAPSHOT")) {

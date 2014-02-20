@@ -6,6 +6,7 @@ import ReleasePlugin.ReleaseKeys._
 import sbtrelease.Utilities._
 import ReleaseStateTransformations._
 import complete.DefaultParsers._
+import BannoDependenciesVersionFile._
 
 object BannoRelease {
 
@@ -114,17 +115,7 @@ object BannoRelease {
                   st.log.info("Updating banno dependencies to latest releases")
                   val withLatestRelease = latestReleasedVersionsForBannoDeps(st)
 
-                  // write to file
-                  val newSettingsContent =  withLatestRelease.map {
-                    case (dep, latest) =>
-                      st.log.info("updating \"%s\" to %s".format(dep, latest))
-                      "SettingKey[String](\"%s-released-version\") in Global := \"%s\"\n\n".format(dep.name, latest)
-                  }
-
-                  if (!newSettingsContent.isEmpty) {
-                    IO.write(new File(bannoDependenciesFileName), newSettingsContent.mkString)
-                  }
-
+                  writeBannoDependenciesVersionsToFile(st.log, withLatestRelease)
                   // reapply settings
                   val newReleaseVersionSettings = withLatestRelease.map {
                     case (dep, latest) =>
