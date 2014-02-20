@@ -194,7 +194,7 @@ object BannoRelease {
           val remoteName = "origin"
           val remoteBranch = "%s/%s".format(remoteName, currentBranch)
 
-          Git.fetch(remoteName)
+          Git.fetch(remoteName) !! st.log
           Git.cmd("merge", remoteBranch) !! st.log
           Git.cmd("push", "origin", "HEAD:%s".format(currentBranch)) !! st.log
       }
