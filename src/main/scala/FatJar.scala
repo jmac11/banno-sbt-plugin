@@ -2,7 +2,7 @@ package com.banno
 import sbt._
 import Keys._
 import sbtassembly._
-import sbtassembly.Plugin
+import sbtassembly.Plugin; import Plugin._
 import Plugin.AssemblyKeys._
 
 object FatJar {
