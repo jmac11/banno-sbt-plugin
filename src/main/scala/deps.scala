@@ -107,13 +107,14 @@ object Metrics {
   val version = SettingKey[String]("metrics-version")
 
   val settings: Seq[Setting[_]] = Seq(
-    version := "2.2.0",
-    libraryDependencies <++= (version) { v=>
+    version := "3.0.1",
+    libraryDependencies <++= (version, Akka.version) { (v, av) =>
+      val msv = if (av startsWith "2.1") "3.0.3_a2.1.0" else "3.0.4" //https://github.com/erikvanoosten/metrics-scala#available-versions
       Seq(
-        "com.yammer.metrics" % "metrics-core" % v,
-        "com.yammer.metrics" % "metrics-graphite" % v,
-        "com.yammer.metrics" % "metrics-logback" % v,
-        "nl.grons"           %% "metrics-scala" % v
+        "com.codahale.metrics" % "metrics-core"     % v,
+        "com.codahale.metrics" % "metrics-graphite" % v,
+        "com.codahale.metrics" % "metrics-logback"  % v,
+        "nl.grons"            %% "metrics-scala"    % msv
       )
     }
   )
