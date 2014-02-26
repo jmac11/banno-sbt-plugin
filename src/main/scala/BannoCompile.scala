@@ -8,7 +8,8 @@ object BannoCompile {
       case sv if sv.startsWith("2.9") =>
         Seq("-deprecation", "-unchecked")
       case _ =>
-        Seq("-deprecation", "-feature", "-language:postfixOps", "-language:implicitConversions",
+        Seq("-deprecation", "-feature", "-language:postfixOps",
+            "-language:implicitConversions", "-language:higherKinds", "-language:existentials", "-language:postfixOps",
             "-Ywarn-adapted-args", "-Ywarn-dead-code", "-Ywarn-numeric-widen", "-Ywarn-inaccessible", "-unchecked")
     },
     scalacOptions <++= (scalaVersion) map { sv =>
