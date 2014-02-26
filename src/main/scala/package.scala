@@ -14,8 +14,7 @@ package object banno {
                          scope: String = "compile"): Seq[Setting[_]] = {
 
     val bannoDepVersion = SettingKey[String]("%s-version".format(artifactId))
-    val bannoDepReleasedVersion = SettingKey[String]("%s-released-version".format(artifactId),
-                                                     "If you get a warning about this, please add a setting to versions-banno-deps.sbt")
+    val bannoDepReleasedVersion = SettingKey[String]("%s-released-version".format(artifactId))
     
     appendSnapshotBannoDependencyVersionToFileIfMissing(artifactId)
 
