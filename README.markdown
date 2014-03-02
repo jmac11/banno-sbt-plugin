@@ -1,4 +1,4 @@
-# *DISCLAIMER* This is now open source under Apache License 2 (see [LICENSE.txt](./LICENSE.txt) for it). This still contains a few things that are specific to Banno, but it's not that bad.
+### *DISCLAIMER* This is now open source under Apache License 2 (see [LICENSE.txt](./LICENSE.txt) for it). This still contains a few things that are specific to Banno, but it's not that bad.
 
 # banno-sbt-plugin #
 
