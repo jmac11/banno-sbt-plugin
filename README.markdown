@@ -1,3 +1,5 @@
+# *DISCLAIMER* This is now open source under Apache License 2 (see [LICENSE.txt](./LICENSE.txt) for it). This still contains a few things that are specific to Banno, but it's not that bad.
+
 # banno-sbt-plugin #
 
 This is Banno's [sbt][] plugin which provides a structured method of which all Banno sbt projects should abide by. It also includes many commonly used dependencies.
