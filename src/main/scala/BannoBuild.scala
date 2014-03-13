@@ -2,7 +2,7 @@ package com.banno
 import sbt._
 import Keys._
 
-class BannoBuild(id: String) extends Build {
+case class BannoBuild(id: String) extends Build {
   // this is weird since if we're the symlinked project we read from the root of the symlinkee project
   def findSymlinkedProjectFiles(cwd: File = file(".")): Seq[File] = {
     val currentSymlinkProjects = cwd.listFiles.filter(Symlink.isSymlinkDirectory)
@@ -34,3 +34,4 @@ object Symlink {
     canon.getCanonicalPath != canon.getAbsolutePath
   }
 }
+
