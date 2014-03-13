@@ -16,8 +16,11 @@ object BannoIvy {
       "asm"-> "asm",
       "com.esotericsoftware.minlog" -> "minlog",
 
-      // why eclipse???
+      // all other serlet-api's must go, use only "javax.servlet" % "javax.servlet-api" % "3.0.1"
       "org.eclipse.jetty.orbit" -> "javax.servlet",
+      "javax.servlet" -> "servlet-api",
+      "org.mortbay.jetty" -> "servlet-api",
+      "org.mortbay.jetty" -> "servlet-api-2.5",
 
       // the beheamouth of unnecessary hbase deps
       "org.jruby" -> "jruby-complete",
@@ -29,8 +32,6 @@ object BannoIvy {
       "tomcat" -> "jasper-runtime",
       "org.mortbay.jetty" -> "jetty",
       "org.mortbay.jetty" -> "jetty-util",
-      "org.mortbay.jetty" -> "servlet-api",
-      "org.mortbay.jetty" -> "servlet-api-2.5",
       "org.mortbay.jetty" -> "jsp-2.1",
       "org.mortbay.jetty" -> "jsp-api-2.1",
       "org.apache.hadoop" -> "avro",
