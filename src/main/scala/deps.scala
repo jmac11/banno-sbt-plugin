@@ -109,7 +109,7 @@ object Metrics {
   val version = SettingKey[String]("metrics-version")
 
   val settings: Seq[Setting[_]] = Seq(
-    version := "3.0.1",
+    version := "3.0.2",
     libraryDependencies <++= (version, Akka.version) { (v, av) =>
       val msv = if (av startsWith "2.1") "3.0.3_a2.1.0" else "3.0.4" //https://github.com/erikvanoosten/metrics-scala#available-versions
       Seq(
