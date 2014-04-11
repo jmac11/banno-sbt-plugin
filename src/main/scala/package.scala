@@ -15,7 +15,7 @@ package object banno {
 
     val bannoDepVersion = SettingKey[String]("%s-version".format(artifactId))
     val bannoDepReleasedVersion = SettingKey[String]("%s-released-version".format(artifactId))
-    
+
     appendSnapshotBannoDependencyVersionToFileIfMissing(artifactId)
 
     val depVersion = bannoDepVersion <<= (version, bannoDepReleasedVersion) { (v, rv) =>
@@ -39,4 +39,18 @@ package object banno {
     artifactIds.foldLeft(Seq[Setting[_]]()) { (settings, artifactId) =>
       settings ++ addBannoDependency(artifactId)
     }
+
+  def bannoRootProject(name: String): Project =
+    bannoProject(name, name, base = file("."))
+
+  def bannoProject(subProjName: String): Project =
+    bannoProject(subProjName, subProjName)
+
+  def bannoProject(id: String, subProjName: String): Project =
+    bannoProject(id, subProjName, file(subProjName))
+
+  def bannoProject(id: String, subProjName: String, base: File): Project =
+    Project(id = id, base = base)
+      .settings(name := subProjName)
+      .settings(BannoSettings.settings: _*)
 }
