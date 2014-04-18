@@ -56,6 +56,6 @@ object Grunt {
     },
     grunt <<= grunt.dependsOn(npm),
     grunt <<= grunt.dependsOn(bower),
-    resourceGenerators in Compile <+= grunt.task
+    resourceGenerators in Compile <+= grunt
   )
 }
