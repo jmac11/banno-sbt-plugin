@@ -35,21 +35,16 @@ object LogbackDeps {
 object Akka {
   val version = SettingKey[String]("akka-version")
 
-  def akkaModule(module: String, v: String, sv: String) = sv match {
-    case sv if sv.startsWith("2.9.") => "com.typesafe.akka" % ("akka-" + module) % v
-    case _                           => "com.typesafe.akka" %% ("akka-" + module) % v
-  }
+  def akkaModule(module: String, v: String) =
+    "com.typesafe.akka" %% ("akka-" + module) % v
 
   val settings: Seq[Setting[_]] = Seq(
-    version <<= scalaVersion.apply {
-      case sv if sv.startsWith("2.9.") => "2.0.2"
-      case _ => "2.1.4"
-    },
-    libraryDependencies <++= (version, scalaVersion) { (v, sv) =>
-      Seq(akkaModule("actor", v, sv),
-          akkaModule("remote", v, sv),
-          akkaModule("slf4j", v, sv),
-          akkaModule("testkit", v, sv) % "test")
+    version := "2.3.2",
+    libraryDependencies <++= (version) { (v) =>
+      Seq(akkaModule("actor", v),
+          akkaModule("remote", v),
+          akkaModule("slf4j", v),
+          akkaModule("testkit", v) % "test")
     }
   )
 }
