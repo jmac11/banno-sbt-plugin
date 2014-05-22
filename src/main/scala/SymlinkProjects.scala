@@ -2,29 +2,24 @@ package com.banno
 import sbt._
 import Keys._
 
-case class BannoBuild(id: String) extends Build {
+object SymlinkProjects {
   // this is weird since if we're the symlinked project we read from the root of the symlinkee project
-  def findSymlinkedProjectFiles(cwd: File = file(".")): Seq[File] = {
+  def findSymlinkedProjectFiles(currentRootProject: String, cwd: File = file(".")): Seq[File] = {
     val currentSymlinkProjects = cwd.listFiles.filter(Symlink.isSymlinkDirectory)
     val allSymlinkProjects = for {
       dir <- currentSymlinkProjects
-      symlinksUnderDir = findSymlinkedProjectFiles(dir)
+      symlinksUnderDir = findSymlinkedProjectFiles(currentRootProject, dir)
     } yield (dir, symlinksUnderDir)
 
     val maybeUs = allSymlinkProjects.collectFirst {
-      case (dir, symlinks) if dir.getName == id =>
+      case (dir, symlinks) if dir.getName == currentRootProject =>
         symlinks.map(f => file(f.getName))
     }
     maybeUs getOrElse currentSymlinkProjects
   }
-  lazy val symlinkedProjects =
-    findSymlinkedProjectFiles().map(sp => RootProject(sp): ClasspathDep[ProjectReference])
 
-  lazy val proj = Project(id = id, base = file("."), dependencies = symlinkedProjects).settings(
-    name := id
-  ).settings(
-    BannoSettings.settings: _*
-  )
+  def symlinkedProjects(currentRootProject: String) =
+    findSymlinkedProjectFiles(currentRootProject).map(sp => RootProject(sp): ClasspathDep[ProjectReference])
 }
 
 object Symlink {

@@ -50,7 +50,9 @@ package object banno {
     bannoProject(id, subProjName, file(subProjName))
 
   def bannoProject(id: String, subProjName: String, base: File): Project =
-    Project(id = id, base = base)
+    Project(id = id,
+            base = base,
+            dependencies = SymlinkProjects.symlinkedProjects(id))
       .settings(name := subProjName)
       .settings(BannoSettings.settings: _*)
 }
