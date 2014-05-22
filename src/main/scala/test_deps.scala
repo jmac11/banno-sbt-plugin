@@ -6,10 +6,7 @@ object Specs2 {
   val version = SettingKey[String]("specs2-version")
 
   val settings: Seq[Setting[_]] = Seq(
-    version <<= (scalaVersion) apply {
-      case sv if sv.startsWith("2.9") => "1.12.4.1"
-      case _ => "2.2.2"
-    },
+    version := "2.3.12",
     libraryDependencies <+= (version) { v =>
       "org.specs2" %% "specs2" % v % "test"
     },
