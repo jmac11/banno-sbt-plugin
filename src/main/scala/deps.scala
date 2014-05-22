@@ -39,7 +39,7 @@ object Akka {
     "com.typesafe.akka" %% ("akka-" + module) % v
 
   val settings: Seq[Setting[_]] = Seq(
-    version := "2.3.2",
+    version := "2.3.3",
     libraryDependencies <++= (version) { (v) =>
       Seq(akkaModule("actor", v),
           akkaModule("remote", v),
