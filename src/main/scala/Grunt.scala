@@ -26,6 +26,6 @@ object Grunt {
       (out ***).get
     },
     grunt <<= grunt.dependsOn(npm),
-    resourceGenerators in Compile <+= grunt.task
+    resourceGenerators in Compile <+= grunt
   )
 }
