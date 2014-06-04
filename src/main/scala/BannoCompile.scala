@@ -15,9 +15,6 @@ object BannoCompile {
     scalacOptions <++= (scalaVersion) map { sv =>
       if (sv.startsWith("2.9")) Seq("-Ydependent-method-types") else Nil
     },
-    scalacOptions <++= (version) map { v =>
-      if (v.endsWith("SNAPSHOT")) Nil else Seq("-optimize")
-    },
     scalacOptions in Test <++= (scalaVersion) map {
       case sv if sv.startsWith("2.9") => Nil
       case _                          => Seq("-language:reflectiveCalls")
