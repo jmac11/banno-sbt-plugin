@@ -152,7 +152,7 @@ object Dispatch {
 object ScalaXML {
   val version = SettingKey[String]("scala-modules-version")
 
-  val modules: Seq[Setting[_]] = Seq(
+  val settings: Seq[Setting[_]] = Seq(
     version := "1.0.1",
     libraryDependencies <++= (version) { (v) =>
       Seq(
