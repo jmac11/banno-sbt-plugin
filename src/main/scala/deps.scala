@@ -135,3 +135,30 @@ object Scalaz {
     }
   )
 }
+
+object Dispatch {
+  val version = SettingKey[String]("dispatch-version")
+
+  val settings: Seq[Setting[_]] = Seq(
+    version := "0.11.1",
+    libraryDependencies <++= (version) { (v) =>
+      Seq(
+        "net.databinder.dispatch" %% "dispatch-core" % v
+      )
+    }
+  )
+}
+
+object ScalaXML {
+  val version = SettingKey[String]("scala-modules-version")
+
+  val modules: Seq[Setting[_]] = Seq(
+    version := "1.0.1",
+    libraryDependencies <++= (version) { (v) =>
+      Seq(
+        "org.scala-lang.modules" %% "scala-xml" % v,
+        "org.scala-lang.modules" %% "scala-parser-combinators" % v
+      )
+    }
+  )
+}
