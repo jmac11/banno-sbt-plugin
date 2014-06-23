@@ -47,6 +47,9 @@ object BannoRelease {
     )
   )
 
+  private lazy val git: Git =
+    Git.mkVcs(file("."))
+
   def codeChangedSinceLastRelease(st: State): Boolean = {
     val extract = Project.extract(st)
     val artifactId = if (extract.get(crossPaths)) {
@@ -58,7 +61,7 @@ object BannoRelease {
     maybeLastRelease.map { lastRelease =>
       val ignorablePaths = extract.get(ignorableCodeChangePaths)
       val diffRevisions = "%s..HEAD".format(lastRelease)
-      val diff = (Git.cmd("diff", diffRevisions, "--name-only") !!).split("\n").toSet
+      val diff = (git.cmd("diff", diffRevisions, "--name-only") !!).split("\n").toSet
       val realDiff = diff -- ignorablePaths
       !realDiff.isEmpty
     } getOrElse true
@@ -93,7 +96,7 @@ object BannoRelease {
   def removeMinorAndAddSnapshot(ver: String) = { Version(ver).map(_.copy(minor = None, bugfix = None)).map(_.asSnapshot.string).getOrElse(versionFormatError) }
 
   def getLastVersionAndIncrement(org: String, name: String, scalaVers: String): (String => String) = { _ =>
-    val tags = (Git.cmd("tag", "-l") !!).split("\n").map(Version.apply).flatten
+    val tags = (git.cmd("tag", "-l") !!).split("\n").map(Version.apply).flatten
     VersionUtil.newestVersion(tags).map(_.bumpMinor.copy(bugfix = Some(0)).string).getOrElse("1.0.0")
   }
 
@@ -128,10 +131,10 @@ object BannoRelease {
 
   val commitReleaseBannoDepsVersions =
     ReleaseStep(action = (st: State) => {
-                  val modified = Git.cmd("status", "--porcelain", "--", bannoDependenciesFileName) !! st.log
+                  val modified = git.cmd("status", "--porcelain", "--", bannoDependenciesFileName) !! st.log
                   if (!modified.isEmpty) {
-                    Git.add(bannoDependenciesFileName) !! st.log
-                    Git.commit("Updating banno dependencies to released versions") !! st.log
+                    git.add(bannoDependenciesFileName) !! st.log
+                    git.commit("Updating banno dependencies to released versions") !! st.log
                   }
                   st
                 })
@@ -180,13 +183,13 @@ object BannoRelease {
         case No() =>
           st.log.warn("Commits were not pushed. Please push them yourself.")
         case _ =>
-          val currentBranch = Git.currentBranch
+          val currentBranch = git.currentBranch
           val remoteName = "origin"
           val remoteBranch = "%s/%s".format(remoteName, currentBranch)
 
-          Git.fetch(remoteName) !! st.log
-          Git.cmd("merge", remoteBranch) !! st.log
-          Git.cmd("push", "origin", "HEAD:%s".format(currentBranch)) !! st.log
+          git.fetch(remoteName) !! st.log
+          git.cmd("merge", remoteBranch) !! st.log
+          git.cmd("push", "origin", "HEAD:%s".format(currentBranch)) !! st.log
       }
       st
     })
@@ -200,7 +203,7 @@ object BannoRelease {
         case _ => 
           val extract = Project.extract(st)
           val (_, currentTagName) = extract.runTask(tagName, st)
-          Git.cmd("push", "origin", currentTagName) !! st.log
+          git.cmd("push", "origin", currentTagName) !! st.log
       }
       st
     })
