@@ -120,17 +120,18 @@ object Scalaz {
   val contribVersion = SettingKey[String]("scalaz-contrib-version")
 
   val settings: Seq[Setting[_]] = Seq(
-    version := "7.0.5",
-    streamVersion := "0.3",
-    contribVersion := "0.1.5",
+    version := "7.0.6",
+    streamVersion := "0.4.1",
+    contribVersion := "0.2",
+    resolvers += "Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases",
     libraryDependencies <++= (version, streamVersion, contribVersion) { (v, sv, cv) =>
       Seq(
-        "org.scalaz" %% "scalaz-core" % v,
-        "org.scalaz" %% "scalaz-concurrent" % v,
-        "org.scalaz" %% "scalaz-effect" % v,
-        "org.scalaz" %% "scalaz-scalacheck-binding" % v % "test",
-        "org.scalaz.stream" %% "scalaz-stream" % sv,
-        "org.typelevel" %% "scalaz-contrib-210" % cv
+        "org.scalaz" %% "scalaz-core" % v
+        // "org.scalaz" %% "scalaz-concurrent" % v,
+        // "org.scalaz" %% "scalaz-effect" % v,
+        // "org.scalaz" %% "scalaz-scalacheck-binding" % v % "test"
+        // "org.scalaz.stream" %% "scalaz-stream" % sv,
+        // "org.typelevel" %% "scalaz-contrib-210" % cv
       )
     }
   )
