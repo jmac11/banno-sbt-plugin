@@ -168,7 +168,7 @@ object BannoRelease {
     enableCrossBuild = true
   )
 
-  private[this] def projectNameOfScopedKey(key: ScopedKey[_]) = 
+  private[this] def projectNameOfScopedKey(key: ScopedKey[_]) =
     key.scope.project.asInstanceOf[Select[ProjectRef]].s.project
 
   object No {
@@ -200,7 +200,7 @@ object BannoRelease {
       (defaultChoice orElse SimpleReader.readLine("Push tag (y/n)? [y] : ")) match {
         case No() =>
           st.log.warn("Tag was not pushed. Please push them yourself.")
-        case _ => 
+        case _ =>
           val extract = Project.extract(st)
           val (_, currentTagName) = extract.runTask(tagName, st)
           git.cmd("push", "origin", currentTagName) !! st.log
