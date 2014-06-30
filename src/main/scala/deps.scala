@@ -118,7 +118,7 @@ object Metrics {
   val settings: Seq[Setting[_]] = Seq(
     version := "3.0.2",
     libraryDependencies <++= (version, Akka.version) { (v, av) =>
-      val msv = s"3.1.1_a${av.take(3)}" // https://github.com/erikvanoosten/metrics-scala#available-versions-abbreviated
+      val msv = s"3.2.0_a${av.take(3)}" // https://github.com/erikvanoosten/metrics-scala#available-versions-abbreviated
       Seq(
         "com.codahale.metrics" % "metrics-core"     % v,
         "com.codahale.metrics" % "metrics-graphite" % v,
