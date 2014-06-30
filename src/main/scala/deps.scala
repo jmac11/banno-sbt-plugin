@@ -17,16 +17,17 @@ object BannoCommonDeps {
   ) ++ LogbackDeps.settings
 }
 
-object ScalaDeps {
+object ScalaModules {
   val xmlVersion = SettingKey[String]("scala-xml-version")
 
   def scalaModule(module: String, version: String) =
     "org.scala-lang.modules" %% ("scala-" + module) % version
 
   val xml: Seq[Setting[_]] = Seq(
-    xmlVersion := "1.0.2",
+    xmlVersion := "1.0.1",
     libraryDependencies ++= Seq(
-      scalaModule("xml", xmlVersion.value)
+      scalaModule("xml", xmlVersion.value),
+      scalaModule("parser-combinators", xmlVersion.value)
     )
   )
 }
@@ -158,20 +159,6 @@ object Dispatch {
     libraryDependencies <++= (version) { (v) =>
       Seq(
         "net.databinder.dispatch" %% "dispatch-core" % v
-      )
-    }
-  )
-}
-
-object ScalaXML {
-  val version = SettingKey[String]("scala-modules-version")
-
-  val settings: Seq[Setting[_]] = Seq(
-    version := "1.0.1",
-    libraryDependencies <++= (version) { (v) =>
-      Seq(
-        "org.scala-lang.modules" %% "scala-xml" % v,
-        "org.scala-lang.modules" %% "scala-parser-combinators" % v
       )
     }
   )
