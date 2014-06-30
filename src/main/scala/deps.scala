@@ -17,6 +17,20 @@ object BannoCommonDeps {
   ) ++ LogbackDeps.settings
 }
 
+object ScalaDeps {
+  val xmlVersion = SettingKey[String]("scala-xml-version")
+
+  def scalaModule(module: String, version: String) =
+    "org.scala-lang.modules" %% ("scala-" + module) % version
+
+  val xml: Seq[Setting[_]] = Seq(
+    xmlVersion := "1.0.2",
+    libraryDependencies ++= Seq(
+      scalaModule("xml", xmlVersion.value)
+    )
+  )
+}
+
 object LogbackDeps {
   val version = SettingKey[String]("logback-version")
 
