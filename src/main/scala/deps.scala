@@ -77,7 +77,7 @@ object Spray {
   val version = SettingKey[String]("spray-version")
 
   def sprayModule(module: String, v: String) =
-    "io.spray" % ("spray-" + module) % v
+    "io.spray" %% ("spray-" + module) % v
 
   val setVersion =
     version := {
