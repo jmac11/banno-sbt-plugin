@@ -106,7 +106,7 @@ object Spray {
     removeWarnAdaptedArgs,
     libraryDependencies <++= (version) { (v) =>
       Seq(sprayModule("can", v),
-          sprayModule("routing-shapeless2_2.11", v),
+          sprayModule("routing-shapeless2", v),
           sprayModule("testkit", v) % "test")
     }
   )
