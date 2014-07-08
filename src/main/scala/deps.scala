@@ -25,10 +25,16 @@ object ScalaModules {
 
   val xml: Seq[Setting[_]] = Seq(
     xmlVersion := "1.0.1",
-    libraryDependencies ++= Seq(
-      scalaModule("xml", xmlVersion.value),
-      scalaModule("parser-combinators", xmlVersion.value)
-    )
+    libraryDependencies ++= {
+      if (!scalaVersion.value.startsWith("2.10"))
+        Seq(
+          scalaModule("xml", xmlVersion.value),
+          scalaModule("parser-combinators", xmlVersion.value)
+        )
+      else
+        Nil
+    }
+      
   )
 }
 
