@@ -47,7 +47,7 @@ package object banno {
     bannoProject(subProjName, subProjName)
 
   def bannoProject(id: String, subProjName: String): Project =
-    bannoProject(id, subProjName, file(subProjName))
+    bannoProject(id, subProjName, file(id))
 
   def bannoProject(id: String, subProjName: String, base: File): Project =
     Project(id = id,
