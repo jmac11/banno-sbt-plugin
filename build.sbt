@@ -16,24 +16,11 @@ libraryDependencies += "net.databinder" %% "dispatch-http" % "0.8.8"
 
 scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature", "-language:postfixOps")
 
-publishArtifact in (Compile, packageSrc) := false
-
-publishArtifact in (Compile, packageDoc) := false
-
-val bannoSnapshots =   "Banno Snapshots Repo" at "http://nexus.banno.com/nexus/content/repositories/snapshots"
-val bannoReleases = "Banno Releases Repo" at "http://nexus.banno.com/nexus/content/repositories/releases"
-
-resolvers := Seq(
-  "Banno External Repo" at "http://nexus.banno.com/nexus/content/groups/external/",
-  bannoSnapshots,
-  bannoReleases
-)
-
-externalResolvers := Resolver.withDefaultResolvers(resolvers.value, mavenCentral = true) 
-
 publishTo := {
-  if (version.value.endsWith("SNAPSHOT")) Some(bannoSnapshots)
-  else Some(bannoReleases)
+  if (version.value.endsWith("SNAPSHOT"))
+    Some("Banno Snapshots Repo" at "http://nexus.banno.com/nexus/content/repositories/snapshots")
+  else
+    Some("Banno Releases Repo" at "http://nexus.banno.com/nexus/content/repositories/releases")
 }
 
 credentials += Credentials(Path.userHome / ".ivy2" / ".banno_credentials")
