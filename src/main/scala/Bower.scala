@@ -22,7 +22,8 @@ object Bower {
     bowerExecutable <<= baseDirectory apply (bd => (bd / "node_modules/bower/bin/bower").toString), // since bower is a npm dev dep
 
     bower <<= (bowerExecutable, baseDirectory, bowerOutputDirectory) map { (be, bd, out) =>
-      (Process(be :: "install" :: Nil, bd, "OUTPUT_DIR" -> out.toString) !)
+      val exitCode = (Process(be :: "install" :: Nil, bd, "OUTPUT_DIR" -> out.toString) !)
+      if (exitCode != 0) sys.error(s"Bower nonzero exit code: ${exitCode}. Aborting!")
       (out ***).get
     },
     bower <<= bower.dependsOn(npm),
