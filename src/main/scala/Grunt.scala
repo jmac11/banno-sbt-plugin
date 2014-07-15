@@ -22,7 +22,8 @@ object Grunt {
     gruntExecutable <<= baseDirectory apply (bd => (bd / "node_modules/grunt-cli/bin/grunt").toString), // since grunt-cli is a npm dev dep
 
     grunt <<= (gruntExecutable, baseDirectory, gruntOutputDirectory) map { (ge, bd, out) =>
-      (Process(ge, bd, "OUTPUT_DIR" -> out.toString) !)
+      val exitCode = (Process(ge, bd, "OUTPUT_DIR" -> out.toString) !)
+      if (exitCode != 0) sys.error(s"Grunt nonzero exit code: ${exitCode}. Aborting!")
       (out ***).get
     },
     grunt <<= grunt.dependsOn(npm),
