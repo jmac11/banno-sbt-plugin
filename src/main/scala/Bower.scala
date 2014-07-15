@@ -19,10 +19,10 @@ object Bower {
     watchSources <<= (watchSources, bowerWatchSources) map ( (ws, bws) => ws ++ bws),
 
     npm <<= (baseDirectory) map (Process("npm" :: "install" :: Nil, _) !),
-    bowerExecutable <<= baseDirectory apply (bd => (bd / "node_modules/bower/bin/bower --allow-root").toString), // since bower is a npm dev dep
+    bowerExecutable <<= baseDirectory apply (bd => (bd / "node_modules/bower/bin/bower")), // since bower is a npm dev dep
 
     bower <<= (bowerExecutable, baseDirectory, bowerOutputDirectory) map { (be, bd, out) =>
-      val exitCode = (Process(be :: "install" :: Nil, bd, "OUTPUT_DIR" -> out.toString) !)
+      val exitCode = (Process(be :: "install" :: "--allow-root" :: Nil, bd, "OUTPUT_DIR" -> out.toString) !)
       if (exitCode != 0) sys.error(s"Bower nonzero exit code: ${exitCode}. Aborting!")
       (out ***).get
     },
