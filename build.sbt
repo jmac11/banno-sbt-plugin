@@ -1,6 +1,6 @@
 name := "banno-sbt-plugin"
 
-version := "1.4.5"
+version := "1.4.6"
 
 organization := "com.banno"
 
