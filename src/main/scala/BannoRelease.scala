@@ -7,6 +7,8 @@ import sbtrelease.Utilities._
 import ReleaseStateTransformations._
 import complete.DefaultParsers._
 import BannoDependenciesVersionFile._
+import sbtdocker._
+import sbtdocker.Plugin.DockerKeys._
 
 object BannoRelease {
 
@@ -39,6 +41,7 @@ object BannoRelease {
       tagRelease,
       pushCurrentBranch,
       pushReleaseTag,
+      buildDockerImage,
       publishArtifacts,
 
       setNextVersion,
@@ -165,7 +168,7 @@ object BannoRelease {
     enableCrossBuild = true
   )
 
-  private[this] def projectNameOfScopedKey(key: ScopedKey[_]) = 
+  private[this] def projectNameOfScopedKey(key: ScopedKey[_]) =
     key.scope.project.asInstanceOf[Select[ProjectRef]].s.project
 
   object No {
@@ -197,10 +200,20 @@ object BannoRelease {
       (defaultChoice orElse SimpleReader.readLine("Push tag (y/n)? [y] : ")) match {
         case No() =>
           st.log.warn("Tag was not pushed. Please push them yourself.")
-        case _ => 
+        case _ =>
           val extract = Project.extract(st)
           val (_, currentTagName) = extract.runTask(tagName, st)
           Git.cmd("push", "origin", currentTagName) !! st.log
+      }
+      st
+    })
+
+  val buildDockerImage = ReleaseStep(
+    action = (st: State) => {
+      val useDocker = Project.extract(st).getOpt(Docker.packageUsingDocker)
+      if (useDocker.getOrElse(false)) {
+        val extract = Project.extract(st)
+        extract.runTask(docker, st)
       }
       st
     })
