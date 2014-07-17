@@ -11,7 +11,7 @@ object MyBuild extends Build {
 
   val myBuildSettings = Seq(sbtPlugin := true,
                             name := "banno-sbt-plugin",
-                            version := "1.3.17",
+                            version := "1.3.18",
                             organization := "com.banno",
                             shellPrompt <<= (name) { (name) => _ => name + " > " },
 
