@@ -214,9 +214,7 @@ object BannoRelease {
       if (useDocker.getOrElse(false)) {
         val extract = Project.extract(st)
         extract.runTask(docker, st)
-        st
-      } else {
-        st
       }
+      st
     })
 }
