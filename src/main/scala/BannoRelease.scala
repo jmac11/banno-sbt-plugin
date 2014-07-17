@@ -7,6 +7,8 @@ import sbtrelease.Utilities._
 import ReleaseStateTransformations._
 import complete.DefaultParsers._
 import BannoDependenciesVersionFile._
+import sbtdocker._
+import sbtdocker.Plugin.DockerKeys._
 
 object BannoRelease {
 
@@ -39,6 +41,7 @@ object BannoRelease {
       tagRelease,
       pushCurrentBranch,
       pushReleaseTag,
+      buildDockerImage,
       publishArtifacts,
 
       setNextVersion,
@@ -204,6 +207,16 @@ object BannoRelease {
           val extract = Project.extract(st)
           val (_, currentTagName) = extract.runTask(tagName, st)
           git.cmd("push", "origin", currentTagName) !! st.log
+      }
+      st
+    })
+
+  val buildDockerImage = ReleaseStep(
+    action = (st: State) => {
+      val useDocker = Project.extract(st).getOpt(Docker.packageUsingDocker)
+      if (useDocker.getOrElse(false)) {
+        val extract = Project.extract(st)
+        extract.runTask(docker, st)
       }
       st
     })

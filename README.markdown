@@ -96,6 +96,7 @@ If I have `addBannoDependency("banno-utils")` in my working project and I want t
 
 There a few other things that the banno-sbt-plugin does do.
 
+ - Build a docker image by adding `Docker.settings`
  - Fat jar deployments via `Deployable.settings`
  - standard compile options
  - sane memory defaults for `run`
