@@ -15,7 +15,7 @@ object Docker {
   val settings = sbtdocker.Plugin.dockerSettings ++ sbtassembly.Plugin.assemblySettings ++ Seq(
     packageUsingDocker := true,
     docker <<= (docker dependsOn assembly),
-    doockerfile in docker := {
+    dockerfile in docker := {
       val artifact = (outputPath in assembly).value
       val appDirPath = "/app"
       val artifactTargetPath = s"$appDirPath/${artifact.name}"
