@@ -42,5 +42,5 @@ object MyBuild extends Build {
                           addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.10.1"),
                           addSbtPlugin("com.github.gseitz" % "sbt-release" % "0.8"),
                           addSbtPlugin("io.spray" % "sbt-revolver" % "0.7.1"),
-                          addSbtPlugin("se.marcuslonnberg" % "sbt-docker" % "0.3.0"))
+                          addSbtPlugin("se.marcuslonnberg" % "sbt-docker" % "0.3.1-Banno"))
 }
