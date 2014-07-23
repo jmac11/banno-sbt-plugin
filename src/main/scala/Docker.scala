@@ -3,28 +3,29 @@ import sbt._
 import Keys._
 import sbtdocker._
 import sbtdocker.Plugin.DockerKeys._
-import sbtassembly._
-import sbtassembly.Plugin
-import sbtassembly.Plugin._
-import sbtassembly.Plugin.AssemblyKeys._
 
 object Docker {
 
   val packageUsingDocker = SettingKey[Boolean]("package-using-docker")
 
-  val settings = sbtdocker.Plugin.dockerSettings ++ sbtassembly.Plugin.assemblySettings ++ Seq(
+  val settings = sbtdocker.Plugin.dockerSettings ++ Seq(
     packageUsingDocker := true,
-    docker <<= (docker dependsOn assembly),
-    dockerfile in docker := {
-      val artifact = (outputPath in assembly).value
-      val appDirPath = "/app"
-      val artifactTargetPath = s"$appDirPath/${artifact.name}"
-      new Dockerfile {
-        from("dockerfile/java")
-        add(artifact, artifactTargetPath)
-        workDir(appDirPath)
-        entryPoint("java", "-jar", artifactTargetPath)
-      }
+    docker <<= docker.dependsOn(Keys.`package`.in(Compile, packageBin)),
+    dockerfile in docker <<= (artifactPath.in(Compile, packageBin), managedClasspath in Compile, mainClass.in(Compile, packageBin)) map {
+      case (jarFile, managedClasspath, Some(mainClass)) =>
+        val libs = "/app/libs"
+        val jarTarget = "/app/" + jarFile.name
+        new Dockerfile {
+          from("dockerfile/java")
+          managedClasspath.files.foreach { depFile =>
+            val target = file(libs) / depFile.name
+            copyToStageDir(depFile, target)
+          }
+          add(libs, libs)
+          add(jarFile, jarTarget)
+          val classpath = s"$libs/*:$jarTarget"
+          cmd("java", "-cp", classpath, mainClass)
+        }
     },
     imageName in docker := {
       ImageName(
