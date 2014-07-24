@@ -35,7 +35,10 @@ object Docker {
       "-Dcom.sun.management.jmxremote",
       "-Dcom.sun.management.jmxremote.authenticate=false",
       s"-Dcom.sun.management.jmxremote.port=${jmxPort.value}",
-      "-Dcom.sun.management.jmxremote.ssl=false"
+      "-Dcom.sun.management.jmxremote.ssl=false",
+      "-Xmx512m",
+      "-XX:MaxPermSize=128M",
+      "$JAVA_OPTS"
     ),
     jmxPort := 8686,
     healthPort := 9090,
@@ -44,8 +47,7 @@ object Docker {
     docker := {
       val imageId = (docker dependsOn regularPackage).value
       val dockerImageName = (imageName in docker).value
-      val cmd = "docker" :: "tag" :: imageId.id :: fullImageName(updateTagToLatest(dockerImageName)) :: Nil
-      (cmd !)
+      dockerTag(imageId.id, fullImageName(updateTagToLatest(dockerImageName)))
       imageId
     },
 
@@ -58,7 +60,13 @@ object Docker {
       val dockerAppDir = appDir.value
       val jar = dockerAppDir / jarFile.name
       val classpath = Seq(dockerAppDir / "libs" / "*", jar).mkString(":")
-      val command = Seq("java", "-cp", classpath) ++ javaArgs :+ main
+      val command =
+        Seq(
+          "bash",
+          "-c",
+          (Seq("java", "-cp", classpath) ++ javaArgs :+ main).mkString(" ")
+        )
+        
 
       new mutable.Dockerfile {
         managedCp.files.foreach { depFile =>
@@ -85,6 +93,11 @@ object Docker {
     dockerPush := execDockerPush((imageName in docker).value),
     dockerPushLatestTag := execDockerPush(updateTagToLatest((imageName in docker).value))
   )
+
+  private[this] def dockerTag(imageId: String, name: String): Unit = {
+    val cmd = "docker" :: "tag" :: imageId :: name :: Nil
+    (cmd !)
+  }
 
   private[this] def updateTagToLatest(dockerImageName: ImageName): ImageName =
     dockerImageName.copy(tag = Some("latest"))
