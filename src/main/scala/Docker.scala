@@ -8,7 +8,6 @@ object Docker {
 
   val dockerPush = TaskKey[Unit]("dockerPush")
   val dockerPushLatestTag = TaskKey[Unit]("dockerPushLatestTag")
-  val dockerTagAsLatest = TaskKey[Unit]("dockerTagAsLatest")
   val packageUsingDocker = SettingKey[Boolean]("packageUsingDocker")
 
   val namespace = SettingKey[String]("dockerNamespace")
@@ -17,6 +16,8 @@ object Docker {
   val jmxPort = SettingKey[Int]("dockerJmxPort")
   val healthPort = SettingKey[Int]("dockerHealthPort")
   val ports = SettingKey[Seq[Int]]("dockerPorts")
+
+  val regularPackage = (Keys.`package` in (Compile, packageBin))
 
   val settings = sbtdocker.Plugin.dockerSettings ++ Seq(
     packageUsingDocker := true,
@@ -40,7 +41,13 @@ object Docker {
     healthPort := 9090,
     ports := Seq(jmxPort.value, healthPort.value),
 
-    docker <<= docker.dependsOn(Keys.`package`.in(Compile, packageBin)),
+    docker := {
+      val imageId = (docker dependsOn regularPackage).value
+      val dockerImageName = (imageName in docker).value
+      val cmd = "docker" :: "tag" :: imageId.id :: fullImageName(updateTagToLatest(dockerImageName)) :: Nil
+      (cmd !)
+      imageId
+    },
 
     dockerfile in docker := {
       val jarFile = artifactPath.in(Compile, packageBin).value
@@ -76,24 +83,18 @@ object Docker {
     },
 
     dockerPush := execDockerPush((imageName in docker).value),
-    dockerPushLatestTag := execDockerPush(updateTagToLatest((imageName in docker).value)),
-
-    dockerTagAsLatest := {
-      val dockerImageName = (imageName in docker).value
-      val cmd = "docker" :: "tag" :: fullImageName(dockerImageName) :: fullImageName(updateTagToLatest(dockerImageName)) :: Nil
-      cmd !!
-    }
-
+    dockerPushLatestTag := execDockerPush(updateTagToLatest((imageName in docker).value))
   )
 
   private[this] def updateTagToLatest(dockerImageName: ImageName): ImageName =
-    dockerImageName.copy(tag = Some("LATEST"))
+    dockerImageName.copy(tag = Some("latest"))
 
   private[this] def execDockerPush(dockerImageName: ImageName): Unit = {
     val cmd = "docker" :: "push" :: fullImageName(dockerImageName) :: Nil
-    cmd !!
+    cmd !
   }
 
   private[this] def fullImageName(dockerImageName: ImageName): String =
-    s"${dockerImageName.namespace}/#{dockerImageName.repository}:#{dockerImageName.tag}"
+    s"${dockerImageName.namespace.get}/${dockerImageName.repository}:${dockerImageName.tag.get}"
 }
+

@@ -215,7 +215,6 @@ object BannoRelease {
       if (useDocker.getOrElse(false)) {
         extract.runTask(docker, st)
         extract.runTask(Docker.dockerPush, st)
-        extract.runTask(Docker.dockerTagAsLatest, st)
         extract.runTask(Docker.dockerPushLatestTag, st)
       }
       st
