@@ -13,7 +13,6 @@ object Docker {
 
   val namespace = SettingKey[String]("dockerNamespace")
   val appDir = SettingKey[File]("dockerAppDir")
-  val appLibDir = SettingKey[File]("dockerAppLibDir")
 
   val jmxPort = SettingKey[Int]("dockerJmxPort")
   val healthPort = SettingKey[Int]("dockerHealthPort")
@@ -25,7 +24,6 @@ object Docker {
     namespace := "registry.banno-internal.com",
 
     appDir := file("/app"),
-    appLibDir := appDir.value / "libs",
 
     javaOptions in docker := Seq(
       "-server",
@@ -48,24 +46,23 @@ object Docker {
       val jarFile = artifactPath.in(Compile, packageBin).value
       val managedCp = (managedClasspath in Compile).value
       val main = mainClass.in(Compile, packageBin).value.get
-      val jarTarget = appDir.value
-      val libs = appLibDir.value
       val javaArgs = (javaOptions in docker).value
-      val classpath = s"$libs/*:$jarTarget"
+
+      val dockerAppDir = appDir.value
+      val jar = dockerAppDir / jarFile.name
+      val classpath = Seq(dockerAppDir / "libs" / "*", jar).mkString(":")
       val command = Seq("java", "-cp", classpath) ++ javaArgs :+ main
 
       new mutable.Dockerfile {
-        from("dockerfile/java")
-
         managedCp.files.foreach { depFile =>
-          val target = libs / depFile.name
+          val target =  dockerAppDir / "libs" / depFile.name
           stageFile(depFile, target)
         }
-        add(libs, libs)
-        add(jarFile, jarTarget)
+        stageFile(jarFile, jar)
 
-        ports.value.foreach(p => expose(p))
-
+        from("dockerfile/java")
+        add(appDir.value, appDir.value)
+        expose(ports.value: _*)
         entryPoint(command: _*)
       }
     },
