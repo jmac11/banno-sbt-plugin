@@ -41,7 +41,7 @@ object BannoRelease {
       tagRelease,
       pushCurrentBranch,
       pushReleaseTag,
-      buildDockerImage,
+      buildAndPushDockerImage,
       publishArtifacts,
 
       setNextVersion,
@@ -208,13 +208,14 @@ object BannoRelease {
       st
     })
 
-  val buildDockerImage = ReleaseStep(
+  val buildAndPushDockerImage = ReleaseStep(
     action = (st: State) => {
-      val useDocker = Project.extract(st).getOpt(Docker.packageUsingDocker)
+      val extract = Project.extract(st)
+      val useDocker = extract.getOpt(Docker.packageUsingDocker)
       if (useDocker.getOrElse(false)) {
-        val extract = Project.extract(st)
         extract.runTask(docker, st)
-        extract.runTask(dockerpush, st)
+        extract.runTask(Docker.dockerPush, st)
+        extract.runTask(Docker.dockerPushLatestTag, st)
       }
       st
     })
