@@ -24,7 +24,7 @@ object ScalaModules {
     "org.scala-lang.modules" %% ("scala-" + module) % version
 
   val xml: Seq[Setting[_]] = Seq(
-    xmlVersion := "1.0.1",
+    xmlVersion := "1.0.2",
     libraryDependencies ++= {
       if (!scalaVersion.value.startsWith("2.10"))
         Seq(
@@ -34,7 +34,7 @@ object ScalaModules {
       else
         Nil
     }
-      
+
   )
 }
 
