@@ -13,9 +13,7 @@ object Docker {
   val namespace = SettingKey[String]("dockerNamespace")
   val appDir = SettingKey[File]("dockerAppDir")
 
-  val jmxPort = SettingKey[Int]("dockerJmxPort")
-  val healthPort = SettingKey[Int]("dockerHealthPort")
-  val ports = SettingKey[Seq[Int]]("dockerPorts")
+  val exposedPorts = SettingKey[Seq[Int]]("dockerPorts")
 
   val regularPackage = (Keys.`package` in (Compile, packageBin))
 
@@ -34,15 +32,16 @@ object Docker {
       "-XX:+UseCompressedOops",
       "-Dcom.sun.management.jmxremote",
       "-Dcom.sun.management.jmxremote.authenticate=false",
-      s"-Dcom.sun.management.jmxremote.port=${jmxPort.value}",
+      s"-Dcom.sun.management.jmxremote.port=8686",
       "-Dcom.sun.management.jmxremote.ssl=false",
       "-Xmx512m",
       "-XX:MaxPermSize=128M",
       "$JAVA_OPTS"
     ),
-    jmxPort := 8686,
-    healthPort := 9090,
-    ports := Seq(jmxPort.value, healthPort.value),
+    exposedPorts := Seq(
+      8686,  // JMX
+      9090   // Default Health
+    ),
 
     docker := {
       val imageId = (docker dependsOn regularPackage).value
@@ -77,7 +76,7 @@ object Docker {
 
         from("dockerfile/java")
         add(appDir.value, appDir.value)
-        expose(ports.value: _*)
+        expose(exposedPorts.value: _*)
         entryPoint(command: _*)
       }
     },
