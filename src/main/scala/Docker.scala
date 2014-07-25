@@ -63,18 +63,20 @@ object Docker {
           "bash",
           "-c",
           (Seq("java", "-cp", classpath) ++ javaArgs :+ main).mkString(" ")
+
         )
 
+      // we sort these so the more volatile things are near the end for docker to cache intermediate images
       val bannoGroupId = Keys.organization.value
       val (bannoDepCp, otherCp) = managedCp.files.partition(isBannoDependency(bannoGroupId))
       val sortedCp = otherCp ++ bannoDepCp
-
       val cpAndTargets = sortedCp.map { depFile =>
         val target =  dockerAppDir / "libs" / depFile.name
         (depFile, target)
       }
         
       new mutable.Dockerfile {
+        // these libraries must be seperate ADDs instead of "ADD /app/lib" since docker takes timestamp into cachability and sbt-docker clears the stage directory
         cpAndTargets.foreach { case (depFile, target) =>
           stageFile(depFile, target)
         }
