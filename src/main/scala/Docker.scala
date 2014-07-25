@@ -65,17 +65,23 @@ object Docker {
           "-c",
           (Seq("java", "-cp", classpath) ++ javaArgs :+ main).mkString(" ")
         )
-        
 
+      val cpAndTargets = managedCp.files.map { depFile =>
+        val target =  dockerAppDir / "libs" / depFile.name
+        (depFile, target)
+      }
+        
       new mutable.Dockerfile {
-        managedCp.files.foreach { depFile =>
-          val target =  dockerAppDir / "libs" / depFile.name
+        cpAndTargets.foreach { case (depFile, target) =>
           stageFile(depFile, target)
         }
         stageFile(jarFile, jar)
 
         from("dockerfile/java")
-        add(appDir.value, appDir.value)
+        cpAndTargets.foreach { case (_, target) => 
+          add(target, target)
+        }
+        add(jar, jar)
         expose(exposedPorts.value: _*)
         entryPoint(command: _*)
       }
