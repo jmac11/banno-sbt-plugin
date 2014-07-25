@@ -12,7 +12,6 @@ object Docker {
 
   val namespace = SettingKey[String]("dockerNamespace")
   val appDir = SettingKey[File]("dockerAppDir")
-
   val exposedPorts = SettingKey[Seq[Int]]("dockerPorts")
 
   val regularPackage = (Keys.`package` in (Compile, packageBin))
@@ -66,7 +65,11 @@ object Docker {
           (Seq("java", "-cp", classpath) ++ javaArgs :+ main).mkString(" ")
         )
 
-      val cpAndTargets = managedCp.files.map { depFile =>
+      val bannoGroupId = Keys.organization.value
+      val (bannoDepCp, otherCp) = managedCp.files.partition(isBannoDependency(bannoGroupId))
+      val sortedCp = otherCp ++ bannoDepCp
+
+      val cpAndTargets = sortedCp.map { depFile =>
         val target =  dockerAppDir / "libs" / depFile.name
         (depFile, target)
       }
@@ -98,6 +101,9 @@ object Docker {
     dockerPush := execDockerPush((imageName in docker).value),
     dockerPushLatestTag := execDockerPush(updateTagToLatest((imageName in docker).value))
   )
+
+  private[this] def isBannoDependency(bannoGroupId: String)(jar: File): Boolean =
+    jar.getPath.contains(s"/${bannoGroupId}/")
 
   private[this] def dockerTag(imageId: String, name: String): Unit = {
     val cmd = "docker" :: "tag" :: imageId :: name :: Nil
