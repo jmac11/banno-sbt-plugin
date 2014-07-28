@@ -42,6 +42,19 @@ object Docker {
       9090   // Default Health
     ),
 
+    // necessary to touch directories
+    docker <<= (streams, dockerPath in docker, buildOptions in docker, stageDirectory in docker, dockerfile in docker, imageName in docker) map {
+        (streams, dockerPath, buildOptions, stageDir, dockerfile, imageName) =>
+      val log = streams.log
+      log.debug("Using Dockerfile:")
+      log.debug(dockerfile.mkString)
+
+      log.info(s"Creating docker image with name: '$imageName'")
+      DockerBuilder.prepareFiles(dockerfile, stageDir, log)
+      touchDirectoriesTo1970(stageDir / "app" / "libs", stageDir / "app" / "banno-libs")
+      DockerBuilder.buildImage(dockerPath, buildOptions, imageName, stageDir, log)
+    },
+
     docker := {
       val imageId = (docker dependsOn regularPackage).value
       val dockerImageName = (imageName in docker).value
@@ -57,7 +70,7 @@ object Docker {
 
       val dockerAppDir = appDir.value
       val jar = dockerAppDir / jarFile.name
-      val classpath = Seq(dockerAppDir / "libs" / "*", jar).mkString(":")
+      val classpath = Seq(dockerAppDir / "libs" / "*", dockerAppDir / "banno-libs" / "*", jar).mkString(":")
       val command =
         Seq(
           "bash",
@@ -66,26 +79,18 @@ object Docker {
 
         )
 
-      // we sort these so the more volatile things are near the end for docker to cache intermediate images
+      // we partition these so the more volatile Banno libs are separate
       val bannoGroupId = Keys.organization.value
       val (bannoDepCp, otherCp) = managedCp.files.partition(isBannoDependency(bannoGroupId))
-      val sortedCp = otherCp ++ bannoDepCp
-      val cpAndTargets = sortedCp.map { depFile =>
-        val target =  dockerAppDir / "libs" / depFile.name
-        (depFile, target)
-      }
         
       new mutable.Dockerfile {
-        // these libraries must be seperate ADDs instead of "ADD /app/lib" since docker takes timestamp into cachability and sbt-docker clears the stage directory
-        cpAndTargets.foreach { case (depFile, target) =>
-          stageFile(depFile, target)
-        }
+        otherCp.foreach    { depFile => stageFile(depFile, dockerAppDir / "libs" / depFile.name) }
+        bannoDepCp.foreach { depFile => stageFile(depFile, dockerAppDir / "banno-libs" / depFile.name) }
         stageFile(jarFile, jar)
 
         from("dockerfile/java")
-        cpAndTargets.foreach { case (_, target) => 
-          add(target, target)
-        }
+        add(dockerAppDir / "libs", dockerAppDir / "libs")
+        add(dockerAppDir / "banno-libs", dockerAppDir / "banno-libs")
         add(jar, jar)
         expose(exposedPorts.value: _*)
         entryPoint(command: _*)
@@ -119,6 +124,11 @@ object Docker {
     val cmd = "docker" :: "push" :: fullImageName(dockerImageName) :: Nil
     cmd !
   }
+
+  private[this] def touchDirectoriesTo1970(dirs: File*): Unit =
+    dirs.foreach { dir =>
+      "touch" :: "-t" :: "197001010000" :: dir.getPath :: Nil !!
+    }
 
   private[this] def fullImageName(dockerImageName: ImageName): String =
     s"${dockerImageName.namespace.get}/${dockerImageName.repository}:${dockerImageName.tag.get}"
