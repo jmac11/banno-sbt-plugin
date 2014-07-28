@@ -42,6 +42,19 @@ object Docker {
       9090   // Default Health
     ),
 
+    // necessary to touch directories
+    docker <<= (streams, dockerPath in docker, buildOptions in docker, stageDirectory in docker, dockerfile in docker, imageName in docker) map {
+        (streams, dockerPath, buildOptions, stageDir, dockerfile, imageName) =>
+      val log = streams.log
+      log.debug("Using Dockerfile:")
+      log.debug(dockerfile.mkString)
+
+      log.info(s"Creating docker image with name: '$imageName'")
+      DockerBuilder.prepareFiles(dockerfile, stageDir, log)
+      touchDirectoriesTo1970(stageDir / "app" / "libs", stageDir / "app" / "banno-libs")
+      DockerBuilder.buildImage(dockerPath, buildOptions, imageName, stageDir, log)
+    },
+
     docker := {
       val imageId = (docker dependsOn regularPackage).value
       val dockerImageName = (imageName in docker).value
@@ -71,7 +84,7 @@ object Docker {
       val (bannoDepCp, otherCp) = managedCp.files.partition(isBannoDependency(bannoGroupId))
         
       new mutable.Dockerfile {
-        otherCp.foreach { depFile => stageFile(depFile, dockerAppDir / "libs" / depFile.name) }
+        otherCp.foreach    { depFile => stageFile(depFile, dockerAppDir / "libs" / depFile.name) }
         bannoDepCp.foreach { depFile => stageFile(depFile, dockerAppDir / "banno-libs" / depFile.name) }
         stageFile(jarFile, jar)
 
@@ -111,6 +124,11 @@ object Docker {
     val cmd = "docker" :: "push" :: fullImageName(dockerImageName) :: Nil
     cmd !
   }
+
+  private[this] def touchDirectoriesTo1970(dirs: File*): Unit =
+    dirs.foreach { dir =>
+      "touch" :: "-t" :: "197001010000" :: dir.getPath :: Nil !!
+    }
 
   private[this] def fullImageName(dockerImageName: ImageName): String =
     s"${dockerImageName.namespace.get}/${dockerImageName.repository}:${dockerImageName.tag.get}"
