@@ -19,7 +19,7 @@ object Grunt {
 
   val settings = Seq(
     // NPM
-    npm <<= (baseDirectory) map (Process("npm" :: "install" :: Nil, _) !),
+    npm <<= (baseDirectory) map (Process("npm" :: "install" :: "--registry" :: "http://npm.banno-internal.com" :: Nil, _) !),
 
     // Bower
     bowerExecutable := "bower",
@@ -47,7 +47,6 @@ object Grunt {
     gruntWatchSources <<= gruntClientDirectory map (d => (d ***).get),
     watchSources <<= (watchSources, gruntWatchSources) map ( (ws, gws) => ws ++ gws),
 
-    npm <<= (baseDirectory) map (Process("npm" :: "install" :: Nil, _) !),
     gruntExecutable <<= baseDirectory apply (bd => (bd / "node_modules/grunt-cli/bin/grunt").toString),
 
     grunt <<= (gruntExecutable, baseDirectory, gruntOutputDirectory) map { (ge, bd, out) =>
