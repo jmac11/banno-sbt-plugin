@@ -57,7 +57,7 @@ object Docker {
 
       val dockerAppDir = appDir.value
       val jar = dockerAppDir / jarFile.name
-      val classpath = Seq(dockerAppDir / "libs" / "*", jar).mkString(":")
+      val classpath = Seq(dockerAppDir / "libs" / "*", dockerAppDir / "banno-libs" / "*", jar).mkString(":")
       val command =
         Seq(
           "bash",
@@ -66,26 +66,18 @@ object Docker {
 
         )
 
-      // we sort these so the more volatile things are near the end for docker to cache intermediate images
+      // we partition these so the more volatile Banno libs are separate
       val bannoGroupId = Keys.organization.value
       val (bannoDepCp, otherCp) = managedCp.files.partition(isBannoDependency(bannoGroupId))
-      val sortedCp = otherCp ++ bannoDepCp
-      val cpAndTargets = sortedCp.map { depFile =>
-        val target =  dockerAppDir / "libs" / depFile.name
-        (depFile, target)
-      }
         
       new mutable.Dockerfile {
-        // these libraries must be seperate ADDs instead of "ADD /app/lib" since docker takes timestamp into cachability and sbt-docker clears the stage directory
-        cpAndTargets.foreach { case (depFile, target) =>
-          stageFile(depFile, target)
-        }
+        otherCp.foreach { depFile => stageFile(depFile, dockerAppDir / "libs" / depFile.name) }
+        bannoDepCp.foreach { depFile => stageFile(depFile, dockerAppDir / "banno-libs" / depFile.name) }
         stageFile(jarFile, jar)
 
         from("dockerfile/java")
-        cpAndTargets.foreach { case (_, target) => 
-          add(target, target)
-        }
+        add(dockerAppDir / "libs", dockerAppDir / "libs")
+        add(dockerAppDir / "banno-libs", dockerAppDir / "banno-libs")
         add(jar, jar)
         expose(exposedPorts.value: _*)
         entryPoint(command: _*)
