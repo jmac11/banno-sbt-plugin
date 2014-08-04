@@ -64,13 +64,30 @@ object Docker {
 
     dockerfile in docker := {
       val jarFile = artifactPath.in(Compile, packageBin).value
-      val managedCp = (managedClasspath in Compile).value
       val main = mainClass.in(Compile, packageBin).value.get
       val javaArgs = (javaOptions in docker).value
 
+      val interalDepClasspaths = (internalDependencyClasspath in Compile).value
+      val cpJars = (managedClasspath in Compile).value
+
+      // we partition these so the more volatile Banno libs are separate
+      val bannoGroupId = Keys.organization.value
+      val (bannoDepCp, otherCp) = cpJars.files.partition(isBannoDependency(bannoGroupId))
+
+      // include internal deps
+      val internalDepsNameWithClassDir = interalDepClasspaths.flatMap { acp =>
+        acp.metadata.get(Keys.moduleID.key).map { depModId =>
+          (depModId.name, acp.data)
+        }
+      }
+        
       val dockerAppDir = appDir.value
       val jar = dockerAppDir / jarFile.name
-      val classpath = Seq(dockerAppDir / "libs" / "*", dockerAppDir / "banno-libs" / "*", jar).mkString(":")
+      val classpath =
+        (
+          internalDepsNameWithClassDir.map { case (name, _) => (dockerAppDir / "internal" / name) } ++
+          List(dockerAppDir / "libs" / "*", dockerAppDir / "banno-libs" / "*", jar)
+        ).mkString(":")
       val command =
         Seq(
           "bash",
@@ -79,18 +96,16 @@ object Docker {
 
         )
 
-      // we partition these so the more volatile Banno libs are separate
-      val bannoGroupId = Keys.organization.value
-      val (bannoDepCp, otherCp) = managedCp.files.partition(isBannoDependency(bannoGroupId))
-        
       new mutable.Dockerfile {
         otherCp.foreach    { depFile => stageFile(depFile, dockerAppDir / "libs" / depFile.name) }
         bannoDepCp.foreach { depFile => stageFile(depFile, dockerAppDir / "banno-libs" / depFile.name) }
+        internalDepsNameWithClassDir.foreach { case (name, classDir) => stageFile(classDir, dockerAppDir / "internal" / name) }
         stageFile(jarFile, jar)
 
         from("dockerfile/java")
         add(dockerAppDir / "libs", dockerAppDir / "libs")
         add(dockerAppDir / "banno-libs", dockerAppDir / "banno-libs")
+        add(dockerAppDir / "internal", dockerAppDir / "internal")
         add(jar, jar)
         expose(exposedPorts.value: _*)
         entryPoint(command: _*)
