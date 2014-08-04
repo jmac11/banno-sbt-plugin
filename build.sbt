@@ -12,6 +12,8 @@ addSbtPlugin("com.github.gseitz" % "sbt-release" % "0.8.3")
 
 addSbtPlugin("io.spray" % "sbt-revolver" % "0.7.1")
 
+addSbtPlugin("se.marcuslonnberg" % "sbt-docker" % "0.4.0")
+
 libraryDependencies += "net.databinder" %% "dispatch-http" % "0.8.8"
 
 scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature", "-language:postfixOps")
