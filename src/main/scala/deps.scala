@@ -5,8 +5,8 @@ import Keys._
 object BannoCommonDeps {
   val settings: Seq[Setting[_]] = Seq(
     libraryDependencies ++= Seq(
-      "org.joda" % "joda-convert" % "1.1",
-      "joda-time" % "joda-time" % "2.0",
+      "org.joda" % "joda-convert" % "1.6",
+      "joda-time" % "joda-time" % "2.4",
 
       "org.slf4j" % "slf4j-api" % "1.7.5",
       "org.slf4j" % "log4j-over-slf4j" % "1.7.5",
