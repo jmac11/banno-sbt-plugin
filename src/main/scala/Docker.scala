@@ -31,7 +31,6 @@ object Docker {
       "-XX:+UseCompressedOops",
       "-Dcom.sun.management.jmxremote",
       "-Dcom.sun.management.jmxremote.authenticate=false",
-      s"-Dcom.sun.management.jmxremote.port=8686",
       "-Dcom.sun.management.jmxremote.ssl=false",
       "-Xmx512m",
       "-XX:MaxPermSize=128M",
@@ -149,4 +148,3 @@ object Docker {
   private[this] def fullImageName(dockerImageName: ImageName): String =
     s"${dockerImageName.namespace.get}/${dockerImageName.repository}:${dockerImageName.tag.get}"
 }
-
