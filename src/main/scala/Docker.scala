@@ -80,7 +80,7 @@ object Docker {
           (depModId.name, acp.data)
         }
       }
-        
+
       val dockerAppDir = appDir.value
       val jar = dockerAppDir / jarFile.name
       val classpath =
@@ -105,7 +105,8 @@ object Docker {
         from("dockerfile/java")
         add(dockerAppDir / "libs", dockerAppDir / "libs")
         add(dockerAppDir / "banno-libs", dockerAppDir / "banno-libs")
-        add(dockerAppDir / "internal", dockerAppDir / "internal")
+        if (internalDepsNameWithClassDir.nonEmpty)
+          add(dockerAppDir / "internal", dockerAppDir / "internal")
         add(jar, jar)
         expose(exposedPorts.value: _*)
         entryPoint(command: _*)
