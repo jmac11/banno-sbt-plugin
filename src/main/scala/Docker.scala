@@ -29,10 +29,6 @@ object Docker {
       "-XX:+UseConcMarkSweepGC",
       "-XX:+CMSClassUnloadingEnabled",
       "-XX:+UseCompressedOops",
-      "-Dcom.sun.management.jmxremote",
-      "-Dcom.sun.management.jmxremote.authenticate=false",
-      s"-Dcom.sun.management.jmxremote.port=8686",
-      "-Dcom.sun.management.jmxremote.ssl=false",
       "-Xmx512m",
       "-XX:MaxPermSize=128M",
       "$JAVA_OPTS"
@@ -80,7 +76,7 @@ object Docker {
           (depModId.name, acp.data)
         }
       }
-        
+
       val dockerAppDir = appDir.value
       val jar = dockerAppDir / jarFile.name
       val classpath =
@@ -105,7 +101,8 @@ object Docker {
         from("dockerfile/java")
         add(dockerAppDir / "libs", dockerAppDir / "libs")
         add(dockerAppDir / "banno-libs", dockerAppDir / "banno-libs")
-        add(dockerAppDir / "internal", dockerAppDir / "internal")
+        if (internalDepsNameWithClassDir.nonEmpty)
+          add(dockerAppDir / "internal", dockerAppDir / "internal")
         add(jar, jar)
         expose(exposedPorts.value: _*)
         entryPoint(command: _*)
@@ -148,4 +145,3 @@ object Docker {
   private[this] def fullImageName(dockerImageName: ImageName): String =
     s"${dockerImageName.namespace.get}/${dockerImageName.repository}:${dockerImageName.tag.get}"
 }
-
