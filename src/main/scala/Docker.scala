@@ -29,9 +29,6 @@ object Docker {
       "-XX:+UseConcMarkSweepGC",
       "-XX:+CMSClassUnloadingEnabled",
       "-XX:+UseCompressedOops",
-      "-Dcom.sun.management.jmxremote",
-      "-Dcom.sun.management.jmxremote.authenticate=false",
-      "-Dcom.sun.management.jmxremote.ssl=false",
       "-Xmx512m",
       "-XX:MaxPermSize=128M",
       "$JAVA_OPTS"
