@@ -2,6 +2,7 @@ package com.banno
 import sbt._
 import Keys._
 import spray.revolver.RevolverPlugin._
+import net.virtualvoid.sbt.graph.{Plugin => GraphPlugin}
 
 object BannoSettings {
   val settings =
@@ -15,6 +16,7 @@ object BannoSettings {
         publishArtifact in (Compile, packageDoc) := false) ++
     Seq(checksums in update := Nil) ++
     Seq(javaOptions ++= Seq("-Djava.awt.headless=true", "-Xmx1024M", "-XX:MaxPermSize=512m")) ++
+    GraphPlugin.graphSettings ++
     Revolver.settings ++
     BannoCi.settings ++
     BannoNexus.settings ++
