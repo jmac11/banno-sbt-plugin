@@ -152,7 +152,7 @@ object BannoRelease {
           case Value(outputs) =>
             outputs.foreach { case Aggregation.KeyValue(k, output) =>
               st.log.info(s"For ${projectNameOfScopedKey(k)}")
-              Tests.showResults(st.log, output, "No tests")
+              TestResultLogger.Default.run(st.log, output, "test")
             }
             val failed = outputs.filterNot {
               case Aggregation.KeyValue(k, output) => output.overall == TestResult.Passed
