@@ -1,7 +1,5 @@
 name := "banno-sbt-plugin"
 
-version := "1.4.6"
-
 organization := "com.banno"
 
 sbtPlugin := true
@@ -19,6 +17,8 @@ addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.7.4")
 libraryDependencies += "net.databinder" %% "dispatch-http" % "0.8.8"
 
 scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature", "-language:postfixOps")
+
+releaseSettings
 
 publishTo := {
   if (version.value.endsWith("SNAPSHOT"))
