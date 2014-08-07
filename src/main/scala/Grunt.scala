@@ -37,7 +37,7 @@ object Grunt {
       (out ***).get
     },
     bower <<= bower.dependsOn(npm),
-    resourceGenerators in Compile <+= bower.task,
+    resourceGenerators in Compile <+= bower,
 
     // Grunt
     gruntExecutable := "grunt",
