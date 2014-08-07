@@ -18,6 +18,12 @@ libraryDependencies += "net.databinder" %% "dispatch-http" % "0.8.8"
 
 scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature", "-language:postfixOps")
 
+ScriptedPlugin.scriptedSettings
+
+scriptedBufferLog := false
+
+scriptedLaunchOpts <+= version { "-Dplugin.version=" + _ }
+
 releaseSettings
 
 publishTo := {
