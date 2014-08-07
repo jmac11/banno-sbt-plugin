@@ -8,7 +8,7 @@ object BannoSettings {
   val settings =
     Seq(organization := "com.banno",
         version in ThisBuild := "1-SNAPSHOT",
-        scalaVersion := "2.11.2"
+        scalaVersion := "2.10.4"
       ) ++
     Seq[Setting[_]](bannoDependencies := Seq.empty,
                     libraryDependencies <++= bannoDependencies) ++
