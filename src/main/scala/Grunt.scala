@@ -22,14 +22,12 @@ object Grunt {
     npm <<= (baseDirectory) map (Process("npm" :: "install" :: "--registry" :: "http://npm.banno-internal.com" :: Nil, _) !),
 
     // Bower
-    bowerExecutable := "bower",
+    bowerExecutable := "node_modules/bower/bin/bower",
     bowerClientDirectory <<= baseDirectory apply (bd => bd / "src/main/client"),
     bowerOutputDirectory <<= (resourceManaged in Compile) apply (out => out / "public"),
 
     bowerWatchSources <<= bowerClientDirectory map (d => (d ***).get),
     watchSources <<= (watchSources, bowerWatchSources) map ( (ws, bws) => ws ++ bws),
-
-    bowerExecutable <<= baseDirectory apply (bd => (bd / "node_modules/bower/bin/bower").toString),
 
     bower <<= (bowerExecutable, baseDirectory, bowerOutputDirectory) map { (be, bd, out) =>
       val exitCode = (Process(be :: "install" :: "--allow-root" :: "--force-latest" :: Nil, bd, "OUTPUT_DIR" -> out.toString) !)
@@ -40,14 +38,13 @@ object Grunt {
     resourceGenerators in Compile <+= bower,
 
     // Grunt
-    gruntExecutable := "grunt",
+    gruntExecutable := "node_modules/grunt-cli/bin/grunt",
+
     gruntClientDirectory <<= baseDirectory apply (bd => bd / "src/main/client"),
     gruntOutputDirectory <<= (resourceManaged in Compile) apply (out => out / "public"),
 
     gruntWatchSources <<= gruntClientDirectory map (d => (d ***).get),
     watchSources <<= (watchSources, gruntWatchSources) map ( (ws, gws) => ws ++ gws),
-
-    gruntExecutable <<= baseDirectory apply (bd => (bd / "node_modules/grunt-cli/bin/grunt").toString),
 
     grunt <<= (gruntExecutable, baseDirectory, gruntOutputDirectory) map { (ge, bd, out) =>
       val exitCode = (Process(ge, bd, "OUTPUT_DIR" -> out.toString) !)
