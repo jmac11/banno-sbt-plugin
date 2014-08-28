@@ -11,6 +11,7 @@ object Docker {
   val packageUsingDocker = SettingKey[Boolean]("packageUsingDocker")
 
   val namespace = SettingKey[String]("dockerNamespace")
+  val baseImage = SettingKey[String]("dockerBaseImage")
   val appDir = SettingKey[File]("dockerAppDir")
   val exposedPorts = SettingKey[Seq[Int]]("dockerPorts")
 
@@ -19,9 +20,10 @@ object Docker {
   val settings = sbtdocker.Plugin.dockerSettings ++ Seq(
     packageUsingDocker := true,
 
-    namespace := "registry.banno-internal.com",
+    namespace in docker := "registry.banno-internal.com",
+    baseImage in docker := "registry.banno-internal.com/java",
 
-    appDir := file("/app"),
+    appDir in docker := file("/app"),
 
     javaOptions in docker := Seq(
       "-server",
@@ -33,7 +35,7 @@ object Docker {
       "-XX:MaxPermSize=128M",
       "$JAVA_OPTS"
     ),
-    exposedPorts := Seq(
+    exposedPorts in docker := Seq(
       8686,  // JMX
       9090   // Default Health
     ),
@@ -77,7 +79,7 @@ object Docker {
         }
       }
 
-      val dockerAppDir = appDir.value
+      val dockerAppDir = (appDir in docker).value
       val jar = dockerAppDir / jarFile.name
       val classpath =
         (
@@ -98,20 +100,20 @@ object Docker {
         internalDepsNameWithClassDir.foreach { case (name, classDir) => stageFile(classDir, dockerAppDir / "internal" / name) }
         stageFile(jarFile, jar)
 
-        from("dockerfile/java")
+        from((baseImage in docker).value)
         add(dockerAppDir / "libs", dockerAppDir / "libs")
         add(dockerAppDir / "banno-libs", dockerAppDir / "banno-libs")
         if (internalDepsNameWithClassDir.nonEmpty)
           add(dockerAppDir / "internal", dockerAppDir / "internal")
         add(jar, jar)
-        expose(exposedPorts.value: _*)
+        expose((exposedPorts in docker).value: _*)
         entryPoint(command: _*)
       }
     },
 
     imageName in docker := {
       ImageName(
-        namespace  = Some(namespace.value),
+        namespace  = Some((namespace in docker).value),
         repository = name.value,
         tag        = Some(version.value)
       )
