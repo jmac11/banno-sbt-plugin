@@ -83,8 +83,10 @@ object Docker {
       val jar = dockerAppDir / jarFile.name
       val classpath =
         (
-          internalDepsNameWithClassDir.map { case (name, _) => (dockerAppDir / "internal" / name) } ++
-          List(dockerAppDir / "libs" / "*", dockerAppDir / "banno-libs" / "*", jar)
+          jar +:
+          internalDepsNameWithClassDir.map { case (name, _) => (dockerAppDir / "internal" / name) } :+
+          dockerAppDir / "banno-libs" / "*" :+
+          dockerAppDir / "libs" / "*"
         ).mkString(":")
       val command =
         Seq(
