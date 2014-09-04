@@ -101,6 +101,7 @@ object Docker {
         stageFile(jarFile, jar)
 
         from((baseImage in docker).value)
+        workDir("/app")
         add(dockerAppDir / "libs", dockerAppDir / "libs")
         add(dockerAppDir / "banno-libs", dockerAppDir / "banno-libs")
         if (internalDepsNameWithClassDir.nonEmpty)
