@@ -161,7 +161,7 @@ object Dispatch {
   val version = SettingKey[String]("dispatch-version")
 
   val settings: Seq[Setting[_]] = Seq(
-    version := "0.11.1",
+    version := "0.11.2",
     libraryDependencies <++= (version) { (v) =>
       Seq(
         "net.databinder.dispatch" %% "dispatch-core" % v
