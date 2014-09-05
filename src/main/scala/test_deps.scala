@@ -6,7 +6,7 @@ object Specs2 {
   val version = SettingKey[String]("specs2-version")
 
   val settings: Seq[Setting[_]] = Seq(
-    version := "2.3.12",
+    version := "2.4.2",
     libraryDependencies <+= (version) { v =>
       "org.specs2" %% "specs2" % v % "test"
     },
@@ -21,7 +21,7 @@ object Scalacheck {
   val version = SettingKey[String]("scalacheck-version")
 
   val settings: Seq[Setting[_]] = Seq(
-    version := "1.10.1",
+    version := "1.11.5",
     libraryDependencies <+= (version) { v =>
       "org.scalacheck" %% "scalacheck" % v % "test"
     }
@@ -33,7 +33,7 @@ object ScalaTest {
   val version = SettingKey[String]("scalatest-version")
 
   val settings: Seq[Setting[_]] = Seq(
-    version := "2.2.0",
+    version := "2.2.1",
     libraryDependencies <+= (version) { v =>
       "org.scalatest" %% "scalatest" % v % "test"
     }
