@@ -85,12 +85,7 @@ Most of them commonly follow overriding version with: `Akka.version := "2.3.0"` 
 
 ### Symlink-ing outside projects
 
-It is easy to work accross libs/projects by symlinking in the external project underneath the working project with the same name as the banno dependency.
-
-For example:
-
-If I have `addBannoDependency("banno-utils")` in my working project and I want to work on banno-utils at the same time. If I have `object Build extends com.banno.BannoBuild("api")` or likewise in my `project/Build.scala`, I can symlink the banno-utils under my project with the name `banno-utils`. A reload and clean will ensure that it creates it as a submodule project.
-
+It is easy to work accross libs/projects by symlinking in the external project underneath the working project with the same name as the banno dependency. Adding `lazy val root = bannoProject("project-name", "project-name", file("."))` to `build.sbt` or `project/Build.scala` will automatically find any symlinks and add those projects as sub modules.
 
 ### Misc
 
