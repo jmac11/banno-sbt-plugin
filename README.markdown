@@ -77,7 +77,7 @@ Most of them commonly follow overriding version with: `Akka.version := "2.3.0"` 
 
  1. set the project version from SNAPSHOT to the next [semver][] version
  1. update banno dependencies to released versions
- 1. run tests
+ 1. run tests (via the `scripted` command)
  1. package/publish
  1. tag
  1. set back to snapshot version
