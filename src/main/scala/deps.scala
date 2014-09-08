@@ -141,9 +141,9 @@ object Scalaz {
   val contribVersion = SettingKey[String]("scalaz-contrib-version")
 
   val settings: Seq[Setting[_]] = Seq(
-    version := "7.0.5",
-    streamVersion := "0.3",
-    contribVersion := "0.1.5",
+    version := "7.1.0",
+    streamVersion := "0.5a",
+    contribVersion := (if (scalaVersion.value.startsWith("2.10")) "0.1.5" else "0.2.0"),
     libraryDependencies <++= (version, streamVersion, contribVersion) { (v, sv, cv) =>
       Seq(
         "org.scalaz" %% "scalaz-core" % v,
