@@ -83,7 +83,10 @@ object Spray {
   val version = SettingKey[String]("spray-version")
 
   def sprayModule(module: String, v: String) =
-    "io.spray" %% ("spray-" + module) % v
+    if (v.startsWith("1.2") || v.startsWith("1.1")) // not cross versioned
+      "io.spray" % ("spray-" + module) % v 
+    else
+      "io.spray" %% ("spray-" + module) % v
 
   val setVersion =
     version := {
