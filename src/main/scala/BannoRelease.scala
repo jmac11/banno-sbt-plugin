@@ -216,6 +216,7 @@ object BannoRelease {
       val extract = Project.extract(st)
       val useDocker = extract.getOpt(Docker.packageUsingDocker)
       if (useDocker.getOrElse(false)) {
+        extract.runTask(Docker.dockerPullLatest, st)
         extract.runTask(docker, st)
         extract.runTask(Docker.dockerPush, st)
         extract.runTask(Docker.dockerPushLatestTag, st)
