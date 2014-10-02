@@ -96,7 +96,7 @@ object BannoRelease {
     case (dep, latestVersion) =>
       val extract = Project.extract(st)
       val key = SettingKey[String]("%s-released-version".format(dep.name))
-      extract.get(key) != latestVersion
+      extract.get(key in Global) != latestVersion
   }
 
   def removeMinorAndAddSnapshot(ver: String) = { Version(ver).map(_.copy(minor = None, bugfix = None)).map(_.asSnapshot.string).getOrElse(versionFormatError) }

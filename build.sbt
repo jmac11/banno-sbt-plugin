@@ -33,6 +33,10 @@ publishTo := {
     Some("Banno Releases Repo" at "http://nexus.banno.com/nexus/content/repositories/releases")
 }
 
+publishArtifact in (Compile, packageSrc) := false
+
+publishArtifact in (Compile, packageDoc) := false
+
 credentials += Credentials(Path.userHome / ".ivy2" / ".banno_credentials")
 
 publishMavenStyle := true
