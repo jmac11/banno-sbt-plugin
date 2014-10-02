@@ -13,6 +13,7 @@ import sbtdocker.Plugin.DockerKeys._
 object BannoRelease {
 
   val ignorableCodeChangePaths = SettingKey[Seq[String]]("ignorable-code-change-paths")
+  val gitPushByDefault = SettingKey[Boolean]("release-default-git-push")
   val releaseFullClean = TaskKey[Unit]("release-full-clean")
 
   val settings = ReleasePlugin.releaseSettings ++ Seq(
@@ -20,6 +21,8 @@ object BannoRelease {
 
     releaseFullClean <<= target.map(IO.delete),
     aggregate in releaseFullClean := true,
+
+    gitPushByDefault := true,
 
     commands += releaseIfChanged,
 
@@ -181,8 +184,8 @@ object BannoRelease {
 
   val pushCurrentBranch = ReleaseStep(
     action = (st: State) => {
-      val defaultChoice = extractDefault(st, "y")
-                                        (defaultChoice orElse SimpleReader.readLine("Push commits (y/n)? [y] : ")) match {
+      val defaultChoice = extractDefault(st, ynGitPushByDefault(st))
+      (defaultChoice orElse SimpleReader.readLine("Push commits (y/n)? [y] : ")) match {
         case No() =>
           st.log.warn("Commits were not pushed. Please push them yourself.")
         case _ =>
@@ -197,9 +200,17 @@ object BannoRelease {
       st
     })
 
+  def ynGitPushByDefault(st: State): String = {
+    val extracted = Project.extract(st)
+    if (extracted.get(gitPushByDefault))
+      "y"
+    else
+      "n"
+  }
+
   val pushReleaseTag = ReleaseStep(
     action = (st: State) => {
-      val defaultChoice = extractDefault(st, "y")
+      val defaultChoice = extractDefault(st, ynGitPushByDefault(st))
       (defaultChoice orElse SimpleReader.readLine("Push tag (y/n)? [y] : ")) match {
         case No() =>
           st.log.warn("Tag was not pushed. Please push them yourself.")
