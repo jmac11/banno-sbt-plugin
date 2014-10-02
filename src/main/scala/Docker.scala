@@ -103,14 +103,16 @@ object Docker {
         stageFile(jarFile, jar)
 
         from((baseImage in docker).value)
+        
         workDir("/app")
+        entryPoint(command: _*)
+        expose((exposedPorts in docker).value: _*)
+
         add(dockerAppDir / "libs", dockerAppDir / "libs")
         add(dockerAppDir / "banno-libs", dockerAppDir / "banno-libs")
         if (internalDepsNameWithClassDir.nonEmpty)
           add(dockerAppDir / "internal", dockerAppDir / "internal")
         add(jar, jar)
-        expose((exposedPorts in docker).value: _*)
-        entryPoint(command: _*)
       }
     },
 
