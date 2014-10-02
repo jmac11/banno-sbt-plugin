@@ -6,6 +6,7 @@ import sbtdocker.Plugin.DockerKeys._
 
 object Docker {
 
+  val dockerPullLatest = TaskKey[Unit]("dockerPullLatest")
   val dockerPush = TaskKey[Unit]("dockerPush")
   val dockerPushLatestTag = TaskKey[Unit]("dockerPushLatestTag")
   val packageUsingDocker = SettingKey[Boolean]("packageUsingDocker")
@@ -39,6 +40,7 @@ object Docker {
       8686,  // JMX
       9090   // Default Health
     ),
+    
 
     // necessary to touch directories
     docker <<= (streams, dockerPath in docker, buildOptions in docker, stageDirectory in docker, dockerfile in docker, imageName in docker) map {
@@ -103,7 +105,7 @@ object Docker {
         stageFile(jarFile, jar)
 
         from((baseImage in docker).value)
-        
+
         workDir("/app")
         entryPoint(command: _*)
         expose((exposedPorts in docker).value: _*)
@@ -124,6 +126,8 @@ object Docker {
       )
     },
 
+    dockerPullLatest := execDockerPull((imageName in docker).value.copy(tag = Some("latest"))),
+
     dockerPush := execDockerPush((imageName in docker).value),
     dockerPushLatestTag := execDockerPush(updateTagToLatest((imageName in docker).value))
   )
@@ -139,9 +143,16 @@ object Docker {
   private[this] def updateTagToLatest(dockerImageName: ImageName): ImageName =
     dockerImageName.copy(tag = Some("latest"))
 
+  private[this] def execDockerPull(dockerImageName: ImageName): Unit = {
+    val cmd = "docker" :: "pull" :: fullImageName(dockerImageName) :: Nil
+    val exitCode = (cmd !)
+    if (exitCode != 0) sys.error(s"'${cmd}' failed")
+  }
+
   private[this] def execDockerPush(dockerImageName: ImageName): Unit = {
     val cmd = "docker" :: "push" :: fullImageName(dockerImageName) :: Nil
-    cmd !
+    val exitCode = (cmd !)
+    if (exitCode != 0) sys.error(s"'${cmd}' failed")
   }
 
   private[this] def touchDirectoriesTo1970(dirs: File*): Unit =
