@@ -82,8 +82,11 @@ object AsyncHttpClient {
 object Spray {
   val version = SettingKey[String]("spray-version")
 
+  def olderSpray(v: String) = 
+    v.startsWith("1.2") || v.startsWith("1.1")
+
   def sprayModule(module: String, v: String) =
-    if (v.startsWith("1.2") || v.startsWith("1.1")) // not cross versioned
+    if (olderSpray(v)) // not cross versioned
       "io.spray" % ("spray-" + module) % v 
     else
       "io.spray" %% ("spray-" + module) % v
@@ -101,23 +104,29 @@ object Spray {
 
   val caching: Seq[Setting[_]] = Seq(
     setVersion,
-    libraryDependencies <+= (version) { (v) => sprayModule("caching", v) }
+    libraryDependencies += sprayModule("caching", version.value)
   )
 
   val client: Seq[Setting[_]] = Seq(
     setVersion,
     removeWarnAdaptedArgs,
-    libraryDependencies <+= (version) { (v) => sprayModule("client", v) }
+    libraryDependencies += sprayModule("client", version.value)
   )
+
+  val routing: Setting[_] =
+    libraryDependencies += {
+      if (olderSpray(version.value))
+        sprayModule("routing", version.value)
+      else
+        sprayModule("routing-shapeless2", version.value)
+    }
 
   val server: Seq[Setting[_]] = Seq(
     setVersion,
     removeWarnAdaptedArgs,
-    libraryDependencies <++= (version) { (v) =>
-      Seq(sprayModule("can", v),
-          sprayModule("routing-shapeless2", v),
-          sprayModule("testkit", v) % "test")
-    }
+    libraryDependencies ++= Seq(sprayModule("can", version.value),
+                                sprayModule("testkit", version.value) % "test"),
+    routing
   )
 }
 
