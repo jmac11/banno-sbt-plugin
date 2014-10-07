@@ -40,7 +40,7 @@ object BannoRelease {
       runTests,
 
       commitReleaseBannoDepsVersions,
-      commitReleaseVersion,
+      commitReleaseVersionWithGitStatus,
       tagRelease,
       pushCurrentBranch,
       pushReleaseTag,
@@ -176,6 +176,22 @@ object BannoRelease {
 
   private[this] def projectNameOfScopedKey(key: ScopedKey[_]) =
     key.scope.project.asInstanceOf[Select[ProjectRef]].s.project
+
+
+  lazy val initialVcsChecksWithGitStatus = { st: State =>
+    val status = (git.status !!).trim
+    if (status.nonEmpty) {
+      st.log.info("Git Status:")
+      git.status !
+      sys.error("Aborting release. Working directory is dirty.")
+    }
+
+    st.log.info("Starting release process off commit: " + git.currentHash)
+    st
+  }
+
+  val commitReleaseVersionWithGitStatus = ReleaseStep(commitReleaseVersion.action,
+                                                      initialVcsChecksWithGitStatus)
 
   object No {
     def unapply(str: Option[String]): Option[String] =
