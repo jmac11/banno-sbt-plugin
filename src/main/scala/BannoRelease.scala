@@ -13,6 +13,7 @@ import sbtdocker.Plugin.DockerKeys._
 object BannoRelease {
 
   val ignorableCodeChangePaths = SettingKey[Seq[String]]("ignorable-code-change-paths")
+  val gitPushByDefault = SettingKey[Boolean]("release-default-git-push")
   val releaseFullClean = TaskKey[Unit]("release-full-clean")
 
   val settings = ReleasePlugin.releaseSettings ++ Seq(
@@ -20,6 +21,8 @@ object BannoRelease {
 
     releaseFullClean <<= target.map(IO.delete),
     aggregate in releaseFullClean := true,
+
+    gitPushByDefault := true,
 
     commands += releaseIfChanged,
 
@@ -37,7 +40,7 @@ object BannoRelease {
       runTests,
 
       commitReleaseBannoDepsVersions,
-      commitReleaseVersion,
+      commitReleaseVersionWithGitStatus,
       tagRelease,
       pushCurrentBranch,
       pushReleaseTag,
@@ -93,7 +96,7 @@ object BannoRelease {
     case (dep, latestVersion) =>
       val extract = Project.extract(st)
       val key = SettingKey[String]("%s-released-version".format(dep.name))
-      extract.get(key) != latestVersion
+      extract.get(key in Global) != latestVersion
   }
 
   def removeMinorAndAddSnapshot(ver: String) = { Version(ver).map(_.copy(minor = None, bugfix = None)).map(_.asSnapshot.string).getOrElse(versionFormatError) }
@@ -174,6 +177,22 @@ object BannoRelease {
   private[this] def projectNameOfScopedKey(key: ScopedKey[_]) =
     key.scope.project.asInstanceOf[Select[ProjectRef]].s.project
 
+
+  lazy val initialVcsChecksWithGitStatus = { st: State =>
+    val status = (git.status !!).trim
+    if (status.nonEmpty) {
+      st.log.info("Git Status:")
+      git.status !
+      sys.error("Aborting release. Working directory is dirty.")
+    }
+
+    st.log.info("Starting release process off commit: " + git.currentHash)
+    st
+  }
+
+  val commitReleaseVersionWithGitStatus = ReleaseStep(commitReleaseVersion.action,
+                                                      initialVcsChecksWithGitStatus)
+
   object No {
     def unapply(str: Option[String]): Option[String] =
       if (str.exists(_.toLowerCase.startsWith("n"))) str else None
@@ -181,8 +200,8 @@ object BannoRelease {
 
   val pushCurrentBranch = ReleaseStep(
     action = (st: State) => {
-      val defaultChoice = extractDefault(st, "y")
-                                        (defaultChoice orElse SimpleReader.readLine("Push commits (y/n)? [y] : ")) match {
+      val defaultChoice = extractDefault(st, ynGitPushByDefault(st))
+      (defaultChoice orElse SimpleReader.readLine("Push commits (y/n)? [y] : ")) match {
         case No() =>
           st.log.warn("Commits were not pushed. Please push them yourself.")
         case _ =>
@@ -197,9 +216,17 @@ object BannoRelease {
       st
     })
 
+  def ynGitPushByDefault(st: State): String = {
+    val extracted = Project.extract(st)
+    if (extracted.get(gitPushByDefault))
+      "y"
+    else
+      "n"
+  }
+
   val pushReleaseTag = ReleaseStep(
     action = (st: State) => {
-      val defaultChoice = extractDefault(st, "y")
+      val defaultChoice = extractDefault(st, ynGitPushByDefault(st))
       (defaultChoice orElse SimpleReader.readLine("Push tag (y/n)? [y] : ")) match {
         case No() =>
           st.log.warn("Tag was not pushed. Please push them yourself.")
