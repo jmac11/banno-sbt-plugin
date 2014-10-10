@@ -1,5 +1,5 @@
 package com.banno
 
 object Test extends App {
-  println("Ok")
+  println(s"Ok - ${args(0)}")
 }

@@ -36,10 +36,7 @@ object Docker {
       "-XX:MaxPermSize=128M",
       "$JAVA_OPTS"
     ),
-    exposedPorts in docker := Seq(
-      8686,  // JMX
-      9090   // Default Health
-    ),
+    exposedPorts in docker := Nil,
     
 
     // necessary to touch directories
@@ -94,8 +91,8 @@ object Docker {
         Seq(
           "bash",
           "-c",
-          (Seq("java", "-cp", classpath) ++ javaArgs :+ main).mkString(" ")
-
+          (Seq("java", "-cp", classpath) ++ javaArgs :+ main :+ "\"$@\"").mkString(" "),
+          "--"
         )
 
       new mutable.Dockerfile {
@@ -108,7 +105,8 @@ object Docker {
 
         workDir("/app")
         entryPoint(command: _*)
-        expose((exposedPorts in docker).value: _*)
+        if ((exposedPorts in docker).value.nonEmpty)
+          expose((exposedPorts in docker).value: _*)
 
         add(dockerAppDir / "libs", dockerAppDir / "libs")
         add(dockerAppDir / "banno-libs", dockerAppDir / "banno-libs")
