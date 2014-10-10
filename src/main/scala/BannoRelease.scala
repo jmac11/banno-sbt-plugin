@@ -182,7 +182,7 @@ object BannoRelease {
     val status = (git.status !!).trim
     if (status.nonEmpty) {
       st.log.info("Git Status:")
-      git.status !
+      st.log.info(status)
       sys.error("Aborting release. Working directory is dirty.")
     }
 
