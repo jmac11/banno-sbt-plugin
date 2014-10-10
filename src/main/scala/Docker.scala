@@ -91,8 +91,8 @@ object Docker {
         Seq(
           "bash",
           "-c",
-          (Seq("java", "-cp", classpath) ++ javaArgs :+ main).mkString(" ")
-
+          (Seq("java", "-cp", classpath) ++ javaArgs :+ main :+ "\"$@\"").mkString(" "),
+          "--"
         )
 
       new mutable.Dockerfile {
