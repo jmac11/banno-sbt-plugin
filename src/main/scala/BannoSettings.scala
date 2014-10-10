@@ -20,6 +20,7 @@ object BannoSettings {
     Revolver.settings ++
     BannoCi.settings ++
     BannoNexus.settings ++
+    BuildInfoSettings.settings ++
     BannoCommonDeps.settings ++
     BannoCompile.settings ++
     BannoRelease.settings ++
