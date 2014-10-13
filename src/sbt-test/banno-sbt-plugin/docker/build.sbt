@@ -6,4 +6,6 @@ BannoSettings.settings
 
 Docker.settings
 
+Docker.additionalRunCommands := Seq("whoami")
+
 Docker.entryPointArguments := Seq("testing", "arg1")
