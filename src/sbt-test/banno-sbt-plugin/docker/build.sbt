@@ -6,6 +6,4 @@ BannoSettings.settings
 
 Docker.settings
 
-Docker.additionalRunCommands := Seq("echo", "hi")
-
-Docker.entrypointArguments := Seq("arg1")
+Docker.entryPointArguments := Seq("testing", "arg1")

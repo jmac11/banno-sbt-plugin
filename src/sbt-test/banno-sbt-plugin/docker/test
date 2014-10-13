@@ -1,3 +1,3 @@
 > docker
 $ exec /bin/bash -c 'docker images | grep -q registry.banno-internal.com/sbt-docker-test'
-$ exec /bin/bash -c "/bin/bash -c 'docker run -t registry.banno-internal.com/sbt-docker-test testing | grep -q 'sbt-docker-test - Ok - testing - arg1"
+$ exec /bin/bash -c "/bin/bash -c 'docker run -t registry.banno-internal.com/sbt-docker-test | grep -q 'sbt-docker-test - Ok - testing - arg1"
