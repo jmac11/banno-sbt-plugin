@@ -16,7 +16,7 @@ object Docker {
   val appDir = SettingKey[File]("dockerAppDir")
   val exposedPorts = SettingKey[Seq[Int]]("dockerPorts")
 
-  val additionalRunCommands = SettingKey[Seq[String]]("runCommands")
+  val additionalRunCommands = SettingKey[Seq[Seq[String]]]("runCommands")
   val entryPointArguments = SettingKey[Seq[String]]("entryPointArguments")
 
   val regularPackage = (Keys.`package` in (Compile, packageBin))
@@ -120,7 +120,7 @@ object Docker {
           expose((exposedPorts in docker).value: _*)
 
         if (runLines.nonEmpty)
-          runLines.foreach { runLine => run(runLine) }
+          runLines.foreach { runLine => run(runLine: _*) }
 
         if (tailingArgs.nonEmpty)
           cmd(tailingArgs: _*)
