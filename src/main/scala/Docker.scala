@@ -16,6 +16,9 @@ object Docker {
   val appDir = SettingKey[File]("dockerAppDir")
   val exposedPorts = SettingKey[Seq[Int]]("dockerPorts")
 
+  val additionalRunCommands = SettingKey[Seq[String]]("runCommands")
+  val entrypointArguments = SettingKey[Seq[String]]("runCommands")
+
   val regularPackage = (Keys.`package` in (Compile, packageBin))
 
   val settings = sbtdocker.Plugin.dockerSettings ++ Seq(
@@ -37,7 +40,9 @@ object Docker {
       "$JAVA_OPTS"
     ),
     exposedPorts in docker := Nil,
-    
+
+    additionalRunCommands in docker := Nil,
+    entrypointArguments in docker := Nil,
 
     // necessary to touch directories
     docker <<= (streams, dockerPath in docker, buildOptions in docker, stageDirectory in docker, dockerfile in docker, imageName in docker) map {
@@ -95,7 +100,16 @@ object Docker {
           "--"
         )
 
+      val runLines = (additionalRunCommands in docker).value
+      val tailingArgs = (entrypointArguments in docker).value
+
       new mutable.Dockerfile {
+        if (runLines.nonEmpty)
+          runLines.foreach { runLine => run(runLine) }
+
+        if (tailingArgs.nonEmpty)
+          cmd(tailingArgs: _*)
+
         otherCp.foreach    { depFile => stageFile(depFile, dockerAppDir / "libs" / depFile.name) }
         bannoDepCp.foreach { depFile => stageFile(depFile, dockerAppDir / "banno-libs" / depFile.name) }
         internalDepsNameWithClassDir.foreach { case (name, classDir) => stageFile(classDir, dockerAppDir / "internal" / name) }
