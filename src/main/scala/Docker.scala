@@ -22,7 +22,7 @@ object Docker {
     packageUsingDocker := true,
 
     namespace in docker := "registry.banno-internal.com",
-    baseImage in docker := "registry.banno-internal.com/java",
+    baseImage in docker := "registry.banno-internal.com/java:latest",
 
     appDir in docker := file("/app"),
 
