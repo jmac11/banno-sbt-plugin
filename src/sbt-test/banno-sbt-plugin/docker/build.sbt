@@ -8,4 +8,4 @@ Docker.settings
 
 Docker.additionalRunCommands := Seq(Seq("uname", "-a"), Seq("whoami"))
 
-Docker.entryPointArguments := Seq("testing", "arg1")
+Docker.defaultCommand := Seq("testing", "arg1")
