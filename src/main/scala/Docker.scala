@@ -143,8 +143,18 @@ object Docker {
 
   private[this] def execDockerPull(dockerImageName: ImageName): Unit = {
     val cmd = "docker" :: "pull" :: fullImageName(dockerImageName) :: Nil
-    val exitCode = (cmd !)
-    if (exitCode != 0) sys.error(s"'${cmd}' failed")
+
+    val log = StringBuilder.newBuilder
+    val exitCode = cmd ! new sbt.ProcessLogger{
+      def info(s: => String): Unit = log ++= s
+      def error(s: => String): Unit = log ++= s
+      def buffer[T](f: => T): T = f
+    }
+
+    // shouldnt care if its not found since it may not have been pushed before.
+    if (exitCode != 0 && !log.result.contains(s"${dockerImageName.repository} not found")) {
+      sys.error(s"'${cmd}' failed output: ${log.result}")
+    }
   }
 
   private[this] def execDockerPush(dockerImageName: ImageName): Unit = {
