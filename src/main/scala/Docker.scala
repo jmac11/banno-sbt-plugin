@@ -16,8 +16,8 @@ object Docker {
   val appDir = SettingKey[File]("dockerAppDir")
   val exposedPorts = SettingKey[Seq[Int]]("dockerPorts")
 
-  val additionalRunCommands = SettingKey[Seq[Seq[String]]]("runCommands")
-  val entryPointArguments = SettingKey[Seq[String]]("entryPointArguments")
+  val additionalRunCommands = SettingKey[Seq[Seq[String]]]("additionalRunCommands")
+  val defaultCommand = SettingKey[Seq[String]]("defaultCommand")
 
   val regularPackage = (Keys.`package` in (Compile, packageBin))
 
@@ -44,8 +44,8 @@ object Docker {
     additionalRunCommands := Nil,
     (additionalRunCommands in docker) := additionalRunCommands.value,
 
-    entryPointArguments := Nil,
-    entryPointArguments in docker := entryPointArguments.value,
+    defaultCommand := Nil,
+    defaultCommand in docker := defaultCommand.value,
 
     // necessary to touch directories
     docker <<= (streams, dockerPath in docker, buildOptions in docker, stageDirectory in docker, dockerfile in docker, imageName in docker) map {
@@ -104,7 +104,7 @@ object Docker {
         )
 
       val runLines = (additionalRunCommands in docker).value
-      val tailingArgs = (entryPointArguments in docker).value
+      val tailingArgs = (defaultCommand in docker).value
 
       new mutable.Dockerfile {
         otherCp.foreach    { depFile => stageFile(depFile, dockerAppDir / "libs" / depFile.name) }
