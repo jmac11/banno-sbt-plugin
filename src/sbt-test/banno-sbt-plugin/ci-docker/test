@@ -1,0 +1,3 @@
+> ci
+$ exec /bin/bash -c 'docker images | grep -q registry.banno-internal.com/sbt-ci-docker-test'
+$ exec /bin/bash -c "/bin/bash -c 'docker run -t registry.banno-internal.com/sbt-ci-docker-test testing | grep -q 'sbt-ci-docker-test - Ok - testing"
