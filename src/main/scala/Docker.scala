@@ -17,7 +17,7 @@ object Docker {
   val exposedPorts = SettingKey[Seq[Int]]("dockerPorts")
 
   val additionalRunCommands = SettingKey[Seq[Seq[String]]]("additionalRunCommands")
-  val defaultCommand = SettingKey[Seq[String]]("defaultCommand")
+  val defaultCommand = SettingKey[String]("defaultCommand")
 
   val regularPackage = (Keys.`package` in (Compile, packageBin))
 
@@ -44,7 +44,7 @@ object Docker {
     additionalRunCommands := Nil,
     (additionalRunCommands in docker) := additionalRunCommands.value,
 
-    defaultCommand := Nil,
+    defaultCommand := "",
     defaultCommand in docker := defaultCommand.value,
 
     // necessary to touch directories
@@ -95,7 +95,7 @@ object Docker {
           dockerAppDir / "banno-libs" / "*" :+
           dockerAppDir / "libs" / "*"
         ).mkString(":")
-      val command =
+      val entryPointLine =
         Seq(
           "bash",
           "-c",
@@ -104,7 +104,8 @@ object Docker {
         )
 
       val runLines = (additionalRunCommands in docker).value
-      val tailingArgs = (defaultCommand in docker).value
+      val command = (defaultCommand in docker).value
+      val parsedCommand = command.split(' ').toList
 
       new mutable.Dockerfile {
         otherCp.foreach    { depFile => stageFile(depFile, dockerAppDir / "libs" / depFile.name) }
@@ -115,15 +116,15 @@ object Docker {
         from((baseImage in docker).value)
 
         workDir("/app")
-        entryPoint(command: _*)
+        entryPoint(entryPointLine: _*)
         if ((exposedPorts in docker).value.nonEmpty)
           expose((exposedPorts in docker).value: _*)
 
         if (runLines.nonEmpty)
           runLines.foreach { runLine => run(runLine: _*) }
 
-        if (tailingArgs.nonEmpty)
-          cmd(tailingArgs: _*)
+        if (command.nonEmpty)
+          cmd(parsedCommand: _*)
 
         add(dockerAppDir / "libs", dockerAppDir / "libs")
         add(dockerAppDir / "banno-libs", dockerAppDir / "banno-libs")
