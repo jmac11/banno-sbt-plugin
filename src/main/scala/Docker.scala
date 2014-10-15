@@ -16,6 +16,9 @@ object Docker {
   val appDir = SettingKey[File]("dockerAppDir")
   val exposedPorts = SettingKey[Seq[Int]]("dockerPorts")
 
+  val additionalRunCommands = SettingKey[Seq[Seq[String]]]("additionalRunCommands")
+  val defaultCommand = SettingKey[String]("defaultCommand")
+
   val regularPackage = (Keys.`package` in (Compile, packageBin))
 
   val settings = sbtdocker.Plugin.dockerSettings ++ Seq(
@@ -37,7 +40,12 @@ object Docker {
       "$JAVA_OPTS"
     ),
     exposedPorts in docker := Nil,
-    
+
+    additionalRunCommands := Nil,
+    (additionalRunCommands in docker) := additionalRunCommands.value,
+
+    defaultCommand := "",
+    defaultCommand in docker := defaultCommand.value,
 
     // necessary to touch directories
     docker <<= (streams, dockerPath in docker, buildOptions in docker, stageDirectory in docker, dockerfile in docker, imageName in docker) map {
@@ -87,13 +95,17 @@ object Docker {
           dockerAppDir / "banno-libs" / "*" :+
           dockerAppDir / "libs" / "*"
         ).mkString(":")
-      val command =
+      val entryPointLine =
         Seq(
           "bash",
           "-c",
           (Seq("java", "-cp", classpath) ++ javaArgs :+ main :+ "\"$@\"").mkString(" "),
           "--"
         )
+
+      val runLines = (additionalRunCommands in docker).value
+      val command = (defaultCommand in docker).value
+      val parsedCommand = command.split(' ').toList
 
       new mutable.Dockerfile {
         otherCp.foreach    { depFile => stageFile(depFile, dockerAppDir / "libs" / depFile.name) }
@@ -104,9 +116,15 @@ object Docker {
         from((baseImage in docker).value)
 
         workDir("/app")
-        entryPoint(command: _*)
+        entryPoint(entryPointLine: _*)
         if ((exposedPorts in docker).value.nonEmpty)
           expose((exposedPorts in docker).value: _*)
+
+        if (runLines.nonEmpty)
+          runLines.foreach { runLine => run(runLine: _*) }
+
+        if (command.nonEmpty)
+          cmd(parsedCommand: _*)
 
         add(dockerAppDir / "libs", dockerAppDir / "libs")
         add(dockerAppDir / "banno-libs", dockerAppDir / "banno-libs")
