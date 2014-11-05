@@ -54,5 +54,5 @@ package object banno {
             base = base,
             dependencies = SymlinkProjects.symlinkedProjects(id))
       .settings(name := subProjName)
-      .settings(BannoSettings.settings: _*)
+      .enablePlugins(BannoSbtPlugin)
 }
