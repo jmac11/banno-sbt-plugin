@@ -1,8 +1,6 @@
 import com.banno._
 
-name := "simple"
-
-BannoSettings.settings
+lazy val root = bannoRootProject("simple")
 
 ScalaModules.xml
 
