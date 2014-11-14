@@ -16,7 +16,7 @@ object Docker {
   val appDir = SettingKey[File]("dockerAppDir")
   val exposedPorts = SettingKey[Seq[Int]]("dockerPorts")
 
-  val additionalRunCommands = SettingKey[Seq[Seq[String]]]("additionalRunCommands")
+  val additionalRunCommands = SettingKey[Seq[String]]("additionalRunCommands")
   val defaultCommand = SettingKey[String]("defaultCommand")
 
   val regularPackage = (Keys.`package` in (Compile, packageBin))
@@ -116,7 +116,7 @@ object Docker {
         from((baseImage in docker).value)
 
         if (runLines.nonEmpty)
-          runLines.foreach { runLine => run(runLine: _*) }
+          runLines.foreach { runLine => run(runLine) }
 
         workDir("/app")
         add(dockerAppDir / "libs", dockerAppDir / "libs")
