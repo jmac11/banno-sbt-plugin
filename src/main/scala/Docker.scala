@@ -115,22 +115,23 @@ object Docker {
 
         from((baseImage in docker).value)
 
-        workDir("/app")
-        entryPoint(entryPointLine: _*)
-        if ((exposedPorts in docker).value.nonEmpty)
-          expose((exposedPorts in docker).value: _*)
-
         if (runLines.nonEmpty)
           runLines.foreach { runLine => run(runLine: _*) }
 
-        if (command.nonEmpty)
-          cmd(parsedCommand: _*)
-
+        workDir("/app")
         add(dockerAppDir / "libs", dockerAppDir / "libs")
         add(dockerAppDir / "banno-libs", dockerAppDir / "banno-libs")
         if (internalDepsNameWithClassDir.nonEmpty)
           add(dockerAppDir / "internal", dockerAppDir / "internal")
         add(jar, jar)
+
+        if ((exposedPorts in docker).value.nonEmpty)
+          expose((exposedPorts in docker).value: _*)
+
+        entryPoint(entryPointLine: _*)
+
+        if (command.nonEmpty)
+          cmd(parsedCommand: _*)
       }
     },
 
