@@ -16,7 +16,7 @@ object Docker {
   val appDir = SettingKey[File]("dockerAppDir")
   val exposedPorts = SettingKey[Seq[Int]]("dockerPorts")
 
-  val additionalRunCommands = SettingKey[Seq[Seq[String]]]("additionalRunCommands")
+  val additionalRunCommands = SettingKey[Seq[String]]("additionalRunCommands")
   val defaultCommand = SettingKey[String]("defaultCommand")
 
   val regularPackage = (Keys.`package` in (Compile, packageBin))
@@ -115,22 +115,23 @@ object Docker {
 
         from((baseImage in docker).value)
 
-        workDir("/app")
-        entryPoint(entryPointLine: _*)
-        if ((exposedPorts in docker).value.nonEmpty)
-          expose((exposedPorts in docker).value: _*)
-
         if (runLines.nonEmpty)
-          runLines.foreach { runLine => run(runLine: _*) }
+          runLines.foreach { runLine => run(runLine) }
 
-        if (command.nonEmpty)
-          cmd(parsedCommand: _*)
-
+        workDir("/app")
         add(dockerAppDir / "libs", dockerAppDir / "libs")
         add(dockerAppDir / "banno-libs", dockerAppDir / "banno-libs")
         if (internalDepsNameWithClassDir.nonEmpty)
           add(dockerAppDir / "internal", dockerAppDir / "internal")
         add(jar, jar)
+
+        if ((exposedPorts in docker).value.nonEmpty)
+          expose((exposedPorts in docker).value: _*)
+
+        entryPoint(entryPointLine: _*)
+
+        if (command.nonEmpty)
+          cmd(parsedCommand: _*)
       }
     },
 
