@@ -6,6 +6,6 @@ BannoSettings.settings
 
 Docker.settings
 
-Docker.additionalRunCommands := Seq("uname -a ", "whoami"))
+Docker.additionalRunCommands := Seq("uname -a ", "whoami")
 
 Docker.defaultCommand := "testing arg1"
