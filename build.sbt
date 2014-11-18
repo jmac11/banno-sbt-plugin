@@ -26,6 +26,8 @@ scriptedBufferLog := false
 
 scriptedLaunchOpts <+= version { "-Dplugin.version=" + _ }
 
+test := scripted.toTask("").value
+
 releaseSettings
 
 publishTo := {

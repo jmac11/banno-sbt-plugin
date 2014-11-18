@@ -5,19 +5,21 @@ import sbtdocker._
 import sbtdocker.Plugin.DockerKeys._
 
 object Docker {
+  val docker = Plugin.DockerKeys.docker
 
-  val dockerPullLatest = TaskKey[Unit]("dockerPullLatest")
-  val dockerPush = TaskKey[Unit]("dockerPush")
-  val dockerPushLatestTag = TaskKey[Unit]("dockerPushLatestTag")
-  val packageUsingDocker = SettingKey[Boolean]("packageUsingDocker")
+  val dockerPullLatest = TaskKey[Unit]("Pull latest docker image")
+  val dockerPush = TaskKey[Unit]("Push docker image")
+  val dockerPushLatestTag = TaskKey[Unit]("Push docker image as latest tag")
 
-  val namespace = SettingKey[String]("dockerNamespace")
-  val baseImage = SettingKey[String]("dockerBaseImage")
-  val appDir = SettingKey[File]("dockerAppDir")
-  val exposedPorts = SettingKey[Seq[Int]]("dockerPorts")
+  val namespace = SettingKey[String]("Namespace for docker image")
+  val baseImage = SettingKey[String]("Base docker image to use during build")
 
-  val additionalRunCommands = SettingKey[Seq[String]]("additionalRunCommands")
-  val defaultCommand = SettingKey[String]("defaultCommand")
+  val packageUsingDocker = SettingKey[Boolean]("Package using docker?")
+  val appDir = SettingKey[File]("App directory within docker")
+  val exposedPorts = SettingKey[Seq[Int]]("Exposed ports in docker")
+
+  val additionalRunCommands = SettingKey[Seq[String]]("Additional Run Commands to run during docker build")
+  val command = SettingKey[Seq[String]]("Docker Default Command (usually arguments given to the java process)")
 
   val regularPackage = (Keys.`package` in (Compile, packageBin))
 
@@ -41,11 +43,9 @@ object Docker {
     ),
     exposedPorts in docker := Nil,
 
-    additionalRunCommands := Nil,
-    (additionalRunCommands in docker) := additionalRunCommands.value,
+    (additionalRunCommands in docker) := Nil,
 
-    defaultCommand := "",
-    defaultCommand in docker := defaultCommand.value,
+    command in docker := Nil,
 
     // necessary to touch directories
     docker <<= (streams, dockerPath in docker, buildOptions in docker, stageDirectory in docker, dockerfile in docker, imageName in docker) map {
@@ -103,10 +103,6 @@ object Docker {
           "--"
         )
 
-      val runLines = (additionalRunCommands in docker).value
-      val command = (defaultCommand in docker).value
-      val parsedCommand = command.split(' ').toList
-
       new mutable.Dockerfile {
         otherCp.foreach    { depFile => stageFile(depFile, dockerAppDir / "libs" / depFile.name) }
         bannoDepCp.foreach { depFile => stageFile(depFile, dockerAppDir / "banno-libs" / depFile.name) }
@@ -115,8 +111,8 @@ object Docker {
 
         from((baseImage in docker).value)
 
-        if (runLines.nonEmpty)
-          runLines.foreach { runLine => run(runLine) }
+        if ((additionalRunCommands in docker).value.nonEmpty)
+          (additionalRunCommands in docker).value.foreach(runLine => run(runLine))
 
         workDir("/app")
         add(dockerAppDir / "libs", dockerAppDir / "libs")
@@ -130,8 +126,8 @@ object Docker {
 
         entryPoint(entryPointLine: _*)
 
-        if (command.nonEmpty)
-          cmd(parsedCommand: _*)
+        if ((command in docker).value.nonEmpty)
+          cmd((command in docker).value: _*)
       }
     },
 
