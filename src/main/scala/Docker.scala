@@ -48,15 +48,15 @@ object Docker {
     command in docker := Nil,
 
     // necessary to touch directories
-    docker <<= (streams, dockerPath in docker, buildOptions in docker, stageDirectory in docker, dockerfile in docker, imageName in docker) map {
-        (streams, dockerPath, buildOptions, stageDir, dockerfile, imageName) =>
+    docker <<= (streams, dockerPath in docker, buildOptions in docker, stageDirectory in docker, dockerfile in docker, imageName in docker, appDir in docker) map {
+        (streams, dockerPath, buildOptions, stageDir, dockerfile, imageName, appDir) =>
       val log = streams.log
       log.debug("Using Dockerfile:")
       log.debug(dockerfile.mkString)
 
       log.info(s"Creating docker image with name: '$imageName'")
       DockerBuilder.prepareFiles(dockerfile, stageDir, log)
-      touchDirectoriesTo1970(stageDir / "app" / "libs", stageDir / "app" / "banno-libs")
+      touchDirectoriesTo1970(stageDir / appDir.getPath / "libs", stageDir / appDir.getPath / "banno-libs")
       DockerBuilder.buildImage(dockerPath, buildOptions, imageName, stageDir, log)
     },
 
