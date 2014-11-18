@@ -27,7 +27,7 @@ object BannoRelease {
     commands += releaseIfChanged,
 
     tagName <<= (version in ThisBuild) map identity,
-    releaseVersion <<= (organization, name, scalaVersion)(getLastVersionAndIncrement),
+    releaseVersion := getLastVersionAndIncrement,
     nextVersion := removeMinorAndAddSnapshot,
 
     releaseProcess := Seq[ReleaseStep](
@@ -101,9 +101,10 @@ object BannoRelease {
 
   def removeMinorAndAddSnapshot(ver: String) = { Version(ver).map(_.copy(minor = None, bugfix = None)).map(_.asSnapshot.string).getOrElse(versionFormatError) }
 
-  def getLastVersionAndIncrement(org: String, name: String, scalaVers: String): (String => String) = { _ =>
-    val tags = (git.cmd("tag", "-l") !!).split("\n").map(Version.apply).flatten
-    VersionUtil.newestVersion(tags).map(_.bumpMinor.copy(bugfix = Some(0)).string).getOrElse("1.0.0")
+  def taggedVersions = (git.cmd("tag", "-l") !!).split("\n").map(Version.apply).flatten
+
+  def getLastVersionAndIncrement: (String => String) = { _ =>
+    VersionUtil.newestVersion(taggedVersions).map(_.bumpMinor.copy(bugfix = Some(0)).string).getOrElse("1.0.0")
   }
 
   def latestReleasedVersionsForBannoDeps(st: State): Seq[Pair[ModuleID, String]] = {
