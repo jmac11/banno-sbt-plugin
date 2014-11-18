@@ -101,7 +101,9 @@ object BannoRelease {
 
   def removeMinorAndAddSnapshot(ver: String) = { Version(ver).map(_.copy(minor = None, bugfix = None)).map(_.asSnapshot.string).getOrElse(versionFormatError) }
 
-  def taggedVersions = (git.cmd("tag", "-l") !!).split("\n").map(Version.apply).flatten
+  def tags = (git.cmd("tag", "-l") !!).split("\n")
+
+  def taggedVersions = tags.map(Version.apply).flatten
 
   def getLastVersionAndIncrement: (String => String) = { _ =>
     VersionUtil.newestVersion(taggedVersions).map(_.bumpMinor.copy(bugfix = Some(0)).string).getOrElse("1.0.0")
