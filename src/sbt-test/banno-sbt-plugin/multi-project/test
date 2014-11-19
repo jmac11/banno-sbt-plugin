@@ -30,11 +30,3 @@ $ exec echo no release because no changes
 > reload
 > release-if-changed
 $ exec /bin/bash -c "! git tag -l | grep -q 1.2.0"
-  
-$ exec echo second release due to change in banno-utils dep
-$ exec /bin/bash -c 'sed -E "s/:=.+$/:= \"1.0.0\"/" versions-banno-deps.sbt | tee versions-banno-deps.sbt'
-$ exec git commit -am "Updating versions-banno-deps.sbt for test"
-$ sleep 1
-> reload
-> release-if-changed
-$ exec /bin/bash -c "git tag -l | grep -q 1.2.0"
