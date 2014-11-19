@@ -189,10 +189,13 @@ object BannoRelease {
 
 
   lazy val initialVcsChecksWithGitStatus = { st: State =>
+    val diff = (git.cmd("diff") !!).trim
     val status = (git.status !!).trim
     if (status.nonEmpty) {
       st.log.info("Git Status:")
       st.log.info(status)
+      st.log.info("Git Diff:")
+      st.log.info(diff)
       sys.error("Aborting release. Working directory is dirty.")
     }
 
