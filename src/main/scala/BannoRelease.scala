@@ -15,6 +15,7 @@ object BannoRelease {
   val ignorableCodeChangePaths = SettingKey[Seq[String]]("ignorable-code-change-paths")
   val gitPushByDefault = SettingKey[Boolean]("release-default-git-push")
   val releaseFullClean = TaskKey[Unit]("release-full-clean")
+  val lastReleaseGetter = SettingKey[(String, String) => Option[String]]("function to get last relase, given org and artifactId")
 
   val settings = ReleasePlugin.releaseSettings ++ Seq(
     ignorableCodeChangePaths := Seq(bannoDependenciesFileName, "version.sbt"),
@@ -23,6 +24,7 @@ object BannoRelease {
     aggregate in releaseFullClean := true,
 
     gitPushByDefault := true,
+    lastReleaseGetter := defaultLatestReleaseGetter,
 
     commands += releaseIfChanged,
 
@@ -56,6 +58,9 @@ object BannoRelease {
   private lazy val git: Git =
     Git.mkVcs(file("."))
 
+  def defaultLatestReleaseGetter(org: String, artifactId: String): Option[String] =
+    Nexus.latestReleasedVersionFor(org, artifactId)
+
   def codeChangedSinceLastRelease(st: State): Boolean = {
     val extract = Project.extract(st)
     val artifactId = if (extract.get(crossPaths)) {
@@ -63,7 +68,9 @@ object BannoRelease {
     } else {
       extract.get(name)
     }
-    val maybeLastRelease = Nexus.latestReleasedVersionFor(extract.get(organization), artifactId)
+    val org = extract.get(organization)
+    val lrGetter = extract.get(lastReleaseGetter)
+    val maybeLastRelease = lrGetter(org, artifactId)
     maybeLastRelease.map { lastRelease =>
       val ignorablePaths = extract.get(ignorableCodeChangePaths)
       val diffRevisions = "%s..HEAD".format(lastRelease)
