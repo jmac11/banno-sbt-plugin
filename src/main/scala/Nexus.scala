@@ -6,7 +6,7 @@ object Nexus {
   import dispatch._
   import Http._
 
-  val versionLinkRegex = "a href=\".+?\">([0-9.]+?)/</a>".r
+  val versionLinkRegex = "a href=\".+?\">(.+?)/</a>".r
 
   def latestReleasedVersionStringsFor(groupId: String, artifactId: String): List[String] = {
     try {
