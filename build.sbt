@@ -28,6 +28,17 @@ scriptedLaunchOpts <+= version { "-Dplugin.version=" + _ }
 
 test := scripted.toTask("").value
 
+val clearLocal = Def.task {
+  println("Removing old published/cached banno-sbt-plugin's")
+  IO.delete(Path.userHome / ".ivy2" / "cache" / "scala_2.10" / "sbt_0.13" / "com.banno" / "banno-sbt-plugin")
+  IO.delete(Path.userHome / ".ivy2" / "local" / "com.banno" / "banno-sbt-plugin")
+}
+
+publishLocal := {
+  val cl = clearLocal.value
+  publishLocal.value
+}
+
 releaseSettings
 
 publishTo := {

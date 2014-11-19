@@ -156,11 +156,8 @@ object Docker {
   private[this] def updateTagToLatest(dockerImageName: ImageName): ImageName =
     dockerImageName.copy(tag = Some("latest"))
 
-  private[this] def execDockerPull(dockerImageName: ImageName): Unit = {
-    val cmd = "docker" :: "pull" :: fullImageName(dockerImageName) :: Nil
-    val exitCode = (cmd !)
-    if (exitCode != 0) sys.error(s"'${cmd}' failed")
-  }
+  private[this] def execDockerPull(dockerImageName: ImageName): Unit =
+    ("docker" :: "pull" :: fullImageName(dockerImageName) :: Nil) !
 
   private[this] def execDockerPush(dockerImageName: ImageName): Unit = {
     val cmd = "docker" :: "push" :: fullImageName(dockerImageName) :: Nil
