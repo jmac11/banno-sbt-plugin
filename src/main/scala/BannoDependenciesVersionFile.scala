@@ -20,8 +20,9 @@ object BannoDependenciesVersionFile {
     if (!bannoDependenciesFile.exists) IO.touch(bannoDependenciesFile)
 
     val existingContent = IO.read(bannoDependenciesFile)
+    val prefix = if (existingContent.nonEmpty) "\n\n" else ""
     if (!existingContent.contains(settingKeyString(name))) {
-      IO.append(bannoDependenciesFile, "\n\n" + settingKeyLine(name, "1-SNAPSHOT"))
+      IO.append(bannoDependenciesFile, prefix + settingKeyLine(name, "1-SNAPSHOT"))
     }
   }
 
