@@ -8,15 +8,17 @@ object Nexus {
 
   val versionLinkRegex = "a href=\".+?\">([0-9.]+?)/</a>".r
 
-  def latestReleasedVersionFor(groupId: String, artifactId: String): Option[String] = {
+  def latestReleasedVersionStringsFor(groupId: String, artifactId: String): List[String] = {
     try {
-      val versionStrings: List[String] =
-        Http(releaseDirectoryPath(groupId, artifactId) >- versionLinkRegex.findAllMatchIn).map(_.group(1)).toList
-      val versions = versionStrings.flatMap(s => Version.apply(s))
-      VersionUtil.newestVersion(versions).map(_.string)
+      Http(releaseDirectoryPath(groupId, artifactId) >- versionLinkRegex.findAllMatchIn).map(_.group(1)).toList
     } catch {
-      case StatusCode(404, _) => None
+      case StatusCode(404, _) => Nil
     }
+  }
+
+  def latestReleasedVersionFor(groupId: String, artifactId: String): Option[String] = {
+    val versions = latestReleasedVersionStringsFor(groupId, artifactId).flatMap(s => Version.apply(s))
+    VersionUtil.newestVersion(versions).map(_.string)
   }
 
   def releaseDirectoryPath(org: String, name: String) = {
