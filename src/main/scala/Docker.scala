@@ -149,7 +149,7 @@ object Docker {
     jar.getPath.contains(s"/${bannoGroupId}/")
 
   private[this] def dockerTag(imageId: String, name: String): Unit = {
-    val cmd = "docker" :: "tag" :: imageId :: name :: Nil
+    val cmd = "docker" :: "tag" :: "-f" :: imageId :: name :: Nil
     (cmd !)
   }
 
