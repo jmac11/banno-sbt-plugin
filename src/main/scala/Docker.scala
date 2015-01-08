@@ -101,7 +101,7 @@ object Docker {
         Seq(
           "bash",
           "-c",
-          entryPointPrelude.value,
+          (entryPointPrelude in docker).value,
           (Seq("java", "-cp", classpath) ++ javaArgs :+ main :+ "\"$@\"").mkString(" "),
           "--"
         )
