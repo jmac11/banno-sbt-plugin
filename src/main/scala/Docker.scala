@@ -18,6 +18,7 @@ object Docker {
   val appDir = SettingKey[File]("App directory within docker")
   val exposedPorts = SettingKey[Seq[Int]]("Exposed ports in docker")
 
+  val entryPointPrelude = SettingKey[String]("Additional ENV variables that need ran (in /bin/bash) before java process starts")
   val additionalRunCommands = SettingKey[Seq[String]]("Additional Run Commands to run during docker build")
   val command = SettingKey[Seq[String]]("Docker Default Command (usually arguments given to the java process)")
 
@@ -46,6 +47,7 @@ object Docker {
     (additionalRunCommands in docker) := Nil,
 
     command in docker := Nil,
+    entryPointPrelude in docker := "",
 
     // necessary to touch directories
     docker <<= (streams, dockerPath in docker, buildOptions in docker, stageDirectory in docker, dockerfile in docker, imageName in docker, appDir in docker) map {
@@ -99,6 +101,7 @@ object Docker {
         Seq(
           "bash",
           "-c",
+          entryPointPrelude.value,
           (Seq("java", "-cp", classpath) ++ javaArgs :+ main :+ "\"$@\"").mkString(" "),
           "--"
         )
