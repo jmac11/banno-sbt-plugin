@@ -1,5 +1,6 @@
 package com.banno
 
 object Test extends App {
-  println(s"${BuildInfo.name} - Ok - ${args(0)} - ${args(1)}")
+  val testEnvVar = sys.env("TEST_VAR")
+  println(s"${BuildInfo.name} - Ok - ${args(0)} - ${args(1)} - ${testEnvVar}")
 }

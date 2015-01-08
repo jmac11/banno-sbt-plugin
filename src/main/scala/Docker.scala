@@ -97,14 +97,14 @@ object Docker {
           dockerAppDir / "banno-libs" / "*" :+
           dockerAppDir / "libs" / "*"
         ).mkString(":")
+      val entryPointLinePrelude = (entryPointPrelude in docker).value
       val entryPointLine =
-        Seq(
-          "bash",
-          "-c",
-          (entryPointPrelude in docker).value,
-          (Seq("java", "-cp", classpath) ++ javaArgs :+ main :+ "\"$@\"").mkString(" "),
-          "--"
-        )
+        Seq( "bash", "-c") :+ (
+          (if (entryPointLinePrelude.nonEmpty) Seq(entryPointLinePrelude) else Nil) ++
+          Seq("java", "-cp", classpath) ++ javaArgs :+ main :+ "\"$@\""
+        ).mkString(" ") :+
+        "--"
+
 
       new mutable.Dockerfile {
         otherCp.foreach    { depFile => stageFile(depFile, dockerAppDir / "libs" / depFile.name) }
