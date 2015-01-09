@@ -23,7 +23,12 @@ object Grunt {
 
     // NPM
     npm :=  {
-      val exitCode = (Process("npm" :: "install" :: "--registry" :: "http://npm.banno-internal.com" :: Nil, baseDirectory.value) !)
+      val exitCode = (Process(
+        "npm" :: "install" ::
+        "--registry" :: "http://npm.banno-internal.com" ::
+        "--color=false" :: "--unicode=false" :: "--spin=false" ::
+        Nil,
+        baseDirectory.value) !)
       if (exitCode != 0) sys.error("'npm install' failed!")
     },
 
