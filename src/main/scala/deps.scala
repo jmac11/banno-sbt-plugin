@@ -73,7 +73,7 @@ object Kafka {
   val settings: Seq[Setting[_]] = Seq(
     setVersion,
     libraryDependencies ++= Seq(
-      "org.apache.kafka" %% "kafka" % version.value % "test"
+      "org.apache.kafka" %% "kafka" % version.value
     )
   )
 }
