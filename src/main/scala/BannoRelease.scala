@@ -255,14 +255,12 @@ object BannoRelease {
 
   val buildAndPushDockerImage = ReleaseStep(
     action = (st: State) => {
-      val extract = Project.extract(st)
-      val usesDocker = Try(extract.get(Docker.docker))
-      if (usesDocker.isSuccess) {
-        extract.runTask(Docker.dockerPullLatest, st)
-        extract.runTask(docker, st)
-        extract.runTask(Docker.dockerPush, st)
-        extract.runTask(Docker.dockerPushLatestTag, st)
-      }
+      val extracted = Project.extract(st)
+      val ref = extracted.get(thisProjectRef)
+      SbtCompat.runTaskAggregated(Docker.dockerPullLatest in ref, st)
+      SbtCompat.runTaskAggregated(docker in ref, st)
+      SbtCompat.runTaskAggregated(Docker.dockerPush in ref, st)
+      SbtCompat.runTaskAggregated(Docker.dockerPushLatestTag in ref, st)
       st
     })
 }
