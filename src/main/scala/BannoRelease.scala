@@ -45,7 +45,6 @@ object BannoRelease {
       commitReleaseBannoDepsVersions,
       commitReleaseVersionWithGitStatus,
       tagRelease,
-      pushCurrentBranch,
       pushReleaseTag,
       buildAndPushDockerImage,
       publishArtifacts,
