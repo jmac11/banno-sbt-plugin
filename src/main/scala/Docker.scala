@@ -14,7 +14,6 @@ object Docker {
   val namespace = SettingKey[String]("Namespace for docker image")
   val baseImage = SettingKey[String]("Base docker image to use during build")
 
-  val packageUsingDocker = SettingKey[Boolean]("Package using docker?")
   val appDir = SettingKey[File]("App directory within docker")
   val exposedPorts = SettingKey[Seq[Int]]("Exposed ports in docker")
 
@@ -25,8 +24,6 @@ object Docker {
   val regularPackage = (Keys.`package` in (Compile, packageBin))
 
   val settings = sbtdocker.Plugin.dockerSettings ++ Seq(
-    packageUsingDocker := true,
-
     namespace in docker := "registry.banno-internal.com",
     baseImage in docker := "registry.banno-internal.com/java:latest",
 

@@ -9,6 +9,7 @@ import complete.DefaultParsers._
 import BannoDependenciesVersionFile._
 import sbtdocker._
 import sbtdocker.Plugin.DockerKeys._
+import scala.util.Try
 
 object BannoRelease {
 
@@ -255,8 +256,8 @@ object BannoRelease {
   val buildAndPushDockerImage = ReleaseStep(
     action = (st: State) => {
       val extract = Project.extract(st)
-      val useDocker = extract.getOpt(Docker.packageUsingDocker)
-      if (useDocker.getOrElse(false)) {
+      val usesDocker = Try(extract.get(Docker.docker))
+      if (usesDocker.isSuccess) {
         extract.runTask(Docker.dockerPullLatest, st)
         extract.runTask(docker, st)
         extract.runTask(Docker.dockerPush, st)
