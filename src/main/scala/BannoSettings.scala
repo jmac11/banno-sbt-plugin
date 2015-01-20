@@ -5,9 +5,12 @@ import spray.revolver.RevolverPlugin._
 import net.virtualvoid.sbt.graph.{Plugin => GraphPlugin}
 
 object BannoSettings {
+  val buildSettings = Seq(
+    version in ThisBuild := "1-SNAPSHOT"
+  )
+
   val settings =
     Seq(organization := "com.banno",
-        version in ThisBuild := "1-SNAPSHOT",
         scalaVersion := "2.10.4"
       ) ++
     Seq[Setting[_]](bannoDependencies := Seq.empty,
