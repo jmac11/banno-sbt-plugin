@@ -1,9 +1,9 @@
 package com.banno
 import sbtrelease.Version
+import dispatch.classic._
 
 object Nexus {
   import org.apache.ivy.util.url.CredentialsStore
-  import dispatch._
   import Http._
 
   val versionLinkRegex = "a href=\".+?\">(.+?)/</a>".r
