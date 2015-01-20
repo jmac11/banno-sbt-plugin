@@ -4,6 +4,11 @@ import dispatch.classic._
 
 object Nexus {
   import org.apache.ivy.util.url.CredentialsStore
+
+  // httpclient is noisy
+  System.setProperty("org.apache.commons.logging.Log",
+                     "org.apache.commons.logging.impl.NoOpLog")
+  
   import Http._
 
   val versionLinkRegex = "a href=\".+?\">(.+?)/</a>".r
