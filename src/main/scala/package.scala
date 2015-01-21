@@ -55,4 +55,8 @@ package object banno {
             dependencies = SymlinkProjects.symlinkedProjects(id))
       .settings(name := subProjName)
       .enablePlugins(BannoSbtPlugin)
+
+  implicit class ProjectSettingsSeq(project: Project) {
+    def settingsSeq(sseq: Seq[Def.Setting[_]]): Project = project.settings(sseq: _*)
+  }
 }

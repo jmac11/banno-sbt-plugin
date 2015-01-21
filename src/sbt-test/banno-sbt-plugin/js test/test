@@ -1,3 +1,1 @@
 > package
-$ exists target/scala-2.10/js-test_2.10-1-SNAPSHOT.jar
-$ exists target/scala-2.10/resource_managed/main/public/js/app.js
