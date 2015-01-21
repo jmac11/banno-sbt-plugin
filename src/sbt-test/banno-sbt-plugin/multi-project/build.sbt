@@ -24,7 +24,7 @@ lazy val subproj2 = bannoProject("sbt-test-multi-project-subproj2")
 lazy val deleteExistingReleases = taskKey[Unit]("Delete the existing multi-project releases")
 
 deleteExistingReleases := {
-  import dispatch._
+  import dispatch.classic._
   import Http._
   val url = Nexus.releaseDirectoryPath("com.banno", "sbt-test-multi-project")
   try Http((Nexus.nexusAuthenticated(url) DELETE) >|)
