@@ -40,9 +40,9 @@ object BannoIvy {
     )
 
 
-  val defaultOverrides =
-    Map[String, (String, String)]{
-      "1.7.6" -> ( "org.slf4j" -> "slf4j-api")
+  def defaultOverrides(slf4jVersion: String) =
+    Map[String, (String, String)] {
+      slf4jVersion -> ( "org.slf4j" -> "slf4j-api")
     }
 
   val excludes = SettingKey[Seq[Pair[String, String]]]("banno-ivy-excludes")
@@ -51,7 +51,7 @@ object BannoIvy {
   val settings = Seq(
     excludes := defaultExcludes,
     excludesIvyXML,
-    overrides := defaultOverrides,
+    overrides <++= (BannoCommonDeps.slf4jVersion) { slf4jV => defaultOverrides(slf4jV) },
     overridesIvyXML
   )
 
