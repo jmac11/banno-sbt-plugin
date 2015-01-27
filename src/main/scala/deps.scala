@@ -29,14 +29,17 @@ object AsyncHttpClient {
 }
 
 object BannoCommonDeps {
+  val slf4jVersion = SettingKey[String]("slf4j-version")
+
   val settings: Seq[Setting[_]] = Seq(
+    slf4jVersion := "1.7.5",
     libraryDependencies ++= Seq(
       "org.joda" % "joda-convert" % "1.6",
       "joda-time" % "joda-time" % "2.4",
 
-      "org.slf4j" % "slf4j-api" % "1.7.5",
-      "org.slf4j" % "log4j-over-slf4j" % "1.7.5",
-      "org.slf4j" % "jcl-over-slf4j" % "1.7.5",
+      "org.slf4j" % "slf4j-api" % slf4jVersion.value,
+      "org.slf4j" % "log4j-over-slf4j" % slf4jVersion.value,
+      "org.slf4j" % "jcl-over-slf4j" % slf4jVersion.value,
 
       "javax.servlet" % "javax.servlet-api" % "3.0.1"
     )
