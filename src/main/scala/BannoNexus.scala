@@ -33,20 +33,16 @@ object BannoNexus {
       getPaths(userHome).foreach(delete(_))
     },
     clearThisProjectsBannoArtifact := {
-      val projectPath = s"${Keys.name.value}_${getScalaVersion(Keys.scalaVersion.value)}"
-      println(projectPath)
-      getPaths(userHome).foreach(p => delete(p / projectPath))
+      val allPossiblePaths = for {
+        basePath    <- getPaths(userHome)
+        projectName <- List(name.value, s"${name.value}_${scalaBinaryVersion.value}")
+      } yield (basePath / projectName)
+
+      allPossiblePaths.foreach(delete)
     }
   )
 
-  private[this] def getScalaVersion(sv: String) = {
-    if (sv.startsWith("2.10"))
-      "2.10"
-    else
-      "2.11"
-  }
-
-  private[this] def getPaths(userHome: File) =
+  private[this] def getPaths(userHome: File): List[File] =
     (userHome / ".ivy2" / "cache" / "com.banno") ::
     (userHome / ".ivy2" / "local" / "com.banno") ::
     (userHome / ".ivy2" / "cache" / "scala_2.9.1" / "sbt_0.12" / "com.banno") ::
