@@ -16,6 +16,8 @@ addSbtPlugin("se.marcuslonnberg" % "sbt-docker" % "0.5.2")
 
 addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.7.4")
 
+addSbtPlugin("com.github.tkawachi" % "sbt-doctest" % "0.3.4")
+
 libraryDependencies += "net.databinder" %% "dispatch-http" % "0.8.10"
 
 scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature", "-language:postfixOps")
