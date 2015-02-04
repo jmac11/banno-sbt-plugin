@@ -51,6 +51,7 @@ object BannoIvy {
   val settings = Seq(
     excludes := defaultExcludes,
     excludesIvyXML,
+    overrides := Map.empty,
     overrides <++= (BannoCommonDeps.slf4jVersion) { slf4jV => defaultOverrides(slf4jV) },
     overridesIvyXML
   )
