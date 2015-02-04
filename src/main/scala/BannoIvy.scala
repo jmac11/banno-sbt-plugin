@@ -38,11 +38,22 @@ object BannoIvy {
       "org.apache.avro" -> "avro-ipc",
       "org.apache.thrift" -> "thrift"
     )
+
+
+  def defaultOverrides(slf4jVersion: String) =
+    Map[String, (String, String)] {
+      slf4jVersion -> ( "org.slf4j" -> "slf4j-api")
+    }
+
   val excludes = SettingKey[Seq[Pair[String, String]]]("banno-ivy-excludes")
+  val overrides = SettingKey[Map[String, (String, String)]]("banno-ivy-overrides")
 
   val settings = Seq(
     excludes := defaultExcludes,
-    excludesIvyXML
+    excludesIvyXML,
+    overrides := Map.empty,
+    overrides <++= (BannoCommonDeps.slf4jVersion) { slf4jV => defaultOverrides(slf4jV) },
+    overridesIvyXML
   )
 
   def addExclude(org: String, module: String) = addExcludes(org -> module)
@@ -59,7 +70,7 @@ object BannoIvy {
       }
     }
   }
-  
+
   def overrideVersion(version: String, modules: Pair[String,String]*) = {
     val allOverridesXml: NodeSeq = modules.map {
       case (org, module) => <override org={org} module={module} rev={version}/>
@@ -95,4 +106,16 @@ object BannoIvy {
     }
   }
 
+  def overridesIvyXML =
+    ivyXML := {
+      val overridesXml = overrides.value.map { case (version, (org, module)) =>
+        <override org={org} module={module} rev={version}/>
+      }
+      ivyXML.value match {
+        case ivyElem: Elem =>
+          ivyElem.copy(child = (ivyElem.child ++ overridesXml))
+        case NodeSeq.Empty =>
+          <dependencies>{overridesXml}</dependencies>
+      }
+    }
 }
