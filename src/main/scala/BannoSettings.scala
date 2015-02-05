@@ -21,6 +21,7 @@ object BannoSettings {
     Seq(javaOptions ++= Seq("-Djava.awt.headless=true", "-Xmx1024M", "-XX:MaxPermSize=512m")) ++
     GraphPlugin.graphSettings ++
     Revolver.settings ++
+    Doctest.settings ++
     BannoCi.settings ++
     BannoNexus.settings ++
     BuildInfoSettings.settings ++
