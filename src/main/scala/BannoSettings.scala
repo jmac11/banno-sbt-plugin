@@ -3,8 +3,6 @@ import sbt._
 import Keys._
 import spray.revolver.RevolverPlugin._
 import net.virtualvoid.sbt.graph.{Plugin => GraphPlugin}
-import com.github.tkawachi.doctest.DoctestPlugin
-import com.github.tkawachi.doctest.DoctestPlugin._
 
 object BannoSettings {
   val buildSettings = Seq(
@@ -23,8 +21,7 @@ object BannoSettings {
     Seq(javaOptions ++= Seq("-Djava.awt.headless=true", "-Xmx1024M", "-XX:MaxPermSize=512m")) ++
     GraphPlugin.graphSettings ++
     Revolver.settings ++
-    DoctestPlugin.doctestSettings ++
-    Seq(doctestTestFramework := DoctestTestFramework.Specs2, doctestWithDependencies := false) ++
+    Doctest.settings ++
     BannoCi.settings ++
     BannoNexus.settings ++
     BuildInfoSettings.settings ++
