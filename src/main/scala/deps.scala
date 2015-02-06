@@ -63,13 +63,14 @@ object Kafka {
   val version = SettingKey[String]("kafka-version")
 
   val setVersion: Setting[_] = {
-    version := "0.8.2-beta"
+    version := "0.8.2.0"
   }
 
   val clients: Seq[Setting[_]] = Seq(
     setVersion,
     libraryDependencies ++= Seq(
-      "org.apache.kafka" % "kafka-clients" % version.value
+      "org.apache.kafka" % "kafka-clients" % version.value,
+      "org.apache.kafka" % "kafka-clients" % version.value % "test" classifier "test"
     )
   )
 
