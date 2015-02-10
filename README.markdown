@@ -6,7 +6,7 @@ This is Banno's [sbt][] plugin which provides a structured method of which all B
 
 ## Installation ##
 
-For sbt versions 0.13.x, please use the latest banno-sbt-plugin 1.3.x version.
+For sbt versions 0.13.x, please use the latest banno-sbt-plugin version.
 
 In `project/plugins.sbt`, add
 
@@ -15,7 +15,7 @@ resolvers ++= Seq("Banno Snapshots Repo" at "http://nexus.banno.com/nexus/conten
                   "Banno Releases Repo" at "http://nexus.banno.com/nexus/content/repositories/releases",
                   "Banno External Repo" at "http://nexus.banno.com/nexus/content/groups/external/")
 
-addSbtPlugin("com.banno" % "banno-sbt-plugin" % "1.3.5")
+addSbtPlugin("com.banno" % "banno-sbt-plugin" % "5")
 ```
 
 and in the `build.sbt`, add
@@ -28,7 +28,7 @@ name := "project-name"
 BannoSettings.settings
 ```
 
-It is also a good idea to configure which version of sbt you wish to use by designating in the `project/build.properties`: `sbt.version=0.13.1`
+It is also a good idea to configure which version of sbt you wish to use by designating in the `project/build.properties`: `sbt.version=0.13.7`
 
 ## Things the banno-sbt-plugin can do
 
@@ -65,7 +65,7 @@ It also will add many entries to the `ivyXML` setting that either interfere with
  - `ScalaTest.settings` will add http://scalatest.org/
  - `HBaseTestingUtility.settings` will add many many hadoop test jars
 
-Most of them commonly follow overriding version with: `Akka.version := "2.3.0"` (change for dependency setting you're using)
+Most of them commonly follow overriding version with: `Akka.version := "2.3.8"` (change for dependency setting you're using)
 
 ### Nice Banno dependencies
 
