@@ -22,6 +22,14 @@ libraryDependencies += "net.databinder" %% "dispatch-http" % "0.8.10"
 
 scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature", "-language:postfixOps")
 
+buildInfoSettings
+
+sourceGenerators in Compile <+= buildInfo
+
+buildInfoPackage := "com.banno"
+
+buildInfoKeys := Seq[BuildInfoKey](version)
+
 ScriptedPlugin.scriptedSettings
 
 scriptedBufferLog := false
