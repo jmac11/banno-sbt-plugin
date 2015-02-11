@@ -10,12 +10,18 @@ object BannoSbtPluginAutoUpdating extends SbtPluginAutoUpdating {
   val currentSbtBinaryVersion = BuildInfo.sbtBinaryVersion
   val currentSbtScalaBinaryVersion = BuildInfo.scalaBinaryVersion
 
-  val pluginsFile = SettingKey[File]("The plugins.sbt file (usually project/plugins.sbt)")
-  val autoUpdateBannoSbtPlugin = SettingKey[Boolean]("Auto-update banno-sbt-plugin")
+  lazy val pluginsFile = settingKey[File]("The plugins.sbt file (usually project/plugins.sbt)")
+  lazy val autoUpdateBannoSbtPlugin = settingKey[Boolean]("Auto-update banno-sbt-plugin")
+
+  lazy val updateBannoPlugin = taskKey[Unit]("Updates the banno-sbt-plugin to the newest available version")
 
   val globalSettings = Seq(
     pluginsFile in Global := file("project") / "plugins.sbt",
     autoUpdateBannoSbtPlugin in Global := userIsntJenkins && notOverriddenBySysProp,
+    updateBannoPlugin in Global := updatePluginIfNecessary("com.banno", "banno-sbt-plugin",
+                                                           currentSbtBinaryVersion, currentSbtScalaBinaryVersion,
+                                                           currentPluginVersion,
+                                                           (pluginsFile in Global).value),
     onLoad in Global := { state =>
       val _ = (onLoad in Global).value
       if ((autoUpdateBannoSbtPlugin in Global).value &&
