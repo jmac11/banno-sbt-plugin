@@ -36,7 +36,7 @@ trait SbtPluginAutoUpdating {
                               pluginsFile: File): Boolean = {
 
     (for {
-      newestPluginVersionInNexus <- Nexus.latestReleasedVersionFor(groupId, s"${name}_${currentSbtScalaBinaryVersion}_${currentSbtScalaBinaryVersion}")
+      newestPluginVersionInNexus <- Nexus.latestReleasedVersionFor(groupId, s"${name}_${currentSbtScalaBinaryVersion}_${currentSbtBinaryVersion}")
 
       if (VersionUtil.isNewerThanByStrings(newestPluginVersionInNexus, currentPluginVersion)) 
     } yield { 
