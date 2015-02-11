@@ -15,7 +15,7 @@ object BannoSbtPluginAutoUpdating extends SbtPluginAutoUpdating {
 
   val globalSettings = Seq(
     pluginsFile in Global := file("project") / "plugins.sbt",
-    autoUpdateBannoSbtPlugin in Global := true,
+    autoUpdateBannoSbtPlugin in Global := userIsntJenkins && notOverriddenBySysProp,
     onLoad in Global := { state =>
       val _ = (onLoad in Global).value
       if ((autoUpdateBannoSbtPlugin in Global).value &&
@@ -36,6 +36,14 @@ object BannoSbtPluginAutoUpdating extends SbtPluginAutoUpdating {
     catch {
       case t: Throwable => false
     }
+
+  def userIsntJenkins = {
+    val username = System.getProperty("user.name")
+    !Set("root", "jenkins").contains(username)
+  }
+
+  def notOverriddenBySysProp =
+    System.getProperty("banno.sbt.no.autoupdate") == null
 }
 
 trait SbtPluginAutoUpdating {
