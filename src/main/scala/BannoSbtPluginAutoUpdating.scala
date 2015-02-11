@@ -24,10 +24,12 @@ trait SbtPluginAutoUpdating {
                          currentPluginVersion: String, currentSbtBinaryVersion: String, currentSbtScalaBinaryVersion: String) = Seq(
     pluginsFile in Global := file("project") / "plugins.sbt",
     autoUpdateBannoSbtPlugin in Global := userIsntJenkins && notOverriddenBySysProp,
-    updateBannoPlugin in Global := updatePluginIfNecessary(groupId, name,
-                                                           currentSbtBinaryVersion, currentSbtScalaBinaryVersion,
-                                                           currentPluginVersion,
-                                                           (pluginsFile in Global).value),
+    updateBannoPlugin in Global := {
+      updatePluginIfNecessary(groupId, name,
+                              currentSbtBinaryVersion, currentSbtScalaBinaryVersion,
+                              currentPluginVersion,
+                              (pluginsFile in Global).value)
+    },
     onLoad in Global := { state =>
       val _ = (onLoad in Global).value
       if ((autoUpdateBannoSbtPlugin in Global).value &&
@@ -71,7 +73,6 @@ trait SbtPluginAutoUpdating {
     } yield { 
       SimpleReader.readLine(s"Update '${name}' from '${currentPluginVersion}' to '${newestPluginVersionInNexus}' (y/n)? [y] : ") match {
         case Yes() =>
-          // TODO also update the project/build.properties to the newest sbt
           updatePluginsFileFor(pluginsFile, groupId, name, newestPluginVersionInNexus)
           true
         case _ => false
@@ -89,17 +90,4 @@ trait SbtPluginAutoUpdating {
     }
     IO.writeLines(pluginsFile, updatedLines)
   }
-
-
-  // i gave up trying to find something in sbt to do this
-  private[this] def extractSbtAndScalaVersions(str: String): Option[(String,String)] =
-    "_([0-9\\.]+)_([0-9\\.]+)".r.findFirstMatchIn(str).map(m => Pair(m.group(1), m.group(2)))
-
-  private[this] def scalaSbtBinaryOrdering(scalaSbtVersion: (String, String)) =
-    (for {
-       scalaV <- Version(scalaSbtVersion._1)
-       sbtV <- Version(scalaSbtVersion._2)
-     } yield ((sbtV.major, sbtV.minor), (scalaV.major, scalaV.minor))) get
-
-
 }
