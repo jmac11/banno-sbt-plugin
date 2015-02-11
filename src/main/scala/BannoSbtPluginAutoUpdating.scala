@@ -3,6 +3,7 @@ import sbt._
 import Keys._
 import sbtrelease.Version
 import sbtrelease.Utilities.Yes
+import java.net.InetAddress
 
 object BannoSbtPluginAutoUpdating extends SbtPluginAutoUpdating {
   val currentPluginVersion = BuildInfo.version
@@ -11,20 +12,27 @@ object BannoSbtPluginAutoUpdating extends SbtPluginAutoUpdating {
 
   val pluginsFile = SettingKey[File]("The plugins.sbt file (usually project/plugins.sbt)")
 
-  val settings = Seq(
-    pluginsFile := baseDirectory.value / "project" / "plugins.sbt",
+  val globalSettings = Seq(
+    pluginsFile in Global := file("project") / "plugins.sbt",
     onLoad in Global := { state =>
       val _ = (onLoad in Global).value
-      // TODO how to not run in jenkins or if offline
-      if (updatePluginIfNecessary("com.banno", "banno-sbt-plugin",
-                                  currentSbtBinaryVersion, currentSbtScalaBinaryVersion,
-                                  currentPluginVersion,
-                                  pluginsFile.value))
+      if (!(offline in Global).value &&
+            nexusIfAccessible && 
+            updatePluginIfNecessary("com.banno", "banno-sbt-plugin",
+                                    currentSbtBinaryVersion, currentSbtScalaBinaryVersion,
+                                    currentPluginVersion,
+                                    (pluginsFile in Global).value))
         state.reload
       else
         state
     }
   )
+
+  def nexusIfAccessible =
+    try InetAddress.getByName("nexus.banno.com").isReachable(30000)
+    catch {
+      case t: Throwable => false
+    }
 }
 
 trait SbtPluginAutoUpdating {
