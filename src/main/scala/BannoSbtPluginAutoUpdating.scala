@@ -10,15 +10,21 @@ object BannoSbtPluginAutoUpdating extends SbtPluginAutoUpdating {
   val currentSbtBinaryVersion = BuildInfo.sbtBinaryVersion
   val currentSbtScalaBinaryVersion = BuildInfo.scalaBinaryVersion
 
+  val globalSettings =
+    makeGlobalSettings("com.banno", "banno-sbt-plugin",
+                       currentPluginVersion, currentSbtBinaryVersion, currentSbtScalaBinaryVersion)
+}
+
+trait SbtPluginAutoUpdating {
   lazy val pluginsFile = settingKey[File]("The plugins.sbt file (usually project/plugins.sbt)")
   lazy val autoUpdateBannoSbtPlugin = settingKey[Boolean]("Auto-update banno-sbt-plugin")
-
   lazy val updateBannoPlugin = taskKey[Unit]("Updates the banno-sbt-plugin to the newest available version")
 
-  val globalSettings = Seq(
+  def makeGlobalSettings(groupId: String, name: String,
+                         currentPluginVersion: String, currentSbtBinaryVersion: String, currentSbtScalaBinaryVersion: String) = Seq(
     pluginsFile in Global := file("project") / "plugins.sbt",
     autoUpdateBannoSbtPlugin in Global := userIsntJenkins && notOverriddenBySysProp,
-    updateBannoPlugin in Global := updatePluginIfNecessary("com.banno", "banno-sbt-plugin",
+    updateBannoPlugin in Global := updatePluginIfNecessary(groupId, name,
                                                            currentSbtBinaryVersion, currentSbtScalaBinaryVersion,
                                                            currentPluginVersion,
                                                            (pluginsFile in Global).value),
@@ -27,7 +33,7 @@ object BannoSbtPluginAutoUpdating extends SbtPluginAutoUpdating {
       if ((autoUpdateBannoSbtPlugin in Global).value &&
             !(offline in Global).value &&
             nexusIfAccessible && 
-            updatePluginIfNecessary("com.banno", "banno-sbt-plugin",
+            updatePluginIfNecessary(groupId, name,
                                     currentSbtBinaryVersion, currentSbtScalaBinaryVersion,
                                     currentPluginVersion,
                                     (pluginsFile in Global).value))
@@ -50,9 +56,7 @@ object BannoSbtPluginAutoUpdating extends SbtPluginAutoUpdating {
 
   def notOverriddenBySysProp =
     System.getProperty("banno.sbt.no.autoupdate") == null
-}
 
-trait SbtPluginAutoUpdating {
 
   def updatePluginIfNecessary(groupId: String, name: String,
                               currentSbtBinaryVersion: String,
