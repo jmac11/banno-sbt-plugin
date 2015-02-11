@@ -19,7 +19,6 @@ object BannoSettings {
         publishArtifact in (Compile, packageDoc) := false) ++
     Seq(checksums in update := Nil) ++
     Seq(javaOptions ++= Seq("-Djava.awt.headless=true", "-Xmx1024M", "-XX:MaxPermSize=512m")) ++
-    BannoSbtPluginAutoUpdating.settings ++ 
     GraphPlugin.graphSettings ++
     Revolver.settings ++
     Doctest.settings ++
