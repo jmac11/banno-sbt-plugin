@@ -28,7 +28,7 @@ sourceGenerators in Compile <+= buildInfo
 
 buildInfoPackage := "com.banno"
 
-buildInfoKeys := Seq[BuildInfoKey](version)
+buildInfoKeys := Seq[BuildInfoKey](version, sbtBinaryVersion, scalaBinaryVersion)
 
 ScriptedPlugin.scriptedSettings
 

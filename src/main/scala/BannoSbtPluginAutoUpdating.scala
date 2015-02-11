@@ -6,6 +6,8 @@ import sbtrelease.Utilities.Yes
 
 object BannoSbtPluginAutoUpdating extends SbtPluginAutoUpdating {
   val currentPluginVersion = BuildInfo.version
+  val currentSbtBinaryVersion = BuildInfo.sbtBinaryVersion
+  val currentSbtScalaBinaryVersion = BuildInfo.scalaBinaryVersion
 
   val pluginsFile = SettingKey[File]("The plugins.sbt file (usually project/plugins.sbt)")
 
@@ -14,7 +16,10 @@ object BannoSbtPluginAutoUpdating extends SbtPluginAutoUpdating {
     onLoad in Global := { state =>
       val _ = (onLoad in Global).value
       // TODO how to not run in jenkins or if offline
-      if (updatePluginIfNecessary("com.banno", "banno-sbt-plugin", currentPluginVersion, pluginsFile.value))
+      if (updatePluginIfNecessary("com.banno", "banno-sbt-plugin",
+                                  currentSbtBinaryVersion, currentSbtScalaBinaryVersion,
+                                  currentPluginVersion,
+                                  pluginsFile.value))
         state.reload
       else
         state
@@ -25,16 +30,13 @@ object BannoSbtPluginAutoUpdating extends SbtPluginAutoUpdating {
 trait SbtPluginAutoUpdating {
 
   def updatePluginIfNecessary(groupId: String, name: String,
+                              currentSbtBinaryVersion: String,
+                              currentSbtScalaBinaryVersion: String,
                               currentPluginVersion: String,
                               pluginsFile: File): Boolean = {
 
-    val allPluginArtifactIds = Nexus.getMatchingArtifactNamesUnder(groupId, startsWith = name)
-    val scalaSbtBinaryVersionsForPlugin = allPluginArtifactIds.flatMap(extractSbtAndScalaVersions)
-    val newestScalaSbtVersions = scalaSbtBinaryVersionsForPlugin.sortBy(scalaSbtBinaryOrdering).reverse.headOption
-
     (for {
-      (scalaV, sbtV) <- newestScalaSbtVersions
-      newestPluginVersionInNexus <- Nexus.latestReleasedVersionFor(groupId, s"${name}_${scalaV}_${sbtV}")
+      newestPluginVersionInNexus <- Nexus.latestReleasedVersionFor(groupId, s"${name}_${currentSbtScalaBinaryVersion}_${currentSbtScalaBinaryVersion}")
 
       if (VersionUtil.isNewerThanByStrings(newestPluginVersionInNexus, currentPluginVersion)) 
     } yield { 
