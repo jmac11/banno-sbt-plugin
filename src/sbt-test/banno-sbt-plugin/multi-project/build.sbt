@@ -8,13 +8,11 @@ crossPaths := false
 
 // publishArtifact := false // necessary so release can keep track of releases
 
-addBannoDependency("banno-utils") // necessary so it picks up changes for the sub projects
-
 BannoRelease.gitPushByDefault := false
 
 lazy val subproj1 = bannoProject("sbt-test-multi-project-subproj1")
   .settings(publishArtifact := false)
-  .settings(addBannoDependency("banno-utils"): _*)
+  .settings(addBannoDependencies("banno-utils", "kafka-utils"): _*)
 
 lazy val subproj2 = bannoProject("sbt-test-multi-project-subproj2")
   .dependsOn(subproj1)

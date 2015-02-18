@@ -13,11 +13,16 @@ $ exec echo first release
 $ exec git tag -l
 $ exec /bin/bash -c "git tag -l | grep -q 1.0.0"
 
+$ exec echo make sure no snapshots are let through
+-$ exec grep SNAPSHOT target/sbt-test-multi-project-1.0.0.pom
+-$ exec grep SNAPSHOT sbt-test-multi-project-subproj1/target/scala-2.10/ivy-1.0.0.xml
+-$ exec grep SNAPSHOT sbt-test-multi-project-subproj2/target/scala-2.10/ivy-1.0.0.xml
+
 $ exec echo no release because no changes
 > reload
 > release-if-changed
 $ exec /bin/bash -c "! git tag -l | grep -q 1.1.0"
-  
+
 $ exec echo second release because change to some file
 $ touch some-file
 $ exec git add some-file
