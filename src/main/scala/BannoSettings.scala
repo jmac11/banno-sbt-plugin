@@ -15,8 +15,7 @@ object BannoSettings {
       ) ++
     Seq[Setting[_]](bannoDependencies := Seq.empty,
                     libraryDependencies <++= bannoDependencies) ++
-    Seq(publishArtifact in (Compile, packageSrc) := false,
-        publishArtifact in (Compile, packageDoc) := false) ++
+    Seq(publishArtifact in (Compile, packageSrc) := false) ++
     Seq(checksums in update := Nil) ++
     Seq(javaOptions ++= Seq("-Djava.awt.headless=true", "-Xmx1024M", "-XX:MaxPermSize=512m")) ++
     GraphPlugin.graphSettings ++
