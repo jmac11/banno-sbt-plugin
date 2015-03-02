@@ -13,8 +13,7 @@ object Samza {
       "-XX:+CMSClassUnloadingEnabled",
       "-XX:+UseCompressedOops",
       "-XX:MaxPermSize=128M",
-      "$JAVA_OPTS",
-      "$SAMZA_CONTAINER_ENV_JAVA_OPTS"
+      "$JAVA_OPTS""
     ),
     mainClass in Compile := Some("com.banno.samza.Main"),
     baseImage in docker := "banno/samza-mesos:0.21.1",
