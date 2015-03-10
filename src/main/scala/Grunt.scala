@@ -18,7 +18,9 @@ object Grunt {
   val gruntDefaultTask = SettingKey[String]("grunt-default-task")
   val grunt = TaskKey[Seq[File]]("grunt")
 
-  val settings = Seq(
+  lazy val settingsRunTime = generateSettings(false)
+  lazy val settings = generateSettings(true)
+  def generateSettings(generateOnCompile: Boolean) = Seq(
     clientSrcDirectory := baseDirectory.value / "src/main/client",
 
     // NPM
@@ -47,7 +49,9 @@ object Grunt {
 
     // Grunt
     gruntExecutable := baseDirectory.value / "node_modules/grunt-cli/bin/grunt",
-    gruntOutputDirectory := (resourceManaged in Compile).value / "public",
+    gruntOutputDirectory := (if (generateOnCompile)
+                               (resourceManaged in Compile).value / "public"
+                            else (resourceManaged in Runtime).value / "public"),
     gruntWatchSources := (clientSrcDirectory.value ***).get,
     watchSources := (watchSources.value ++ gruntWatchSources.value),
     gruntDefaultTask := "default",
@@ -59,6 +63,10 @@ object Grunt {
       (out ***).get
     },
     grunt <<= grunt.dependsOn(bower),
-    resourceGenerators in Compile <+= grunt
+    if (generateOnCompile)
+      resourceGenerators in Compile <+= grunt
+    else
+      resourceGenerators in Runtime <+= grunt
+
   )
 }

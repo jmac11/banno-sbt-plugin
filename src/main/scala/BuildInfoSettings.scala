@@ -4,11 +4,16 @@ import Keys._
 import sbtbuildinfo.Plugin._
 
 object BuildInfoSettings {
-  val settings: Seq[Setting[_]] =
+  lazy val settingsRunTime = generateSettings(false)
+  lazy val settings = generateSettings(true)
+  def generateSettings(generateOnCompile: Boolean): Seq[Setting[_]] =
     buildInfoSettings ++
     Seq(
       buildInfoPackage := "com.banno",
-      sourceGenerators in Compile <+= buildInfo,
+      (if (generateOnCompile)
+         sourceGenerators in Compile <+= buildInfo
+      else
+        sourceGenerators in Runtime <+= buildInfo),
       buildInfoKeys := Seq[BuildInfoKey](name,
                                          version,
                                          scalaVersion,

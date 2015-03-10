@@ -9,13 +9,17 @@ object BannoSettings {
     version in ThisBuild := "1-SNAPSHOT"
   )
 
-  val settings =
+  lazy val settingsRunTime = generateSettings(false)
+  lazy val settings = generateSettings(true)
+  def generateSettings(generateOnCompile: Boolean) = {
     Seq(organization := "com.banno",
         scalaVersion := "2.10.5"
       ) ++
     Seq[Setting[_]](bannoDependencies := Seq.empty,
                     libraryDependencies <++= bannoDependencies) ++
-    Seq(publishArtifact in (Compile, packageSrc) := false) ++
+    (if (generateOnCompile)
+      Seq(publishArtifact in (Compile, packageSrc) := false)
+    else Seq(publishArtifact in (Runtime, packageSrc) := false)) ++
     Seq(checksums in update := Nil) ++
     Seq(javaOptions ++= Seq("-Djava.awt.headless=true", "-Xmx1024M", "-XX:MaxPermSize=512m")) ++
     GraphPlugin.graphSettings ++
@@ -28,5 +32,5 @@ object BannoSettings {
     BannoCompile.settings ++
     BannoRelease.settings ++
     BannoPrompt.settings ++
-    BannoIvy.settings
+    BannoIvy.settings}
 }
