@@ -63,7 +63,7 @@ object Kafka {
   val version = SettingKey[String]("kafka-version")
 
   val setVersion: Setting[_] = {
-    version := "0.8.2.0"
+    version := "0.8.2.1"
   }
 
   val clients: Seq[Setting[_]] = Seq(
