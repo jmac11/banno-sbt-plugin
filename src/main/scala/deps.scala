@@ -173,9 +173,9 @@ object Spray {
   val setVersion =
     version := {
       Akka.version.value match {
-        case av if av.startsWith("2.3") => "1.3.1"
-        case av if av.startsWith("2.2") => "1.2.1"
-        case av if av.startsWith("2.1") => "1.1.1"
+        case av if av.startsWith("2.3") => "1.3.3"
+        case av if av.startsWith("2.2") => "1.2.3"
+        case av if av.startsWith("2.1") => "1.1.3"
       }
     }
 
