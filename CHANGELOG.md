@@ -1,15 +1,12 @@
 # 6 (unreleased)
 
-IMPROVEMENTS:
-
-- [Spray](http://spray.io) deps upgraded from `1.k.1` to `1.k.3`. ([Their changelog](http://spray.io/project-info/changelog/))
-
 ADDITIONS:
 
 - Adding a couple [more compiler flags](https://github.com/Banno/banno-sbt-plugin/commit/4f6f9fb9aa2f293a21a819c08c5a8e0296fa8732)
 
 VERSION UPGRADES:
 
+- [Spray](http://spray.io) deps upgraded from `1.k.1` to `1.k.3`. ([Their changelog](http://spray.io/project-info/changelog/))
 - Bumping scala to `2.10.5`
 - Bump samza-mesos to `0.21.1-1`
 - Bump Kafka to `0.8.2.1`
