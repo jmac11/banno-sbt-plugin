@@ -192,19 +192,28 @@ object Spray {
     libraryDependencies += sprayModule("client", version.value)
   )
 
-  val routing: Setting[_] =
+  val routing: Seq[Setting[_]] = Seq(
+    setVersion,
+    removeWarnAdaptedArgs,
     libraryDependencies += {
-      if (olderSpray(version.value))
+      if (olderSpray(version.value)) {
         sprayModule("routing", version.value)
-      else
+      } else {
         sprayModule("routing-shapeless2", version.value)
+      }
+    },
+    scalacOptions ++= {
+      // From: https://github.com/milessabin/shapeless/wiki/Migration-guide:-shapeless-2.0.0-to-2.1.0#macro-paradise-plugin-required-for-scala-210x
+      if (scalaVersion.value.trim == "2.10.5") {
+        Seq("-Yfundep-materialization")
+      } else Seq.empty[String]
     }
+  )
 
   val server: Seq[Setting[_]] = Seq(
     setVersion,
     removeWarnAdaptedArgs,
     libraryDependencies ++= Seq(sprayModule("can", version.value),
-                                sprayModule("testkit", version.value) % "test"),
-    routing
-  )
+                                sprayModule("testkit", version.value) % "test")
+  ) ++ routing
 }
