@@ -2,7 +2,7 @@
 
 IMPROVEMENTS:
 
-- [Spray](http://spray.io) deps upgraded from `1.k.1` to `1.k.3`.
+- [Spray](http://spray.io) deps upgraded from `1.k.1` to `1.k.3`. ([Their changelog](http://spray.io/project-info/changelog/))
 
 ADDITIONS:
 
