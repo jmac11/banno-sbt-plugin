@@ -105,7 +105,6 @@ object Docker {
           add(bannoDepCp, s"${dockerAppDir}/banno-libs/")
         if (internalDepsClassDirs.nonEmpty)
           add(internalDepsClassDirs, s"${dockerAppDir}/internal/")
-        add(jarFile, jar)
 
         if ((exposedPorts in docker).value.nonEmpty)
           expose((exposedPorts in docker).value: _*)
@@ -117,6 +116,8 @@ object Docker {
 
         if ((command in docker).value.nonEmpty)
           cmd((command in docker).value: _*)
+        
+        add(jarFile, jar)
       }
     },
 
