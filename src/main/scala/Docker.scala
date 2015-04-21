@@ -89,8 +89,6 @@ object Docker {
 
       val dockerVolumes = (exposedVolumes in docker).value.map(_.toString)
 
-      val internalDepsClassDirs = internalDepsNameWithClassDir.map(_._2)
-
       new mutable.Dockerfile {
         from((baseImage in docker).value)
 
@@ -100,11 +98,17 @@ object Docker {
           (additionalRunExecCommands in docker).value.foreach(execLine => run(execLine: _*))
 
         workDir(dockerAppDir.toString)
+
         add(otherCp, s"${dockerAppDir}/libs/")
+
         if (bannoDepCp.nonEmpty)
           add(bannoDepCp, s"${dockerAppDir}/banno-libs/")
-        if (internalDepsClassDirs.nonEmpty)
-          add(internalDepsClassDirs, s"${dockerAppDir}/internal/")
+
+        if (internalDepsNameWithClassDir.nonEmpty)
+          internalDepsNameWithClassDir.foreach {
+            case (name, classDir) => add(classDir, s"${dockerAppDir}/internal/${name}/")
+          }
+          
 
         if ((exposedPorts in docker).value.nonEmpty)
           expose((exposedPorts in docker).value: _*)
@@ -116,7 +120,7 @@ object Docker {
 
         if ((command in docker).value.nonEmpty)
           cmd((command in docker).value: _*)
-        
+
         add(jarFile, jar)
       }
     },
