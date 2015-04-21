@@ -12,7 +12,7 @@ addSbtPlugin("com.github.gseitz" % "sbt-release" % "0.8.5")
 
 addSbtPlugin("io.spray" % "sbt-revolver" % "0.7.2")
 
-addSbtPlugin("se.marcuslonnberg" % "sbt-docker" % "0.5.2")
+addSbtPlugin("se.marcuslonnberg" % "sbt-docker" % "1.1.0")
 
 addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.7.4")
 

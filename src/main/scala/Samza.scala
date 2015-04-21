@@ -2,7 +2,7 @@ package com.banno
 import sbt._
 import Keys._
 import com.banno.Docker.{baseImage, entryPointPrelude}
-import sbtdocker.Plugin.DockerKeys.docker
+import sbtdocker.DockerKeys.docker
 
 object Samza {
   val settings = Docker.settings ++ Seq(

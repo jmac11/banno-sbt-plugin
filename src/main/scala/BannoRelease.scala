@@ -8,7 +8,7 @@ import ReleaseStateTransformations._
 import complete.DefaultParsers._
 import BannoDependenciesVersionFile._
 import sbtdocker._
-import sbtdocker.Plugin.DockerKeys._
+import sbtdocker.DockerKeys._
 import scala.util.Try
 
 object BannoRelease {
@@ -259,7 +259,6 @@ object BannoRelease {
       SbtCompat.runTaskAggregated(Docker.dockerPullLatest in ref, st)
       SbtCompat.runTaskAggregated(docker in ref, st)
       SbtCompat.runTaskAggregated(Docker.dockerPush in ref, st)
-      SbtCompat.runTaskAggregated(Docker.dockerPushLatestTag in ref, st)
       st
     })
 }
