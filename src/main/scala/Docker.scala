@@ -16,7 +16,10 @@ object Docker {
   val exposedPorts = SettingKey[Seq[Int]]("Exposed ports in docker")
 
   val entryPointPrelude = SettingKey[String]("Additional ENV variables that need ran (in /bin/bash) before java process starts")
-  val additionalRunCommands = SettingKey[Seq[String]]("Additional Run Commands to run during docker build")
+  val additionalRunShellCommands =
+    SettingKey[Seq[String]]("Additional Run Commands to run during docker build. Each entry represents a RUN command in the /bin/sh -c '...' form")
+  val additionalRunExecCommands =
+    SettingKey[Seq[Seq[String]]]("Additional Run Commands to run during docker build. Each entry represents a RUN command in the exec form")
   val command = SettingKey[Seq[String]]("Docker Default Command (usually arguments given to the java process)")
 
   val regularPackage = (Keys.`package` in (Compile, packageBin))
@@ -40,7 +43,8 @@ object Docker {
     ),
     exposedPorts in docker := Nil,
 
-    (additionalRunCommands in docker) := Nil,
+    (additionalRunShellCommands in docker) := Nil,
+    (additionalRunExecCommands in docker) := Nil,
 
     command in docker := Nil,
     entryPointPrelude in docker := "",
@@ -90,8 +94,10 @@ object Docker {
       new mutable.Dockerfile {
         from((baseImage in docker).value)
 
-        if ((additionalRunCommands in docker).value.nonEmpty)
-          (additionalRunCommands in docker).value.foreach(runLine => run(runLine))
+        if ((additionalRunShellCommands in docker).value.nonEmpty)
+          (additionalRunShellCommands in docker).value.foreach(runLine => runRaw(runLine))
+        if ((additionalRunExecCommands in docker).value.nonEmpty)
+          (additionalRunExecCommands in docker).value.foreach(execLine => run(execLine: _*))
 
         workDir(dockerAppDir.toString)
         add(otherCp, s"${dockerAppDir}/libs/")

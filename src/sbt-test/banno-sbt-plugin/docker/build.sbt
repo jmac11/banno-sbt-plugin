@@ -9,7 +9,9 @@ Docker.settings
 
 appDir in docker := file("/test")
 
-additionalRunCommands in docker := Seq("uname", "whoami")
+additionalRunShellCommands in docker := Seq("uname -a", "whoami")
+
+additionalRunExecCommands in docker += Seq("echo", "hello")
 
 entryPointPrelude in docker := "TEST_VAR=`echo -n test_env_var`"
 
