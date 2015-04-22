@@ -2,32 +2,34 @@ package com.banno
 import sbt._
 import Keys._
 import sbtdocker._
-import sbtdocker.Plugin.DockerKeys._
+import sbtdocker.DockerKeys._
 
 object Docker {
-  val docker = Plugin.DockerKeys.docker
-
   val dockerPullLatest = TaskKey[Unit]("Pull latest docker image")
-  val dockerPush = TaskKey[Unit]("Push docker image")
-  val dockerPushLatestTag = TaskKey[Unit]("Push docker image as latest tag")
+  val dockerPush = DockerKeys.dockerPush
 
   val namespace = SettingKey[String]("Namespace for docker image")
   val baseImage = SettingKey[String]("Base docker image to use during build")
 
   val appDir = SettingKey[File]("App directory within docker")
+  val exposedVolumes = SettingKey[Seq[File]]("Directories within docker to map")
   val exposedPorts = SettingKey[Seq[Int]]("Exposed ports in docker")
 
   val entryPointPrelude = SettingKey[String]("Additional ENV variables that need ran (in /bin/bash) before java process starts")
-  val additionalRunCommands = SettingKey[Seq[String]]("Additional Run Commands to run during docker build")
+  val additionalRunShellCommands =
+    SettingKey[Seq[String]]("Additional Run Commands to run during docker build. Each entry represents a RUN command in the /bin/sh -c '...' form")
+  val additionalRunExecCommands =
+    SettingKey[Seq[Seq[String]]]("Additional Run Commands to run during docker build. Each entry represents a RUN command in the exec form")
   val command = SettingKey[Seq[String]]("Docker Default Command (usually arguments given to the java process)")
 
   val regularPackage = (Keys.`package` in (Compile, packageBin))
 
-  val settings = sbtdocker.Plugin.dockerSettings ++ Seq(
+  val settings = DockerSettings.baseDockerSettings ++ Seq(
     namespace in docker := "registry.banno-internal.com",
     baseImage in docker := "registry.banno-internal.com/java:latest",
 
     appDir in docker := file("/app"),
+    exposedVolumes in docker := Seq((appDir in docker).value / "logs"),
 
     javaOptions in docker := Seq(
       "-server",
@@ -41,30 +43,13 @@ object Docker {
     ),
     exposedPorts in docker := Nil,
 
-    (additionalRunCommands in docker) := Nil,
+    (additionalRunShellCommands in docker) := Nil,
+    (additionalRunExecCommands in docker) := Nil,
 
     command in docker := Nil,
     entryPointPrelude in docker := "",
 
-    // necessary to touch directories
-    docker <<= (streams, dockerPath in docker, buildOptions in docker, stageDirectory in docker, dockerfile in docker, imageName in docker, appDir in docker) map {
-        (streams, dockerPath, buildOptions, stageDir, dockerfile, imageName, appDir) =>
-      val log = streams.log
-      log.debug("Using Dockerfile:")
-      log.debug(dockerfile.mkString)
-
-      log.info(s"Creating docker image with name: '$imageName'")
-      DockerBuilder.prepareFiles(dockerfile, stageDir, log)
-      touchDirectoriesTo1970(stageDir / appDir.getPath / "libs", stageDir / appDir.getPath / "banno-libs")
-      DockerBuilder.buildImage(dockerPath, buildOptions, imageName, stageDir, log)
-    },
-
-    docker := {
-      val imageId = (docker dependsOn regularPackage).value
-      val dockerImageName = (imageName in docker).value
-      dockerTag(imageId.id, fullImageName(updateTagToLatest(dockerImageName)))
-      imageId
-    },
+    docker <<= docker.dependsOn(sbt.Keys.`package`.in(Compile, packageBin)),
 
     dockerfile in docker := {
       val jarFile = artifactPath.in(Compile, packageBin).value
@@ -100,76 +85,70 @@ object Docker {
           (if (entryPointLinePrelude.nonEmpty) Seq(entryPointLinePrelude) else Nil) ++
           Seq("java", "-cp", classpath) ++ javaArgs :+ main :+ "\"$@\""
         ).mkString(" ") :+
-        "--"
+      "--"
 
+      val dockerVolumes = (exposedVolumes in docker).value.map(_.toString)
 
       new mutable.Dockerfile {
-        otherCp.foreach    { depFile => stageFile(depFile, dockerAppDir / "libs" / depFile.name) }
-        bannoDepCp.foreach { depFile => stageFile(depFile, dockerAppDir / "banno-libs" / depFile.name) }
-        internalDepsNameWithClassDir.foreach { case (name, classDir) => stageFile(classDir, dockerAppDir / "internal" / name) }
-        stageFile(jarFile, jar)
-
         from((baseImage in docker).value)
 
-        if ((additionalRunCommands in docker).value.nonEmpty)
-          (additionalRunCommands in docker).value.foreach(runLine => run(runLine))
+        if ((additionalRunShellCommands in docker).value.nonEmpty)
+          (additionalRunShellCommands in docker).value.foreach(runLine => runRaw(runLine))
+        if ((additionalRunExecCommands in docker).value.nonEmpty)
+          (additionalRunExecCommands in docker).value.foreach(execLine => run(execLine: _*))
 
-        workDir("/app")
-        add(dockerAppDir / "libs", dockerAppDir / "libs")
-        add(dockerAppDir / "banno-libs", dockerAppDir / "banno-libs")
-        if (internalDepsNameWithClassDir.nonEmpty)
-          add(dockerAppDir / "internal", dockerAppDir / "internal")
-        add(jar, jar)
+        workDir(dockerAppDir.toString)
+
+        add(otherCp, s"${dockerAppDir}/libs/")
 
         if ((exposedPorts in docker).value.nonEmpty)
           expose((exposedPorts in docker).value: _*)
+
+        if (dockerVolumes.nonEmpty)
+          volume(dockerVolumes: _*)
 
         entryPoint(entryPointLine: _*)
 
         if ((command in docker).value.nonEmpty)
           cmd((command in docker).value: _*)
+
+        if (bannoDepCp.nonEmpty)
+          add(bannoDepCp, s"${dockerAppDir}/banno-libs/")
+
+        if (internalDepsNameWithClassDir.nonEmpty)
+          internalDepsNameWithClassDir.foreach {
+            case (name, classDir) => add(classDir, s"${dockerAppDir}/internal/${name}/")
+          }          
+
+        add(jarFile, jar)
       }
     },
 
-    imageName in docker := {
+    imageNames in docker := Seq(
       ImageName(
         namespace  = Some((namespace in docker).value),
         repository = name.value,
         tag        = Some(version.value)
+      ),
+      ImageName(
+        namespace  = Some((namespace in docker).value),
+        repository = name.value,
+        tag        = Some("latest")
       )
-    },
+    ),
 
-    dockerPullLatest := execDockerPull((imageName in docker).value.copy(tag = Some("latest"))),
+    buildOptions in docker := BuildOptions(pullBaseImage = BuildOptions.Pull.Always),
 
-    dockerPush := execDockerPush((imageName in docker).value),
-    dockerPushLatestTag := execDockerPush(updateTagToLatest((imageName in docker).value))
+    dockerPullLatest := execDockerPull(updateTagToLatest((imageNames in docker).value.head))
   )
 
-  private[this] def isBannoDependency(bannoGroupId: String)(jar: File): Boolean =
+  private[this] def isBannoDependency(bannoGroupId: String)(jar: sbt.File): Boolean =
     jar.getPath.contains(s"/${bannoGroupId}/")
-
-  private[this] def dockerTag(imageId: String, name: String): Unit = {
-    val cmd = "docker" :: "tag" :: "-f" :: imageId :: name :: Nil
-    (cmd !)
-  }
 
   private[this] def updateTagToLatest(dockerImageName: ImageName): ImageName =
     dockerImageName.copy(tag = Some("latest"))
 
   private[this] def execDockerPull(dockerImageName: ImageName): Unit =
-    ("docker" :: "pull" :: fullImageName(dockerImageName) :: Nil) !
+    ("docker" :: "pull" :: dockerImageName.toString :: Nil) !
 
-  private[this] def execDockerPush(dockerImageName: ImageName): Unit = {
-    val cmd = "docker" :: "push" :: fullImageName(dockerImageName) :: Nil
-    val exitCode = (cmd !)
-    if (exitCode != 0) sys.error(s"'${cmd}' failed")
-  }
-
-  private[this] def touchDirectoriesTo1970(dirs: File*): Unit =
-    dirs.foreach { dir =>
-      "touch" :: "-t" :: "197001010000" :: dir.getPath :: Nil !!
-    }
-
-  private[this] def fullImageName(dockerImageName: ImageName): String =
-    s"${dockerImageName.namespace.get}/${dockerImageName.repository}:${dockerImageName.tag.get}"
 }
