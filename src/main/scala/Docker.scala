@@ -10,6 +10,7 @@ object Docker {
 
   val namespace = SettingKey[String]("Namespace for docker image")
   val baseImage = SettingKey[String]("Base docker image to use during build")
+  val alwaysPull = SettingKey[Boolean]("Always pull base image on build")
 
   val appDir = SettingKey[File]("App directory within docker")
   val exposedVolumes = SettingKey[Seq[File]]("Directories within docker to map")
@@ -27,6 +28,7 @@ object Docker {
   val settings = DockerSettings.baseDockerSettings ++ Seq(
     namespace in docker := "registry.banno-internal.com",
     baseImage in docker := "registry.banno-internal.com/java:latest",
+    alwaysPull in docker := true,
 
     appDir in docker := file("/app"),
     exposedVolumes in docker := Seq((appDir in docker).value / "logs"),
@@ -137,7 +139,11 @@ object Docker {
       )
     ),
 
-    buildOptions in docker := BuildOptions(pullBaseImage = BuildOptions.Pull.Always),
+    buildOptions in docker := BuildOptions(pullBaseImage =
+                                             if (alwaysPull.value)
+                                               BuildOptions.Pull.Always
+                                             else
+                                               BuildOptions.Pull.IfMissing),
 
     dockerPullLatest := execDockerPull(updateTagToLatest((imageNames in docker).value.head))
   )
