@@ -140,7 +140,7 @@ object Docker {
     ),
 
     buildOptions in docker := BuildOptions(pullBaseImage =
-                                             if (alwaysPull.value)
+                                             if ((alwaysPull in docker).value)
                                                BuildOptions.Pull.Always
                                              else
                                                BuildOptions.Pull.IfMissing),
