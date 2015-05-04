@@ -7,10 +7,8 @@ object Nexus {
 
   // httpclient is noisy
   System.setProperty("org.apache.commons.logging.Log",
-                     "org.apache.commons.logging.impl.NoOpLog")
+                     "org.apache.commons.logging.impl.SimpleLog")
   
-  import Http._
-
   val linkRegex = "a href=\".+?\">(.+?)/</a>".r
 
   def latestReleasedVersionStringsFor(groupId: String, artifactId: String): List[String] =

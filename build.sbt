@@ -20,6 +20,12 @@ addSbtPlugin("com.github.tkawachi" % "sbt-doctest" % "0.3.4")
 
 libraryDependencies += "net.databinder" %% "dispatch-http" % "0.8.10"
 
+libraryDependencies ++= Seq(
+  "org.slf4j" % "slf4j-api" % "1.7.5",
+  "org.slf4j" % "log4j-over-slf4j" % "1.7.5",
+  "org.slf4j" % "jcl-over-slf4j" % "1.7.5"
+)
+
 scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature", "-language:postfixOps")
 
 buildInfoSettings
