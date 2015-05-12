@@ -76,9 +76,11 @@ object Grunt {
     gruntDefaultTask := "default",
     grunt := {
       val out = gruntOutputDirectory.value
-      val exitCode = (Process(gruntExecutable.value.absolutePath :: gruntDefaultTask.value :: Nil, baseDirectory.value,
-                              "OUTPUT_DIR" -> out.toString) !)
-      if (exitCode != 0) sys.error(s"Grunt nonzero exit code: ${exitCode}. Aborting!")
+      if (!gulpExecutable.value.exists || !gulpFile.value.exists) {
+        val exitCode = (Process(gruntExecutable.value.absolutePath :: gruntDefaultTask.value :: Nil, baseDirectory.value,
+                                "OUTPUT_DIR" -> out.toString) !)
+        if (exitCode != 0) sys.error(s"Grunt nonzero exit code: ${exitCode}. Aborting!")
+      }
       (out ***).get
     },
     grunt <<= grunt.dependsOn(bower),
