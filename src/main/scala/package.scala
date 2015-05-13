@@ -40,6 +40,12 @@ package object banno {
       settings ++ addBannoDependency(artifactId)
     }
 
+  def addBigService(service: String) =
+    BannoBig.addService(service)
+
+  def addBigServices(services: String*) =
+    BannoBig.addServices(services: _*)
+
   def bannoRootProject(name: String): Project =
     bannoProject(name, name, base = file("."))
 
