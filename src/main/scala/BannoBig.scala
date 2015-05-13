@@ -38,7 +38,9 @@ object BannoBig {
     kill :=  processBigKill(),
     killServices := processBigKillServices(services.value),
 
-    (executeTests in Test) <<= (executeTests in Test).dependsOn(upServicesIfEnabled)
+    (test in Test) <<= (test in Test).dependsOn(upServicesIfEnabled),
+    (testOnly in Test) <<= (testOnly in Test).dependsOn(upServicesIfEnabled),
+    (run in Compile) <<= (run in Compile).dependsOn(upServicesIfEnabled)
   )
 
   private[this] def processBigDoctor() =
