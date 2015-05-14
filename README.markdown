@@ -79,12 +79,10 @@ Big is our internal project that adds functionality to [docker-compose](https://
 
 Big commands included as sbt tasks:
 
- - `big-doctor`
- - `big-up` will execute `big up -d`
+ - `big` will execute any big command. E.g. `big up -d redis` and `big doctor`.
  - `big-up-services` will execute `big up -d` only on services in `build.sbt`.
- - `big-ps`
- - `big-kill`
  - `big-kill-services` will execute `big kill` only on services in `build.sbt`.
+ - `big-destroy-services` will execute `big destroy` only on services in `build.sbt`.
 
 ### Releases
 
