@@ -9,13 +9,12 @@ object BannoBig {
 
   val services = SettingKey[Seq[String]]("big-services")
 
-  val doctor = TaskKey[Unit]("big-doctor")
-  val up = TaskKey[Unit]("big-up")
+  val big = InputKey[Unit]("big")
+
   val upServices = TaskKey[Unit]("big-up-services")
   val upServicesIfAutocreate = TaskKey[Unit]("big-up-services-if-autocreate")
-  val ps = TaskKey[Unit]("big-ps")
-  val kill = TaskKey[Unit]("big-kill")
   val killServices = TaskKey[Unit]("big-kill-services")
+  val destroyServices = TaskKey[Unit]("big-destroy-services")
 
   def addService(service: String) = {
     services += service
@@ -30,39 +29,34 @@ object BannoBig {
     noRecreate := true,
     services := Nil,
 
-    doctor := processBigDoctor(),
-    up := processBigUp(noRecreate.value),
+    big := processBigWithArguments(Def.spaceDelimited("<arg>").parsed),
+
     upServices := processBigUpServices(services.value, noRecreate.value),
     upServicesIfAutocreate := { if (autocreate.value) processBigUpServices(services.value, noRecreate.value) },
-    ps := processBigPs(),
-    kill :=  processBigKill(),
     killServices := processBigKillServices(services.value),
+    destroyServices := processBigDestroyServices(services.value),
 
     (test in Test) <<= (test in Test).dependsOn(upServicesIfAutocreate),
     (testOnly in Test) <<= (testOnly in Test).dependsOn(upServicesIfAutocreate),
     (run in Compile) <<= (run in Compile).dependsOn(upServicesIfAutocreate)
   )
 
-  private[this] def processBigDoctor() =
-    processBigCommand(List("big", "doctor"))
-
-  private[this] def processBigUp(noRecreate: Boolean) =
-    processBigCommand(makeBigUpCommand(noRecreate))
+  private[this] def processBigWithArguments(args: Seq[String]) =
+    processBigCommand("big" :: args.toList)
 
   private[this] def processBigUpServices(services: Seq[String], noRecreate: Boolean) =
     if (services.nonEmpty) {
       processBigCommand(makeBigUpCommand(noRecreate) ++ services)
     }
 
-  private[this] def processBigPs() =
-    processBigCommand(List("big", "ps"))
-
-  private[this] def processBigKill() =
-    processBigCommand(List("big", "kill"))
-
   private[this] def processBigKillServices(services: Seq[String]) =
     if (services.nonEmpty) {
       processBigCommand(List("big", "kill") ++ services)
+    }
+
+  private[this] def processBigDestroyServices(services: Seq[String]) =
+    if (services.nonEmpty) {
+      processBigCommand(List("big", "destroy") ++ services)
     }
 
   private[this] def makeBigUpCommand(noRecreate: Boolean) = {
