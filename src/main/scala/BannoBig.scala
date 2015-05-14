@@ -70,6 +70,6 @@ object BannoBig {
 
   private[this] def processBigCommand(command: List[String]) = {
     val exitCode = Process(command).!
-    if (exitCode != 0) sys.error(s"Problem running command: $command.mkString(' '.toString)")
+    if (exitCode != 0) sys.error(s"Problem running command: ${command.mkString(' '.toString)}")
   }
 }
