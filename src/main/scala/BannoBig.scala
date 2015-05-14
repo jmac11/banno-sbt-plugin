@@ -50,7 +50,9 @@ object BannoBig {
     processBigCommand(makeBigUpCommand(noRecreate))
 
   private[this] def processBigUpServices(services: Seq[String], noRecreate: Boolean) =
-    processBigCommand(makeBigUpCommand(noRecreate) ++ services)
+    if (services.nonEmpty) {
+      processBigCommand(makeBigUpCommand(noRecreate) ++ services)
+    }
 
   private[this] def processBigPs() =
     processBigCommand(List("big", "ps"))
@@ -59,7 +61,9 @@ object BannoBig {
     processBigCommand(List("big", "kill"))
 
   private[this] def processBigKillServices(services: Seq[String]) =
-    processBigCommand(List("big", "kill") ++ services)
+    if (services.nonEmpty) {
+      processBigCommand(List("big", "kill") ++ services)
+    }
 
   private[this] def makeBigUpCommand(noRecreate: Boolean) = {
     val baseCommand = List("big", "up", "-d")
