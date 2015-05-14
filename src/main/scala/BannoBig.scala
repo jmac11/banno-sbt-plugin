@@ -4,7 +4,7 @@ import Keys._
 
 object BannoBig {
 
-  val enabled = SettingKey[Boolean]("big-enabled")
+  val autocreate = SettingKey[Boolean]("big-autocreate")
   val noRecreate = SettingKey[Boolean]("big-no-recreate")
 
   val services = SettingKey[Seq[String]]("big-services")
@@ -12,7 +12,7 @@ object BannoBig {
   val doctor = TaskKey[Unit]("big-doctor")
   val up = TaskKey[Unit]("big-up")
   val upServices = TaskKey[Unit]("big-up-services")
-  val upServicesIfEnabled = TaskKey[Unit]("big-up-services-if-enabled")
+  val upServicesIfAutocreate = TaskKey[Unit]("big-up-services-if-autocreate")
   val ps = TaskKey[Unit]("big-ps")
   val kill = TaskKey[Unit]("big-kill")
   val killServices = TaskKey[Unit]("big-kill-services")
@@ -26,21 +26,21 @@ object BannoBig {
   }
 
   val settings: Seq[Setting[_]] = Seq(
-    enabled := true,
+    autocreate := true,
     noRecreate := true,
     services := Nil,
 
     doctor := processBigDoctor(),
     up := processBigUp(noRecreate.value),
     upServices := processBigUpServices(services.value, noRecreate.value),
-    upServicesIfEnabled := processBigUpServices(services.value, noRecreate.value, enabled.value),
+    upServicesIfAutocreate := { if (autocreate.value) processBigUpServices(services.value, noRecreate.value) },
     ps := processBigPs(),
     kill :=  processBigKill(),
     killServices := processBigKillServices(services.value),
 
-    (test in Test) <<= (test in Test).dependsOn(upServicesIfEnabled),
-    (testOnly in Test) <<= (testOnly in Test).dependsOn(upServicesIfEnabled),
-    (run in Compile) <<= (run in Compile).dependsOn(upServicesIfEnabled)
+    (test in Test) <<= (test in Test).dependsOn(upServicesIfAutocreate),
+    (testOnly in Test) <<= (testOnly in Test).dependsOn(upServicesIfAutocreate),
+    (run in Compile) <<= (run in Compile).dependsOn(upServicesIfAutocreate)
   )
 
   private[this] def processBigDoctor() =
@@ -49,13 +49,8 @@ object BannoBig {
   private[this] def processBigUp(noRecreate: Boolean) =
     processBigCommand(makeBigUpCommand(noRecreate))
 
-  private[this] def processBigUpService(service: String, noRecreate: Boolean) =
-    processBigCommand(makeBigUpCommand(noRecreate) :+ service)
-
-  private[this] def processBigUpServices(services: Seq[String], noRecreate: Boolean, enabled: Boolean = true) =
-    if (enabled) {
-      services.foreach(processBigUpService(_, noRecreate))
-    }
+  private[this] def processBigUpServices(services: Seq[String], noRecreate: Boolean) =
+    processBigCommand(makeBigUpCommand(noRecreate) ++ services)
 
   private[this] def processBigPs() =
     processBigCommand(List("big", "ps"))
@@ -63,11 +58,8 @@ object BannoBig {
   private[this] def processBigKill() =
     processBigCommand(List("big", "kill"))
 
-  private[this] def processBigKillService(service: String) =
-    processBigCommand(List("big", "kill", service))
-
   private[this] def processBigKillServices(services: Seq[String]) =
-    services.foreach(processBigKillService(_))
+    processBigCommand(List("big", "kill") ++ services)
 
   private[this] def makeBigUpCommand(noRecreate: Boolean) = {
     val baseCommand = List("big", "up", "-d")

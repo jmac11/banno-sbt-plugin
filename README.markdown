@@ -75,7 +75,7 @@ Most of them commonly follow overriding version with: `Akka.version := "2.3.8"` 
 
 Big is our internal project that adds functionality to [docker-compose](https://docs.docker.com/compose/) functions for our services, named _Banno Fig_ before fig was renamed to compose.
 
-`addBigService` is used to denote which services the project depends on within Big, usually for local testing or running sbt tests. `addBigServices` can can used to specify multiple services. By default, as long as `BannoBig.enabled` is set to `true` (the default), then sbt tests will make sure the specified Big services are started prior to test execution. For example, you can place `addBigServices("redis", "postgres")` to your project's `build.sbt` to ensure they are started before tests.
+`addBigService` is used to denote which services the project depends on within Big, usually for local testing or running sbt tests. `addBigServices` can can used to specify multiple services. By default, as long as `BannoBig.autocreate` is set to `true` (the default), then `sbt test` and `sbt run` will make sure the specified Big services are started prior to test execution. For example, you can place `addBigServices("redis", "postgres")` to your project's `build.sbt` to ensure they are started before tests.
 
 Big commands included as sbt tasks:
 
@@ -84,7 +84,7 @@ Big commands included as sbt tasks:
  - `big-up-services` will execute `big up -d` only on services in `build.sbt`.
  - `big-ps`
  - `big-kill`
- - `big-kill-services` will execute `big kill` only on services in `built.sbt`.
+ - `big-kill-services` will execute `big kill` only on services in `build.sbt`.
 
 ### Releases
 
