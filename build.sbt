@@ -40,7 +40,11 @@ ScriptedPlugin.scriptedSettings
 
 scriptedBufferLog := false
 
-scriptedLaunchOpts <+= version { "-Dplugin.version=" + _ }
+scriptedLaunchOpts := Seq(
+  "-XX:MaxPermSize=128m",
+  "-Xmx512m",
+  "-Dplugin.version=" + version.value
+)
 
 test := scripted.toTask("").value
 
