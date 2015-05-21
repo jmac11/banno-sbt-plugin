@@ -38,6 +38,7 @@ object BannoBig {
 
     (test in Test) <<= (test in Test).dependsOn(upServicesIfAutocreate),
     (testOnly in Test) <<= (testOnly in Test).dependsOn(upServicesIfAutocreate),
+    (executeTests in Test) <<= (executeTests in Test).dependsOn(upServicesIfAutocreate),
     (run in Compile) <<= (run in Compile).dependsOn(upServicesIfAutocreate)
   )
 
