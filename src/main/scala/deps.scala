@@ -102,16 +102,13 @@ object Metrics {
 
   val settings: Seq[Setting[_]] = Seq(
     version := "3.1.2",
-    resolvers ++= Seq(
-      "3rd Party" at "http://nexus.banno.com/nexus/content/repositories/thirdparty"
-    ),
     libraryDependencies <++= (version, Akka.version) { (v, av) =>
       val msv = s"3.3.0_a${av.take(3)}" // https://github.com/erikvanoosten/metrics-scala#available-versions-abbreviated
       Seq(
         "io.dropwizard.metrics" % "metrics-core"     % "3.1.2-java7", // until https://github.com/dropwizard/metrics/issues/742 is resolved
         "io.dropwizard.metrics" % "metrics-graphite" % v,
         "io.dropwizard.metrics" % "metrics-logback"  % v,
-        "nl.grons" %% "metrics-scala" % msv
+        "nl.grons" %% "metrics-scala"    % msv
       )
     }
   )
