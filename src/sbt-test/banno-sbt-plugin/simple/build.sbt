@@ -2,6 +2,8 @@ import com.banno._
 
 lazy val root = bannoRootProject("simple")
 
+BannoSettings.settings
+
 Akka.settings
 
 AsyncHttpClient.settings
